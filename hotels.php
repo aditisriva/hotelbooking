@@ -1,9 +1,12 @@
+<?php
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a56db'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='18' font-family='system-ui' fill='%23f59e0b'%3E&#x1F3E8;%3C/text%3E%3C/svg%3E"/>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a56db'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='18' font-family='system-ui' fill='%23f59e0b'%3E&#x1F3E8;%3C/text%3E%3C/svg%3E"/>
   <title>Hotels – bookHotel</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" crossorigin="anonymous"/>
@@ -16,7 +19,7 @@
 <!-- ========== NAVBAR ========== -->
 <nav class="navbar navbar-expand-lg navbar-dark sticky-top" id="mainNav">
   <div class="container">
-    <a class="navbar-brand fw-800 fs-4" href="index.html">
+    <a class="navbar-brand fw-800 fs-4" href="index.php">
       <i class="bi bi-building-fill text-warning me-1"></i>bookHotel
     </a>
     <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
@@ -24,12 +27,12 @@
     </button>
     <div class="collapse navbar-collapse" id="navMenu">
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
-        <li class="nav-item"><a class="nav-link active" href="hotels.html">Hotels</a></li>
-        <li class="nav-item"><a class="nav-link" href="index.html#destinations">Destinations</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">My Bookings</a></li>
+        <li class="nav-item"><a class="nav-link active" href="hotels.php">Hotels</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.php#destinations">Destinations</a></li>
+        <li class="nav-item"><a class="nav-link" href="my-bookings.php">My Bookings</a></li>
         <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
-        <li class="nav-item ms-lg-3">
-          <a class="btn btn-outline-warning btn-sm px-3" href="#">Login / Sign Up</a>
+        <li class="nav-item ms-lg-3" id="navAuthSlot">
+          <a class="btn btn-outline-warning btn-sm px-3" href="login.php">Login / Sign Up</a>
         </li>
       </ul>
     </div>
@@ -42,14 +45,12 @@
   <div class="container position-relative z-1 text-white py-5">
     <nav aria-label="breadcrumb" class="mb-3">
       <ol class="breadcrumb breadcrumb-dark">
-        <li class="breadcrumb-item"><a href="index.html" class="text-warning text-decoration-none">Home</a></li>
+        <li class="breadcrumb-item"><a href="index.php" class="text-warning text-decoration-none">Home</a></li>
         <li class="breadcrumb-item active text-white-50">Hotels</li>
       </ol>
     </nav>
     <h1 class="fw-800 display-5 mb-2">Find Your Perfect Hotel</h1>
     <p class="opacity-75 mb-4">Showing results across top destinations in India</p>
-
-    <!-- Search Bar -->
     <div class="listing-search-bar">
       <div class="row g-2 align-items-end">
         <div class="col-12 col-md-4">
@@ -121,7 +122,8 @@
           <!-- Price Range -->
           <div class="filter-group">
             <h6 class="filter-title">Price Per Night</h6>
-            <input type="range" class="form-range price-range" min="500" max="25000" value="15000" id="priceRange" oninput="document.getElementById('priceVal').textContent='₹'+this.value.toLocaleString()"/>
+            <input type="range" class="form-range price-range" min="500" max="25000" value="15000" id="priceRange"
+              oninput="document.getElementById('priceVal').textContent='₹'+this.value.toLocaleString()"/>
             <div class="d-flex justify-content-between mt-1">
               <span class="text-muted small">₹500</span>
               <span class="fw-700 small text-danger" id="priceVal">₹15,000</span>
@@ -160,7 +162,7 @@
               <label class="filter-check"><input type="checkbox"/><span class="ms-2"><i class="bi bi-car-front text-success me-1"></i>Free Parking</span></label>
               <label class="filter-check"><input type="checkbox"/><span class="ms-2"><i class="bi bi-fan text-secondary me-1"></i>Air Conditioning</span></label>
               <label class="filter-check"><input type="checkbox"/><span class="ms-2"><i class="bi bi-dumbbell text-danger me-1"></i>Gym / Fitness</span></label>
-              <label class="filter-check"><input type="checkbox"/><span class="ms-2"><i class="bi bi-flower1 text-success me-1"></i>Spa & Wellness</span></label>
+              <label class="filter-check"><input type="checkbox"/><span class="ms-2"><i class="bi bi-flower1 text-success me-1"></i>Spa &amp; Wellness</span></label>
             </div>
           </div>
 
@@ -183,7 +185,7 @@
 
         <!-- Sort Bar -->
         <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
-          <p class="mb-0 text-muted small"><span class="fw-700 text-dark">248 hotels</span> found in India</p>
+          <p class="mb-0 text-muted small"><span class="fw-700 text-dark">9 hotels</span> found in India</p>
           <div class="d-flex align-items-center gap-2">
             <span class="text-muted small">Sort by:</span>
             <select class="form-select form-select-sm sort-select">
@@ -225,7 +227,7 @@
                     <span class="text-muted text-decoration-line-through small">₹6,500</span>
                     <div class="fw-800 text-primary fs-5">₹4,299<span class="fs-6 fw-400 text-muted">/night</span></div>
                   </div>
-                  <a href="hotel-details.html" class="btn btn-primary btn-sm px-3">View Details</a>
+                  <a href="hotel-details.php" class="btn btn-primary btn-sm px-3">View Details</a>
                 </div>
               </div>
             </div>
@@ -257,7 +259,7 @@
                     <span class="text-muted text-decoration-line-through small">₹8,000</span>
                     <div class="fw-800 text-primary fs-5">₹5,499<span class="fs-6 fw-400 text-muted">/night</span></div>
                   </div>
-                  <a href="hotel-details.html" class="btn btn-primary btn-sm px-3">View Details</a>
+                  <a href="hotel-details.php" class="btn btn-primary btn-sm px-3">View Details</a>
                 </div>
               </div>
             </div>
@@ -289,7 +291,7 @@
                     <span class="text-muted text-decoration-line-through small">₹7,200</span>
                     <div class="fw-800 text-primary fs-5">₹4,680<span class="fs-6 fw-400 text-muted">/night</span></div>
                   </div>
-                  <a href="hotel-details.html" class="btn btn-primary btn-sm px-3">View Details</a>
+                  <a href="hotel-details.php" class="btn btn-primary btn-sm px-3">View Details</a>
                 </div>
               </div>
             </div>
@@ -321,7 +323,7 @@
                     <span class="text-muted text-decoration-line-through small">₹5,500</span>
                     <div class="fw-800 text-primary fs-5">₹3,299<span class="fs-6 fw-400 text-muted">/night</span></div>
                   </div>
-                  <a href="hotel-details.html" class="btn btn-primary btn-sm px-3">View Details</a>
+                  <a href="hotel-details.php" class="btn btn-primary btn-sm px-3">View Details</a>
                 </div>
               </div>
             </div>
@@ -353,7 +355,7 @@
                     <span class="text-muted text-decoration-line-through small">₹18,000</span>
                     <div class="fw-800 text-primary fs-5">₹12,499<span class="fs-6 fw-400 text-muted">/night</span></div>
                   </div>
-                  <a href="hotel-details.html" class="btn btn-primary btn-sm px-3">View Details</a>
+                  <a href="hotel-details.php" class="btn btn-primary btn-sm px-3">View Details</a>
                 </div>
               </div>
             </div>
@@ -385,7 +387,7 @@
                     <span class="text-muted text-decoration-line-through small">₹9,000</span>
                     <div class="fw-800 text-primary fs-5">₹6,799<span class="fs-6 fw-400 text-muted">/night</span></div>
                   </div>
-                  <a href="hotel-details.html" class="btn btn-primary btn-sm px-3">View Details</a>
+                  <a href="hotel-details.php" class="btn btn-primary btn-sm px-3">View Details</a>
                 </div>
               </div>
             </div>
@@ -417,7 +419,7 @@
                     <span class="text-muted text-decoration-line-through small">₹11,000</span>
                     <div class="fw-800 text-primary fs-5">₹8,799<span class="fs-6 fw-400 text-muted">/night</span></div>
                   </div>
-                  <a href="hotel-details.html" class="btn btn-primary btn-sm px-3">View Details</a>
+                  <a href="hotel-details.php" class="btn btn-primary btn-sm px-3">View Details</a>
                 </div>
               </div>
             </div>
@@ -449,7 +451,7 @@
                     <span class="text-muted text-decoration-line-through small">₹6,200</span>
                     <div class="fw-800 text-primary fs-5">₹4,100<span class="fs-6 fw-400 text-muted">/night</span></div>
                   </div>
-                  <a href="hotel-details.html" class="btn btn-primary btn-sm px-3">View Details</a>
+                  <a href="hotel-details.php" class="btn btn-primary btn-sm px-3">View Details</a>
                 </div>
               </div>
             </div>
@@ -481,15 +483,15 @@
                     <span class="text-muted text-decoration-line-through small">₹7,800</span>
                     <div class="fw-800 text-primary fs-5">₹5,200<span class="fs-6 fw-400 text-muted">/night</span></div>
                   </div>
-                  <a href="hotel-details.html" class="btn btn-primary btn-sm px-3">View Details</a>
+                  <a href="hotel-details.php" class="btn btn-primary btn-sm px-3">View Details</a>
                 </div>
               </div>
             </div>
           </div>
 
-        </div><!-- end row -->
+        </div><!-- end #hotelGrid -->
 
-        <!-- Pagination -->
+        <!-- Pagination — rendered dynamically by pagination.js -->
         <div class="d-flex justify-content-center mt-5">
           <nav aria-label="Hotel listing pagination">
             <ul class="pagination pagination-custom" id="paginationList">
@@ -539,9 +541,9 @@
       <div class="col-6 col-md-2">
         <h6 class="fw-700 mb-3">Explore</h6>
         <ul class="list-unstyled footer-links">
-          <li><a href="hotels.html">Hotels</a></li>
+          <li><a href="hotels.php">Hotels</a></li>
           <li><a href="#">Destinations</a></li>
-          <li><a href="#">My Bookings</a></li>
+          <li><a href="my-bookings.php">My Bookings</a></li>
           <li><a href="#">Car Rentals</a></li>
         </ul>
       </div>
@@ -568,14 +570,16 @@
   </div>
 </footer>
 
-<button id="backToTop" class="btn btn-warning btn-sm rounded-circle shadow" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+<button id="backToTop" class="btn btn-warning btn-sm rounded-circle shadow" aria-label="Back to top"
+  onclick="window.scrollTo({top:0,behavior:'smooth'})">
   <i class="bi bi-arrow-up"></i>
 </button>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="navbar.js"></script>
 <script src="pagination.js"></script>
 <script>
-  // Navbar scroll
+  // Navbar scroll + back-to-top
   window.addEventListener('scroll', () => {
     document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 50);
     document.getElementById('backToTop').classList.toggle('show', window.scrollY > 300);
@@ -593,14 +597,13 @@
 
   // Default dates
   const t = new Date(), t1 = new Date(t), t2 = new Date(t);
-  t1.setDate(t.getDate()+1); t2.setDate(t.getDate()+2);
+  t1.setDate(t.getDate() + 1); t2.setDate(t.getDate() + 2);
   const fmt = d => d.toISOString().split('T')[0];
   document.getElementById('checkin').value  = fmt(t1);
   document.getElementById('checkout').value = fmt(t2);
 
   // ============================================================
-  //  FILTER & SORT
-  //  applyAllFilters() now delegates visibility to pagination.js
+  //  FILTER & SORT — delegates show/hide to pagination.js
   // ============================================================
   let activeLocation = 'all';
   let maxPrice = 25000;
@@ -610,7 +613,6 @@
   }
 
   function applyAllFilters() {
-    // Determine which cards pass the current filter criteria
     const filtered = allCards().filter(card => {
       const loc   = card.getAttribute('data-location') || '';
       const price = parseInt(card.getAttribute('data-price')) || 0;
@@ -619,15 +621,14 @@
       return locOk && priceOk;
     });
 
-    // Hand off to pagination — it handles show/hide + count update
     if (window.Pagination) {
       window.Pagination.setFiltered(filtered);
     }
   }
 
   // Location chips
-  document.querySelectorAll('.filter-chip').forEach(function(chip) {
-    chip.addEventListener('click', function() {
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
       document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       activeLocation = chip.textContent.trim().toLowerCase();
@@ -636,13 +637,13 @@
   });
 
   // Price range slider
-  document.getElementById('priceRange').addEventListener('input', function() {
+  document.getElementById('priceRange').addEventListener('input', function () {
     maxPrice = parseInt(this.value);
     applyAllFilters();
   });
 
-  // Sort by — sorts ALL cards in DOM then re-triggers filter+pagination
-  document.querySelector('.sort-select').addEventListener('change', function() {
+  // Sort by
+  document.querySelector('.sort-select').addEventListener('change', function () {
     const val  = this.value;
     const grid = document.getElementById('hotelGrid');
     const cards = allCards();
