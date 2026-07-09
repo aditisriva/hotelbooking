@@ -1,33 +1,53 @@
 ﻿<?php
 session_start();
+require_once 'pricing.php';
 
-// ── Read & sanitize city param from URL ──
-$city_param = isset($_GET['city']) ? strtolower(trim($_GET['city'])) : '';
-$city_label = $city_param ? ucfirst($city_param) : '';
+// Read all URL params
+$city_param   = isset($_GET['city'])     ? strtolower(trim($_GET['city']))  : '';
+$city_label   = $city_param ? ucfirst($city_param) : '';
+$checkin_raw  = isset($_GET['checkin'])  ? trim($_GET['checkin'])  : '';
+$checkout_raw = isset($_GET['checkout']) ? trim($_GET['checkout']) : '';
+$guests_raw   = isset($_GET['guests'])   ? (int)$_GET['guests']   : 0;
 
-// Map of all static hotel data (mirrors the HTML cards below)
-// Used for PHP-side count and title generation
+function bhFmtDate(string $d): string {
+    if (!$d) return ''; $ts = strtotime($d); return $ts ? date('d M Y', $ts) : $d;
+}
+function bhCalcNights(string $ci, string $co): int {
+    if (!$ci || !$co) return 1; $diff = (strtotime($co) - strtotime($ci)) / 86400; return max(1,(int)$diff);
+}
+$nights       = bhCalcNights($checkin_raw, $checkout_raw);
+$checkin_fmt  = bhFmtDate($checkin_raw);
+$checkout_fmt = bhFmtDate($checkout_raw);
+$guests_label = $guests_raw >= 6 ? '3 Rooms, 6 Guests' : ($guests_raw >= 4 ? '2 Rooms, 4 Guests' : ($guests_raw == 1 ? '1 Room, 1 Guest' : '1 Room, 2 Guests'));
+$qs_parts = [];
+if ($checkin_raw)  $qs_parts[] = 'checkin='  . urlencode($checkin_raw);
+if ($checkout_raw) $qs_parts[] = 'checkout=' . urlencode($checkout_raw);
+if ($guests_raw)   $qs_parts[] = 'guests='   . $guests_raw;
+$booking_qs = $qs_parts ? '&' . implode('&', $qs_parts) : '';
+
 $all_hotels = [
-  ['name'=>'The Grand Palace',      'location'=>'mumbai',  'price'=>4299,  'rating'=>4.8, 'type'=>'hotel'],
-  ['name'=>'Sunset Beach Resort',   'location'=>'goa',     'price'=>5499,  'rating'=>4.6, 'type'=>'resort'],
-  ['name'=>'Heritage Haveli',       'location'=>'jaipur',  'price'=>4680,  'rating'=>4.9, 'type'=>'boutique-hotel'],
-  ['name'=>'Mountain View Lodge',   'location'=>'manali',  'price'=>3299,  'rating'=>4.7, 'type'=>'hotel'],
-  ['name'=>'Lake Palace Udaipur',   'location'=>'udaipur', 'price'=>12499, 'rating'=>4.9, 'type'=>'resort'],
-  ['name'=>'Kerala Backwater Resort','location'=>'kerala',  'price'=>6799,  'rating'=>4.8, 'type'=>'resort'],
-  ['name'=>'Zen Garden Resort',     'location'=>'kerala',  'price'=>4100,  'rating'=>4.5, 'type'=>'boutique-hotel'],
-  ['name'=>'The Imperial Delhi',    'location'=>'delhi',   'price'=>8799,  'rating'=>4.7, 'type'=>'hotel'],
-  ['name'=>'The Grand Palace Mumbai','location'=>'mumbai', 'price'=>4299,  'rating'=>4.8, 'type'=>'hotel'],
+  ['name'=>'The Grand Palace',       'location'=>'mumbai',  'price'=>4299,  'rating'=>4.8, 'type'=>'hotel',          'capacity'=>4],
+  ['name'=>'Sunset Beach Resort',    'location'=>'goa',     'price'=>5499,  'rating'=>4.6, 'type'=>'resort',         'capacity'=>4],
+  ['name'=>'Heritage Haveli',        'location'=>'jaipur',  'price'=>4680,  'rating'=>4.9, 'type'=>'boutique-hotel', 'capacity'=>4],
+  ['name'=>'Mountain View Lodge',    'location'=>'manali',  'price'=>3299,  'rating'=>4.7, 'type'=>'hotel',          'capacity'=>2],
+  ['name'=>'Lake Palace Udaipur',    'location'=>'udaipur', 'price'=>12499, 'rating'=>4.9, 'type'=>'resort',         'capacity'=>6],
+  ['name'=>'Kerala Backwater Resort','location'=>'kerala',  'price'=>6799,  'rating'=>4.8, 'type'=>'resort',         'capacity'=>4],
+  ['name'=>'Zen Garden Resort',      'location'=>'kerala',  'price'=>4100,  'rating'=>4.5, 'type'=>'boutique-hotel', 'capacity'=>2],
+  ['name'=>'The Imperial Delhi',     'location'=>'delhi',   'price'=>8799,  'rating'=>4.7, 'type'=>'hotel',          'capacity'=>4],
+  ['name'=>'The Grand Palace Mumbai','location'=>'mumbai',  'price'=>4299,  'rating'=>4.8, 'type'=>'hotel',          'capacity'=>4],
 ];
 
-// Filter by city if param present
-$filtered_hotels = $city_param
-  ? array_filter($all_hotels, fn($h) => $h['location'] === $city_param)
-  : $all_hotels;
+$filtered = $city_param ? array_values(array_filter($all_hotels, fn($h) => $h['location'] === $city_param)) : $all_hotels;
+if ($guests_raw > 0) $filtered = array_values(array_filter($filtered, fn($h) => $h['capacity'] >= $guests_raw));
 
-$hotel_count  = count($filtered_hotels);
-$page_title   = $city_param ? "Hotels in $city_label" : "Find Your Perfect Hotel";
-$page_sub     = $city_param ? "Showing $hotel_count hotel" . ($hotel_count !== 1 ? 's' : '') . " in $city_label" : "Showing results across top destinations in India";
-$count_text   = $hotel_count . ' hotel' . ($hotel_count !== 1 ? 's' : '');
+$hotel_count = count($filtered);
+$page_title  = $city_param ? "Hotels in $city_label" : "Find Your Perfect Hotel";
+$count_text  = $hotel_count . ' hotel' . ($hotel_count !== 1 ? 's' : '');
+$sub_parts = [];
+if ($city_label)   $sub_parts[] = $city_label;
+if ($checkin_fmt && $checkout_fmt) $sub_parts[] = "$checkin_fmt → $checkout_fmt ($nights night" . ($nights>1?'s':''') . ')';
+if ($guests_label && $guests_raw)  $sub_parts[] = $guests_label;
+$page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub_parts) : ' across India');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -85,16 +105,16 @@ $count_text   = $hotel_count . ' hotel' . ($hotel_count !== 1 ? 's' : '');
           <label class="form-label small fw-600 text-muted">WHERE</label>
           <div class="input-group">
             <span class="input-group-text bg-white border-end-0"><i class="bi bi-geo-alt-fill text-warning"></i></span>
-            <input type="text" id="heroSearchCity" class="form-control border-start-0 ps-0" placeholder="City, hotel or destination" value="<?php echo htmlspecialchars($city_label ?: 'India'); ?>"/>
+            <input type="text" id="heroSearchCity" class="form-control border-start-0 ps-0" placeholder="City, hotel or destination" value="<?php echo htmlspecialchars($city_label ?: "India"); ?>" />
           </div>
         </div>
         <div class="col-6 col-md-2">
           <label class="form-label small fw-600 text-muted">CHECK-IN</label>
-          <input type="date" class="form-control" id="checkin"/>
+          <input type="date" class="form-control" id="checkin" value="<?php echo htmlspecialchars($checkin_raw); ?>"/>
         </div>
         <div class="col-6 col-md-2">
           <label class="form-label small fw-600 text-muted">CHECK-OUT</label>
-          <input type="date" class="form-control" id="checkout"/>
+          <input type="date" class="form-control" id="checkout" value="<?php echo htmlspecialchars($checkout_raw); ?>"/>
         </div>
         <div class="col-6 col-md-2">
           <label class="form-label small fw-600 text-muted">ROOMS & GUESTS</label>
@@ -223,6 +243,23 @@ $count_text   = $hotel_count . ' hotel' . ($hotel_count !== 1 ? 's' : '');
         </div>
         <?php endif; ?>
 
+
+        <!-- Active Search Filter Strip -->
+        <?php if ($city_param || $checkin_raw || $guests_raw): ?>
+        <div class="d-flex flex-wrap gap-2 align-items-center mb-3 p-2 rounded-3" style="background:#f0f4ff;border:1px solid #bfdbfe">
+          <span class="small fw-700 text-primary"><i class="bi bi-funnel-fill me-1"></i>Filters:</span>
+          <?php if ($city_label): ?>
+          <span class="badge" style="background:#1a56db;font-size:.75rem"><i class="bi bi-geo-alt-fill me-1"></i><?php echo htmlspecialchars($city_label); ?></span>
+          <?php endif; ?>
+          <?php if ($checkin_fmt && $checkout_fmt): ?>
+          <span class="badge bg-secondary" style="font-size:.75rem"><i class="bi bi-calendar3 me-1"></i><?php echo htmlspecialchars($checkin_fmt); ?> → <?php echo htmlspecialchars($checkout_fmt); ?> (<?php echo $nights; ?> night<?php echo $nights>1?'s':''; ?>)</span>
+          <?php endif; ?>
+          <?php if ($guests_raw > 0): ?>
+          <span class="badge bg-dark" style="font-size:.75rem"><i class="bi bi-people-fill me-1"></i><?php echo htmlspecialchars($guests_label); ?></span>
+          <?php endif; ?>
+          <a href="hotels.php" class="ms-auto text-danger small fw-600 text-decoration-none"><i class="bi bi-x-circle me-1"></i>Clear All</a>
+        </div>
+        <?php endif; ?>
         <!-- Sort Bar -->
         <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
           <p class="mb-0 text-muted small"><span class="fw-700 text-dark"><?php echo $count_text; ?></span> found<?php echo $city_param ? ' in ' . htmlspecialchars($city_label) : ' in India'; ?></p>
@@ -774,21 +811,22 @@ $count_text   = $hotel_count . ' hotel' . ($hotel_count !== 1 ? 's' : '');
   if (heroCity) heroCity.value = '<?php echo addslashes($city_label); ?>';
   <?php endif; ?>
 
-  // Hero search bar — redirect to hotels.php?city=X
+  // Hero search bar — full search with all params
   const heroSearchBtn = document.querySelector('.listing-search-bar .btn-warning');
   if (heroSearchBtn) {
     heroSearchBtn.addEventListener('click', function() {
-      const city = (document.getElementById('heroSearchCity')?.value || '').trim().toLowerCase();
-      const ci   = document.getElementById('checkin')?.value  || '';
-      const co   = document.getElementById('checkout')?.value || '';
-      const qs   = [];
-      if (city) qs.push('city=' + encodeURIComponent(city));
-      if (ci)   qs.push('checkin=' + encodeURIComponent(ci));
-      if (co)   qs.push('checkout=' + encodeURIComponent(co));
+      const city   = (document.getElementById('heroSearchCity')?.value || '').trim().toLowerCase();
+      const ci     = document.getElementById('checkin')?.value   || '';
+      const co     = document.getElementById('checkout')?.value  || '';
+      const guests = document.querySelector('.listing-search-bar select')?.value || '';
+      const qs = [];
+      if (city)   qs.push('city='     + encodeURIComponent(city));
+      if (ci)     qs.push('checkin='  + encodeURIComponent(ci));
+      if (co)     qs.push('checkout=' + encodeURIComponent(co));
+      if (guests) qs.push('guests='   + encodeURIComponent(guests));
       window.location.href = 'hotels.php' + (qs.length ? '?' + qs.join('&') : '');
     });
   }
 </script>
 </body>
 </html>
-

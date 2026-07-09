@@ -1,4 +1,20 @@
-﻿<?php require_once 'pricing.php'; ?>
+﻿<?php
+// Read booking params passed from search
+$checkin_raw  = isset($_GET['checkin'])  ? trim($_GET['checkin'])  : '';
+$checkout_raw = isset($_GET['checkout']) ? trim($_GET['checkout']) : '';
+$guests_raw   = isset($_GET['guests'])   ? (int)$_GET['guests']   : 0;
+$nights       = 1;
+if ($checkin_raw && $checkout_raw) {
+    $diff = (strtotime($checkout_raw) - strtotime($checkin_raw)) / 86400;
+    $nights = max(1, (int)$diff);
+}
+function hd_fmt(string $d): string { return $d ? date('d M Y', strtotime($d)) : ''; }
+$qs_parts = [];
+if ($checkin_raw)  $qs_parts[] = 'checkin='  . urlencode($checkin_raw);
+if ($checkout_raw) $qs_parts[] = 'checkout=' . urlencode($checkout_raw);
+if ($guests_raw)   $qs_parts[] = 'guests='   . $guests_raw;
+$booking_qs = $qs_parts ? '&' . implode('&', $qs_parts) : '';
+?><?php require_once 'pricing.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,7 +92,7 @@
     <div class="row g-4">
 
       <!-- LEFT: Hotel Info -->
-      <div class="col-12">
+      <div class="col-12 col-lg-8">
 
         <!-- Hotel Header -->
         <div class="detail-card mb-4">
@@ -112,6 +128,39 @@
             <span class="quick-amenity"><i class="bi bi-flower1 text-danger"></i> Spa</span>
             <span class="quick-amenity"><i class="bi bi-dumbbell text-secondary"></i> Gym</span>
           </div>
+
+          <!-- Availability Summary Strip -->
+          <?php if ($checkin_raw || $guests_raw): ?>
+          <div class="mt-3 p-3 rounded-3 d-flex flex-wrap gap-3 align-items-center" style="background:linear-gradient(135deg,#e8f0fe,#dbeafe);border:1.5px solid #bfdbfe">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-calendar-check-fill text-primary"></i>
+              <div>
+                <div style="font-size:.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em">Check-in</div>
+                <div style="font-weight:700;color:#1a1a2e;font-size:.875rem"><?php echo $checkin_raw ? hd_fmt($checkin_raw) : 'Select date'; ?></div>
+              </div>
+            </div>
+            <i class="bi bi-arrow-right text-muted"></i>
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-calendar-x-fill text-danger"></i>
+              <div>
+                <div style="font-size:.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em">Check-out</div>
+                <div style="font-weight:700;color:#1a1a2e;font-size:.875rem"><?php echo $checkout_raw ? hd_fmt($checkout_raw) : 'Select date'; ?></div>
+              </div>
+            </div>
+            <?php if ($nights > 1): ?>
+            <span class="badge bg-primary" style="font-size:.78rem"><?php echo $nights; ?> Nights</span>
+            <?php endif; ?>
+            <?php if ($guests_raw > 0): ?>
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-people-fill text-success"></i>
+              <div style="font-weight:700;color:#1a1a2e;font-size:.875rem"><?php echo htmlspecialchars($guests_raw); ?> Guests</div>
+            </div>
+            <?php endif; ?>
+            <a href="hotels.php?<?php echo $city_param ? 'city='.urlencode($city_param).'&' : ''; ?>checkin=<?php echo urlencode($checkin_raw); ?>&checkout=<?php echo urlencode($checkout_raw); ?>&guests=<?php echo $guests_raw; ?>" class="ms-auto btn btn-outline-primary btn-sm">
+              <i class="bi bi-pencil-fill me-1"></i>Change Dates
+            </a>
+          </div>
+          <?php endif; ?>
         </div>
 
         <!-- Description -->
@@ -183,7 +232,7 @@
                       <div>
                         <?php bhPriceBlock(4680, 7200); ?>
                       </div>
-                      <a href="review-booking.php?room=deluxe" class="btn btn-primary btn-sm px-4">Select</a>
+                      <a href="review-booking.php?room=deluxe<?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-4">Select</a>
                     </div>
                   </div>
                 </div>
@@ -211,7 +260,7 @@
                       <div>
                         <?php bhPriceBlock(9800, 14000); ?>
                       </div>
-                      <a href="review-booking.php?room=royal" class="btn btn-primary btn-sm px-4">Select</a>
+                      <a href="review-booking.php?room=royal<?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-4">Select</a>
                     </div>
                   </div>
                 </div>
@@ -239,7 +288,7 @@
                       <div>
                         <?php bhPriceBlock(19500, 28000); ?>
                       </div>
-                      <a href="review-booking.php?room=maharaja" class="btn btn-primary btn-sm px-4">Select</a>
+                      <a href="review-booking.php?room=maharaja<?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-4">Select</a>
                     </div>
                   </div>
                 </div>
@@ -361,6 +410,63 @@
         </div>
 
       </div><!-- end left col -->
+
+      <!-- RIGHT: Sticky Booking Sidebar -->
+      <div class="col-12 col-lg-4">
+        <div class="booking-card sticky-booking">
+          <div class="booking-card-header text-white p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="fw-700 mb-0"><i class="bi bi-calendar2-check me-2"></i>Book This Hotel</h6>
+              <span class="badge bg-success small">Free Cancellation</span>
+            </div>
+            <?php bhPriceBlock(4680, 7200, false); ?>
+          </div>
+          <div class="booking-card-body">
+            <!-- Dates -->
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-600 text-muted mb-1">CHECK-IN</label>
+                <input type="date" class="form-control form-control-sm" id="bkCheckin" value="<?php echo htmlspecialchars($checkin_raw); ?>"/>
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-600 text-muted mb-1">CHECK-OUT</label>
+                <input type="date" class="form-control form-control-sm" id="bkCheckout" value="<?php echo htmlspecialchars($checkout_raw); ?>"/>
+              </div>
+            </div>
+            <!-- Guests -->
+            <div class="mb-3">
+              <label class="form-label small fw-600 text-muted mb-1">GUESTS</label>
+              <select class="form-select form-select-sm" id="bkGuests">
+                <option value="1" <?php echo $guests_raw==1?'selected':''; ?>>1 Guest</option>
+                <option value="2" <?php echo (!$guests_raw||$guests_raw==2)?'selected':''; ?>>2 Guests</option>
+                <option value="3" <?php echo $guests_raw==3?'selected':''; ?>>3 Guests</option>
+                <option value="4" <?php echo $guests_raw>=4?'selected':''; ?>>4 Guests</option>
+              </select>
+            </div>
+            <!-- Price Breakdown -->
+            <div class="price-breakdown-box mb-3" id="bkBreakdown">
+              <?php
+                $p_calc = bhCalcPricing(4680);
+                $room_cost = 4680 * $nights;
+                $tax_amt   = round($room_cost * bhTaxRate(4680));
+                $disc      = round($room_cost * 0.35);
+                $grand     = $room_cost - $disc + $tax_amt + SERVICE_CHARGE;
+              ?>
+              <div class="row-item"><span class="label">₹4,680 × <?php echo $nights; ?> night<?php echo $nights>1?'s':''; ?></span><span class="value">₹<?php echo number_format($room_cost); ?></span></div>
+              <div class="row-item"><span class="label" style="color:#059669">Discount (35%)</span><span class="value" style="color:#059669">− ₹<?php echo number_format($disc); ?></span></div>
+              <div class="row-item"><span class="label">GST (12%)</span><span class="value">₹<?php echo number_format($tax_amt); ?></span></div>
+              <div class="row-item"><span class="label">Service Charge</span><span class="value">₹200</span></div>
+              <div class="row-item total"><span>Total Payable</span><span class="value">₹<?php echo number_format($grand); ?></span></div>
+              <div class="savings-row"><i class="bi bi-piggy-bank-fill"></i>You save ₹<?php echo number_format($disc); ?> on this booking!</div>
+            </div>
+            <!-- CTA -->
+            <a href="review-booking.php?room=deluxe<?php echo $booking_qs; ?>" class="btn book-now-btn w-100 fw-700 py-3 mb-2">
+              <i class="bi bi-calendar2-check me-2"></i>Book Now
+            </a>
+            <p class="text-muted text-center" style="font-size:.75rem"><i class="bi bi-shield-check text-success me-1"></i>Secure booking · No hidden charges</p>
+          </div>
+        </div>
+      </div><!-- end right col -->
 
     </div><!-- end row -->
   </div><!-- end container -->

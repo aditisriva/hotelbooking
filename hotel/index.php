@@ -76,19 +76,19 @@
             </div>
             <div class="col-6 col-md-2">
               <label class="form-label small fw-600 text-muted">CHECK-IN</label>
-              <input type="date" class="form-control" value="<?php echo $checkin; ?>"/>
+              <input type="date" class="form-control" id="searchCheckin" value="<?php echo $checkin; ?>"/>
             </div>
             <div class="col-6 col-md-2">
               <label class="form-label small fw-600 text-muted">CHECK-OUT</label>
-              <input type="date" class="form-control" value="<?php echo $checkout; ?>"/>
+              <input type="date" class="form-control" id="searchCheckout" value="<?php echo $checkout; ?>"/>
             </div>
             <div class="col-6 col-md-2">
               <label class="form-label small fw-600 text-muted">ROOMS & GUESTS</label>
-              <select class="form-select">
-                <option>1 Room, 2 Guests</option>
-                <option>1 Room, 1 Guest</option>
-                <option>2 Rooms, 4 Guests</option>
-                <option>3 Rooms, 6 Guests</option>
+              <select class="form-select" id="searchGuests">
+                <option value="2">1 Room, 2 Guests</option>
+                <option value="1">1 Room, 1 Guest</option>
+                <option value="4">2 Rooms, 4 Guests</option>
+                <option value="6">3 Rooms, 6 Guests</option>
               </select>
             </div>
             <div class="col-6 col-md-2">
@@ -619,13 +619,17 @@
   // Set default dates � handled server-side by PHP (see top of file)
 </script>
 <script>
-function searchHotels(){
-  const city=(document.getElementById('searchCity')?.value||'').trim().toLowerCase();
-  const ci=document.getElementById('checkin')?.value||'';
-  const co=document.getElementById('checkout')?.value||'';
-  const p=new URLSearchParams();
-  if(city)p.set('city',city);if(ci)p.set('checkin',ci);if(co)p.set('checkout',co);
-  window.location.href='hotels.php'+(p.toString()?'?'+p.toString():'');
+function searchHotels() {
+  var city    = (document.getElementById('searchCity') ? document.getElementById('searchCity').value : '').trim().toLowerCase();
+  var ci      = document.getElementById('searchCheckin')  ? document.getElementById('searchCheckin').value  : '';
+  var co      = document.getElementById('searchCheckout') ? document.getElementById('searchCheckout').value : '';
+  var guests  = document.getElementById('searchGuests')   ? document.getElementById('searchGuests').value   : '2';
+  var qs = [];
+  if (city)   qs.push('city='    + encodeURIComponent(city));
+  if (ci)     qs.push('checkin=' + encodeURIComponent(ci));
+  if (co)     qs.push('checkout='+ encodeURIComponent(co));
+  if (guests) qs.push('guests='  + encodeURIComponent(guests));
+  window.location.href = 'hotels.php' + (qs.length ? '?' + qs.join('&') : '');
 }
 document.addEventListener('DOMContentLoaded',function(){const inp=document.getElementById('searchCity');if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter')searchHotels();});});
 </script>
