@@ -122,7 +122,7 @@
               </div>
             </div>
             <p style="font-size:.88rem;margin-bottom:.75rem">"Overall a wonderful experience. The ocean suite was gorgeous and the spa was absolutely relaxing. Only minor issue was the room service was a bit slow on the second evening, but the food quality made up for it. Would recommend to anyone visiting Mumbai."</p>
-            <button class="ds-btn prim sm" onclick="openReplyModal('Priya Gupta','4 stars — Ocean Suite · 10 Jul 2026','Overall a wonderful experience. The ocean suite was gorgeous...')"><i class="bi bi-reply-fill me-1"></i>Reply Now</button>
+            <button class="ds-btn prim sm" onclick="openReplyModal(this, 'Priya Gupta','4 stars — Ocean Suite · 10 Jul 2026','Overall a wonderful experience. The ocean suite was gorgeous...')"><i class="bi bi-reply-fill me-1"></i>Reply Now</button>
           </div>
         </div>
         <!-- Review 3 -->
@@ -159,7 +159,7 @@
               </div>
             </div>
             <p style="font-size:.88rem;margin-bottom:.75rem">"Disappointed with the stay. AC was not working properly in the room and it took over 3 hours for maintenance to fix it. Staff at the front desk were not very helpful when I raised the complaint. Expected much better service given the room rate."</p>
-            <button class="ds-btn dng sm" onclick="openReplyModal('Vijay Joshi','2 stars — Deluxe King · 18 May 2026','Disappointed with the stay. AC was not working properly...')"><i class="bi bi-reply-fill me-1"></i>Reply Now</button>
+            <button class="ds-btn dng sm" onclick="openReplyModal(this, 'Vijay Joshi','2 stars — Deluxe King · 18 May 2026','Disappointed with the stay. AC was not working properly...')"><i class="bi bi-reply-fill me-1"></i>Reply Now</button>
           </div>
         </div>
       </div>
@@ -184,7 +184,7 @@
       </div>
       <div class="modal-footer gap-2">
         <button class="ds-btn gho sm" data-bs-dismiss="modal">Cancel</button>
-        <button class="ds-btn prim sm" onclick="dsToast('Reply posted successfully!','success');bootstrap.Modal.getInstance(document.getElementById('replyModal')).hide()"><i class="bi bi-send-fill me-1"></i>Post Reply</button>
+        <button class="ds-btn prim sm" onclick="postReply()"><i class="bi bi-send-fill me-1"></i>Post Reply</button>
       </div>
     </div>
   </div>
@@ -192,12 +192,35 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <script src="dashboard.js"></script>
 <script>
-function openReplyModal(guest,meta,text){
+let currentReplyReview = null;
+let currentReplyBtn = null;
+function openReplyModal(btn, guest,meta,text){
+  currentReplyBtn = btn;
+  currentReplyReview = btn.closest('.ds-rev');
   document.getElementById('rplGuestName').textContent=guest;
   document.getElementById('rplMeta').textContent=meta;
   document.getElementById('rplText').textContent='"'+text+'"';
   document.getElementById('replyTextarea').value='';
   new bootstrap.Modal(document.getElementById('replyModal')).show();
+}
+function postReply() {
+  const text = document.getElementById('replyTextarea').value.trim();
+  if(!text) return dsToast('Please enter a reply', 'error');
+  if(currentReplyReview) {
+    currentReplyReview.dataset.status = 'replied';
+    const badge = currentReplyReview.querySelector('.ds-badge');
+    badge.className = 'ds-badge confirmed';
+    badge.innerHTML = '<i class="bi bi-check-circle-fill"></i>Replied';
+    
+    const replyHtml = '<div style="background:var(--sb-bg);border-left:3px solid var(--pr);padding:.75rem;border-radius:0 8px 8px 0;font-size:.82rem;margin-top:1rem">' +
+                      '<div style="font-weight:700;color:var(--pr);margin-bottom:.3rem"><i class="bi bi-building-fill me-1"></i>Management Reply</div>' +
+                      '<div style="color:var(--txt)">'+text+'</div></div>';
+    currentReplyBtn.insertAdjacentHTML('beforebegin', replyHtml);
+    currentReplyBtn.remove();
+  }
+  dsToast('Reply posted successfully!','success');
+  bootstrap.Modal.getInstance(document.getElementById('replyModal')).hide();
+  filterRevs(document.querySelector('.ds-btn.outl.active')?.dataset?.filter || '');
 }
 function filterRevs(f){
   document.querySelectorAll('#revList .ds-rev').forEach(r=>{

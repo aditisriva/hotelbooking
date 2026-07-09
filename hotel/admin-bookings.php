@@ -93,8 +93,8 @@
             <td><span class="ds-badge confirmed"><i class="bi bi-check-circle-fill"></i>Confirmed</span></td>
             <td><div class="d-flex gap-1">
               <button class="ds-btn gho ico sm" title="View Details" onclick="openBkModal('#BKH001','Rahul Sharma','RS','rahul.s@email.com','+91 98001 11222','Deluxe King · 204','12 Jul 2026','15 Jul 2026',3,'₹8,598','Confirmed','UPI')"><i class="bi bi-eye-fill"></i></button>
-              <button class="ds-btn suc ico sm" title="Check In" onclick="dsToast('Rahul Sharma checked in successfully!','success')"><i class="bi bi-box-arrow-in-right"></i></button>
-              <button class="ds-btn dng ico sm" title="Cancel" onclick="dsConfirm('Cancel booking #BKH001?',()=>dsToast('Booking cancelled.','error'))"><i class="bi bi-x-lg"></i></button>
+              <button class="ds-btn suc ico sm" title="Check In" onclick="updateStatus(this, 'checkin', 'Rahul Sharma checked in successfully!')"><i class="bi bi-box-arrow-in-right"></i></button>
+              <button class="ds-btn dng ico sm" title="Cancel" onclick="updateStatus(this, 'cancelled', 'Booking cancelled.')"><i class="bi bi-x-lg"></i></button>
             </div></td>
           </tr>
           <tr data-status="checkin">
@@ -105,8 +105,8 @@
             <td><span class="ds-badge checkin"><i class="bi bi-door-open"></i>Checked In</span></td>
             <td><div class="d-flex gap-1">
               <button class="ds-btn gho ico sm" title="View Details" onclick="openBkModal('#BKH002','Priya Gupta','PG','priya.g@email.com','+91 98001 22333','Ocean Suite · 501','10 Jul 2026','14 Jul 2026',4,'₹16,497','Checked In','Credit Card')"><i class="bi bi-eye-fill"></i></button>
-              <button class="ds-btn suc ico sm" title="Check Out" onclick="dsToast('Priya Gupta checked out.','success')"><i class="bi bi-box-arrow-right"></i></button>
-              <button class="ds-btn dng ico sm" title="Cancel" onclick="dsConfirm('Cancel booking #BKH002?',()=>dsToast('Booking cancelled.','error'))"><i class="bi bi-x-lg"></i></button>
+              <button class="ds-btn suc ico sm" title="Check Out" onclick="updateStatus(this, 'checkout', 'Priya Gupta checked out.')"><i class="bi bi-box-arrow-right"></i></button>
+              <button class="ds-btn dng ico sm" title="Cancel" onclick="updateStatus(this, 'cancelled', 'Booking cancelled.')"><i class="bi bi-x-lg"></i></button>
             </div></td>
           </tr>
           <tr data-status="pending">
@@ -117,8 +117,8 @@
             <td><span class="ds-badge pending"><i class="bi bi-hourglass-split"></i>Pending</span></td>
             <td><div class="d-flex gap-1">
               <button class="ds-btn gho ico sm" title="View Details" onclick="openBkModal('#BKH003','Amit Kumar','AK','amit.k@email.com','+91 98001 33444','Standard Twin · 108','15 Jul 2026','17 Jul 2026',2,'₹5,200','Pending','Net Banking')"><i class="bi bi-eye-fill"></i></button>
-              <button class="ds-btn suc ico sm" title="Confirm" onclick="dsToast('Booking #BKH003 confirmed!','success')"><i class="bi bi-check-lg"></i></button>
-              <button class="ds-btn dng ico sm" title="Cancel" onclick="dsConfirm('Cancel booking #BKH003?',()=>dsToast('Booking cancelled.','error'))"><i class="bi bi-x-lg"></i></button>
+              <button class="ds-btn suc ico sm" title="Confirm" onclick="updateStatus(this, 'confirmed', 'Booking #BKH003 confirmed!')"><i class="bi bi-check-lg"></i></button>
+              <button class="ds-btn dng ico sm" title="Cancel" onclick="updateStatus(this, 'cancelled', 'Booking cancelled.')"><i class="bi bi-x-lg"></i></button>
             </div></td>
           </tr>
           <tr data-status="confirmed">
@@ -129,8 +129,8 @@
             <td><span class="ds-badge confirmed"><i class="bi bi-check-circle-fill"></i>Confirmed</span></td>
             <td><div class="d-flex gap-1">
               <button class="ds-btn gho ico sm" title="View Details" onclick="openBkModal('#BKH004','Sneha Rao','SR','sneha.r@email.com','+91 98001 44555','Presidential Suite · 601','16 Jul 2026','20 Jul 2026',4,'₹24,000','Confirmed','Debit Card')"><i class="bi bi-eye-fill"></i></button>
-              <button class="ds-btn suc ico sm" title="Check In" onclick="dsToast('Sneha Rao checked in successfully!','success')"><i class="bi bi-box-arrow-in-right"></i></button>
-              <button class="ds-btn dng ico sm" title="Cancel" onclick="dsConfirm('Cancel booking #BKH004?',()=>dsToast('Booking cancelled.','error'))"><i class="bi bi-x-lg"></i></button>
+              <button class="ds-btn suc ico sm" title="Check In" onclick="updateStatus(this, 'checkin', 'Sneha Rao checked in successfully!')"><i class="bi bi-box-arrow-in-right"></i></button>
+              <button class="ds-btn dng ico sm" title="Cancel" onclick="updateStatus(this, 'cancelled', 'Booking cancelled.')"><i class="bi bi-x-lg"></i></button>
             </div></td>
           </tr>
           <tr data-status="cancelled">
@@ -267,6 +267,34 @@ function openBkModal(id,name,av,email,phone,room,ci,co,nights,amt,status,pay){
   const stCls=stMap[status]||'pending';
   document.getElementById('bkStatusDisplay').innerHTML='<span class="ds-badge '+stCls+'">'+status+'</span>';
   new bootstrap.Modal(document.getElementById('bkModal')).show();
+}
+function updateStatus(btn, newStatus, msg) {
+  dsConfirm('Confirm this action?', () => {
+    const tr = btn.closest('tr');
+    tr.dataset.status = newStatus;
+    const badgeTd = tr.querySelector('td:nth-child(8)');
+    const actionsTd = tr.querySelector('td:nth-child(9)');
+    let badgeHtml = '';
+    let actionsHtml = actionsTd.innerHTML;
+    const viewBtn = actionsTd.querySelector('button').outerHTML;
+    if(newStatus === 'checkin') {
+      badgeHtml = '<span class="ds-badge checkin"><i class="bi bi-door-open"></i>Checked In</span>';
+      actionsHtml = '<div class="d-flex gap-1">'+viewBtn+'<button class="ds-btn suc ico sm" title="Check Out" onclick="updateStatus(this, \'checkout\', \'Checked out successfully!\')"><i class="bi bi-box-arrow-right"></i></button><button class="ds-btn dng ico sm" title="Cancel" onclick="updateStatus(this, \'cancelled\', \'Booking cancelled.\')"><i class="bi bi-x-lg"></i></button></div>';
+    } else if(newStatus === 'confirmed') {
+      badgeHtml = '<span class="ds-badge confirmed"><i class="bi bi-check-circle-fill"></i>Confirmed</span>';
+      actionsHtml = '<div class="d-flex gap-1">'+viewBtn+'<button class="ds-btn suc ico sm" title="Check In" onclick="updateStatus(this, \'checkin\', \'Checked in successfully!\')"><i class="bi bi-box-arrow-in-right"></i></button><button class="ds-btn dng ico sm" title="Cancel" onclick="updateStatus(this, \'cancelled\', \'Booking cancelled.\')"><i class="bi bi-x-lg"></i></button></div>';
+    } else if(newStatus === 'checkout') {
+      badgeHtml = '<span class="ds-badge checkout"><i class="bi bi-box-arrow-right"></i>Checked Out</span>';
+      actionsHtml = '<div class="d-flex gap-1">'+viewBtn+'<button class="ds-btn gho ico sm disabled"><i class="bi bi-box-arrow-in-right"></i></button><button class="ds-btn gho ico sm disabled"><i class="bi bi-x-lg"></i></button></div>';
+    } else if(newStatus === 'cancelled') {
+      badgeHtml = '<span class="ds-badge cancelled"><i class="bi bi-x-circle-fill"></i>Cancelled</span>';
+      actionsHtml = '<div class="d-flex gap-1">'+viewBtn+'<button class="ds-btn gho ico sm disabled"><i class="bi bi-box-arrow-in-right"></i></button><button class="ds-btn gho ico sm disabled"><i class="bi bi-x-lg"></i></button></div>';
+    }
+    badgeTd.innerHTML = badgeHtml;
+    actionsTd.innerHTML = actionsHtml;
+    dsToast(msg, newStatus === 'cancelled' ? 'error' : 'success');
+    filterBookings();
+  });
 }
 </script>
 </body></html>

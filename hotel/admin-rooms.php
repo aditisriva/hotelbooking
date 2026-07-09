@@ -31,7 +31,7 @@
             <td><span class="ds-badge available">Available</span></td>
             <td><div class="d-flex gap-1">
               <button class="ds-btn gho ico" data-bs-toggle="modal" data-bs-target="#editRoomModal" title="Edit"><i class="bi bi-pencil-fill"></i></button>
-              <button class="ds-btn dng ico" onclick="dsConfirm('Delete Room 101?',()=>dsToast('Room deleted','error'))" title="Delete"><i class="bi bi-trash-fill"></i></button>
+              <button class="ds-btn dng ico" onclick="dsConfirm('Delete Room 101?',()=>{this.closest('tr').remove();dsToast('Room deleted','error')})" title="Delete"><i class="bi bi-trash-fill"></i></button>
             </div></td>
           </tr>
           <tr data-type="Deluxe">
@@ -42,7 +42,7 @@
             <td><span class="ds-badge occupied">Occupied</span></td>
             <td><div class="d-flex gap-1">
               <button class="ds-btn gho ico" data-bs-toggle="modal" data-bs-target="#editRoomModal"><i class="bi bi-pencil-fill"></i></button>
-              <button class="ds-btn dng ico" onclick="dsConfirm('Delete Room 201?',()=>dsToast('Room deleted','error'))"><i class="bi bi-trash-fill"></i></button>
+              <button class="ds-btn dng ico" onclick="dsConfirm('Delete Room 201?',()=>{this.closest('tr').remove();dsToast('Room deleted','error')})"><i class="bi bi-trash-fill"></i></button>
             </div></td>
           </tr>
           <tr data-type="Suite">
@@ -53,7 +53,7 @@
             <td><span class="ds-badge occupied">Occupied</span></td>
             <td><div class="d-flex gap-1">
               <button class="ds-btn gho ico" data-bs-toggle="modal" data-bs-target="#editRoomModal"><i class="bi bi-pencil-fill"></i></button>
-              <button class="ds-btn dng ico" onclick="dsConfirm('Delete?',()=>dsToast('Deleted','error'))"><i class="bi bi-trash-fill"></i></button>
+              <button class="ds-btn dng ico" onclick="dsConfirm('Delete?',()=>{this.closest('tr').remove();dsToast('Deleted','error')})"><i class="bi bi-trash-fill"></i></button>
             </div></td>
           </tr>
           <tr data-type="Presidential">
@@ -64,7 +64,7 @@
             <td><span class="ds-badge available">Available</span></td>
             <td><div class="d-flex gap-1">
               <button class="ds-btn gho ico" data-bs-toggle="modal" data-bs-target="#editRoomModal"><i class="bi bi-pencil-fill"></i></button>
-              <button class="ds-btn dng ico" onclick="dsConfirm('Delete?',()=>dsToast('Deleted','error'))"><i class="bi bi-trash-fill"></i></button>
+              <button class="ds-btn dng ico" onclick="dsConfirm('Delete?',()=>{this.closest('tr').remove();dsToast('Deleted','error')})"><i class="bi bi-trash-fill"></i></button>
             </div></td>
           </tr>
           <tr data-type="Standard">
@@ -75,7 +75,7 @@
             <td><span class="ds-badge maintenance">Maintenance</span></td>
             <td><div class="d-flex gap-1">
               <button class="ds-btn gho ico" data-bs-toggle="modal" data-bs-target="#editRoomModal"><i class="bi bi-pencil-fill"></i></button>
-              <button class="ds-btn dng ico" onclick="dsConfirm('Delete?',()=>dsToast('Deleted','error'))"><i class="bi bi-trash-fill"></i></button>
+              <button class="ds-btn dng ico" onclick="dsConfirm('Delete?',()=>{this.closest('tr').remove();dsToast('Deleted','error')})"><i class="bi bi-trash-fill"></i></button>
             </div></td>
           </tr>
           <tr data-type="Deluxe">
@@ -86,7 +86,7 @@
             <td><span class="ds-badge occupied">Occupied</span></td>
             <td><div class="d-flex gap-1">
               <button class="ds-btn gho ico" data-bs-toggle="modal" data-bs-target="#editRoomModal"><i class="bi bi-pencil-fill"></i></button>
-              <button class="ds-btn dng ico" onclick="dsConfirm('Delete?',()=>dsToast('Deleted','error'))"><i class="bi bi-trash-fill"></i></button>
+              <button class="ds-btn dng ico" onclick="dsConfirm('Delete?',()=>{this.closest('tr').remove();dsToast('Deleted','error')})"><i class="bi bi-trash-fill"></i></button>
             </div></td>
           </tr>
           <tr data-type="Suite">
@@ -97,7 +97,7 @@
             <td><span class="ds-badge available">Available</span></td>
             <td><div class="d-flex gap-1">
               <button class="ds-btn gho ico" data-bs-toggle="modal" data-bs-target="#editRoomModal"><i class="bi bi-pencil-fill"></i></button>
-              <button class="ds-btn dng ico" onclick="dsConfirm('Delete?',()=>dsToast('Deleted','error'))"><i class="bi bi-trash-fill"></i></button>
+              <button class="ds-btn dng ico" onclick="dsConfirm('Delete?',()=>{this.closest('tr').remove();dsToast('Deleted','error')})"><i class="bi bi-trash-fill"></i></button>
             </div></td>
           </tr>
           <tr data-type="Standard">
@@ -108,7 +108,7 @@
             <td><span class="ds-badge occupied">Occupied</span></td>
             <td><div class="d-flex gap-1">
               <button class="ds-btn gho ico" data-bs-toggle="modal" data-bs-target="#editRoomModal"><i class="bi bi-pencil-fill"></i></button>
-              <button class="ds-btn dng ico" onclick="dsConfirm('Delete?',()=>dsToast('Deleted','error'))"><i class="bi bi-trash-fill"></i></button>
+              <button class="ds-btn dng ico" onclick="dsConfirm('Delete?',()=>{this.closest('tr').remove();dsToast('Deleted','error')})"><i class="bi bi-trash-fill"></i></button>
             </div></td>
           </tr>
         </tbody>

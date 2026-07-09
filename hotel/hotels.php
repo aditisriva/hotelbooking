@@ -1,5 +1,33 @@
 <?php
 session_start();
+
+// ── Read & sanitize city param from URL ──
+$city_param = isset($_GET['city']) ? strtolower(trim($_GET['city'])) : '';
+$city_label = $city_param ? ucfirst($city_param) : '';
+
+// Map of all static hotel data (mirrors the HTML cards below)
+// Used for PHP-side count and title generation
+$all_hotels = [
+  ['name'=>'The Grand Palace',      'location'=>'mumbai',  'price'=>4299,  'rating'=>4.8, 'type'=>'hotel'],
+  ['name'=>'Sunset Beach Resort',   'location'=>'goa',     'price'=>5499,  'rating'=>4.6, 'type'=>'resort'],
+  ['name'=>'Heritage Haveli',       'location'=>'jaipur',  'price'=>4680,  'rating'=>4.9, 'type'=>'boutique-hotel'],
+  ['name'=>'Mountain View Lodge',   'location'=>'manali',  'price'=>3299,  'rating'=>4.7, 'type'=>'hotel'],
+  ['name'=>'Lake Palace Udaipur',   'location'=>'udaipur', 'price'=>12499, 'rating'=>4.9, 'type'=>'resort'],
+  ['name'=>'Kerala Backwater Resort','location'=>'kerala',  'price'=>6799,  'rating'=>4.8, 'type'=>'resort'],
+  ['name'=>'Zen Garden Resort',     'location'=>'kerala',  'price'=>4100,  'rating'=>4.5, 'type'=>'boutique-hotel'],
+  ['name'=>'The Imperial Delhi',    'location'=>'delhi',   'price'=>8799,  'rating'=>4.7, 'type'=>'hotel'],
+  ['name'=>'The Grand Palace Mumbai','location'=>'mumbai', 'price'=>4299,  'rating'=>4.8, 'type'=>'hotel'],
+];
+
+// Filter by city if param present
+$filtered_hotels = $city_param
+  ? array_filter($all_hotels, fn($h) => $h['location'] === $city_param)
+  : $all_hotels;
+
+$hotel_count  = count($filtered_hotels);
+$page_title   = $city_param ? "Hotels in $city_label" : "Find Your Perfect Hotel";
+$page_sub     = $city_param ? "Showing $hotel_count hotel" . ($hotel_count !== 1 ? 's' : '') . " in $city_label" : "Showing results across top destinations in India";
+$count_text   = $hotel_count . ' hotel' . ($hotel_count !== 1 ? 's' : '');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -7,7 +35,7 @@ session_start();
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a56db'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='18' font-family='system-ui' fill='%23f59e0b'%3E&#x1F3E8;%3C/text%3E%3C/svg%3E"/>
-  <title>Hotels – bookHotel</title>
+  <title><?php echo htmlspecialchars($page_title); ?> – bookHotel</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" crossorigin="anonymous"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" crossorigin="anonymous"/>
@@ -49,15 +77,15 @@ session_start();
         <li class="breadcrumb-item active text-white-50">Hotels</li>
       </ol>
     </nav>
-    <h1 class="fw-800 display-5 mb-2">Find Your Perfect Hotel</h1>
-    <p class="opacity-75 mb-4">Showing results across top destinations in India</p>
+    <h1 class="fw-800 display-5 mb-2"><?php echo htmlspecialchars($page_title); ?></h1>
+    <p class="opacity-75 mb-4"><?php echo htmlspecialchars($page_sub); ?></p>
     <div class="listing-search-bar">
       <div class="row g-2 align-items-end">
         <div class="col-12 col-md-4">
           <label class="form-label small fw-600 text-muted">WHERE</label>
           <div class="input-group">
             <span class="input-group-text bg-white border-end-0"><i class="bi bi-geo-alt-fill text-warning"></i></span>
-            <input type="text" class="form-control border-start-0 ps-0" placeholder="City, hotel or destination" value="India"/>
+            <input type="text" id="heroSearchCity" class="form-control border-start-0 ps-0" placeholder="City, hotel or destination" value="<?php echo htmlspecialchars($city_label ?: 'India'); ?>"/>
           </div>
         </div>
         <div class="col-6 col-md-2">
@@ -108,14 +136,14 @@ session_start();
               <input type="text" class="form-control" placeholder="Search location..."/>
             </div>
             <div class="d-flex flex-wrap gap-2 mt-2">
-              <span class="filter-chip active">All</span>
-              <span class="filter-chip">Mumbai</span>
-              <span class="filter-chip">Goa</span>
-              <span class="filter-chip">Delhi</span>
-              <span class="filter-chip">Jaipur</span>
-              <span class="filter-chip">Kerala</span>
-              <span class="filter-chip">Manali</span>
-              <span class="filter-chip">Udaipur</span>
+              <span class="filter-chip <?php echo !$city_param ? 'active' : ''; ?>" data-city="">All</span>
+              <span class="filter-chip <?php echo $city_param==='mumbai'  ? 'active' : ''; ?>" data-city="mumbai">Mumbai</span>
+              <span class="filter-chip <?php echo $city_param==='goa'     ? 'active' : ''; ?>" data-city="goa">Goa</span>
+              <span class="filter-chip <?php echo $city_param==='delhi'   ? 'active' : ''; ?>" data-city="delhi">Delhi</span>
+              <span class="filter-chip <?php echo $city_param==='jaipur'  ? 'active' : ''; ?>" data-city="jaipur">Jaipur</span>
+              <span class="filter-chip <?php echo $city_param==='kerala'  ? 'active' : ''; ?>" data-city="kerala">Kerala</span>
+              <span class="filter-chip <?php echo $city_param==='manali'  ? 'active' : ''; ?>" data-city="manali">Manali</span>
+              <span class="filter-chip <?php echo $city_param==='udaipur' ? 'active' : ''; ?>" data-city="udaipur">Udaipur</span>
             </div>
           </div>
 
@@ -184,18 +212,20 @@ session_start();
       <div class="col-12 col-lg-9">
 
         <!-- City Banner (shown when filtering by city) -->
-        <div id="cityBanner" class="d-none mb-3 p-3 rounded-3 d-flex align-items-center gap-3" style="background:linear-gradient(135deg,#e8f0fe,#dbeafe);border:1.5px solid #bfdbfe">
+        <?php if ($city_param): ?>
+        <div class="mb-3 p-3 rounded-3 d-flex align-items-center gap-3" style="background:linear-gradient(135deg,#e8f0fe,#dbeafe);border:1.5px solid #bfdbfe">
           <i class="bi bi-geo-alt-fill text-primary fs-4"></i>
           <div>
-            <div class="fw-700" id="cityBannerTitle" style="color:#1a1a2e">Hotels in Mumbai</div>
+            <div class="fw-700" style="color:#1a1a2e">Hotels in <?php echo htmlspecialchars($city_label); ?></div>
             <div class="small text-muted">Showing all available hotels in this destination</div>
           </div>
-          <a href="hotels.php" class="ms-auto btn btn-outline-primary btn-sm">Clear Filter</a>
+          <a href="hotels.php" class="ms-auto btn btn-outline-primary btn-sm flex-shrink-0">Clear Filter</a>
         </div>
+        <?php endif; ?>
 
         <!-- Sort Bar -->
         <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
-          <p class="mb-0 text-muted small"><span class="fw-700 text-dark">9 hotels</span> found in India</p>
+          <p class="mb-0 text-muted small"><span class="fw-700 text-dark"><?php echo $count_text; ?></span> found<?php echo $city_param ? ' in ' . htmlspecialchars($city_label) : ' in India'; ?></p>
           <div class="d-flex align-items-center gap-2">
             <span class="text-muted small">Sort by:</span>
             <select class="form-select form-select-sm sort-select">
@@ -502,15 +532,26 @@ session_start();
         </div><!-- end #hotelGrid -->
 
         <!-- Empty State — shown when no hotels match the city filter -->
+        <?php if ($city_param && $hotel_count === 0): ?>
+        <div class="text-center py-5 my-3">
+          <div style="width:100px;height:100px;background:#e8f0fe;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem">
+            <i class="bi bi-building-x" style="font-size:2.5rem;color:#1a56db"></i>
+          </div>
+          <h4 class="fw-800 mb-2" style="color:#1a1a2e">No Hotels Found in <?php echo htmlspecialchars($city_label); ?></h4>
+          <p class="text-muted mb-4">We couldn't find any hotels in <strong><?php echo htmlspecialchars($city_label); ?></strong>.<br/>Try a different city or browse all available hotels.</p>
+          <a href="hotels.php" class="btn btn-primary px-4 me-2"><i class="bi bi-search me-2"></i>Browse All Hotels</a>
+          <a href="index.php" class="btn btn-outline-secondary px-4"><i class="bi bi-house me-2"></i>Back to Home</a>
+        </div>
+        <?php else: ?>
         <div id="emptyState" class="d-none text-center py-5 my-3">
           <div style="width:100px;height:100px;background:#e8f0fe;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem">
             <i class="bi bi-building-x" style="font-size:2.5rem;color:#1a56db"></i>
           </div>
           <h4 class="fw-800 mb-2" style="color:#1a1a2e">No Hotels Found</h4>
-          <p class="text-muted mb-4" id="emptyStateMsg">We couldn't find any hotels in this destination.<br/>Try a different city or browse all available hotels.</p>
+          <p class="text-muted mb-4" id="emptyStateMsg">No hotels match your current filters.<br/>Try adjusting your search criteria.</p>
           <a href="hotels.php" class="btn btn-primary px-4 me-2"><i class="bi bi-search me-2"></i>Browse All Hotels</a>
-          <a href="index.php" class="btn btn-outline-secondary px-4"><i class="bi bi-house me-2"></i>Back to Home</a>
         </div>
+        <?php endif; ?>
 
         <!-- Pagination — rendered dynamically by pagination.js -->
         <div class="d-flex justify-content-center mt-5">
@@ -626,7 +667,6 @@ session_start();
   // ============================================================
   //  FILTER & SORT — delegates show/hide to pagination.js
   // ============================================================
-  let activeLocation = 'all';
   let maxPrice = 25000;
 
   function allCards() {
@@ -661,17 +701,20 @@ session_start();
     }
   }
 
-  // Location chips
+  // Location chips — redirect to hotels.php?city=X for server-side filtering
   document.querySelectorAll('.filter-chip').forEach(chip => {
     chip.addEventListener('click', () => {
-      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      activeLocation = chip.textContent.trim().toLowerCase();
-      applyAllFilters();
+      const city = (chip.dataset.city || '').trim().toLowerCase();
+      if (city === '' || city === 'all') {
+        window.location.href = 'hotels.php';
+      } else {
+        window.location.href = 'hotels.php?city=' + encodeURIComponent(city);
+      }
     });
   });
 
-  // Price range slider
+  // Set activeLocation from PHP city param (for JS-side filters like price/rating)
+  let activeLocation = '<?php echo addslashes($city_param); ?>' || 'all';  // Price range slider
   document.getElementById('priceRange').addEventListener('input', function () {
     maxPrice = parseInt(this.value);
     applyAllFilters();
@@ -714,59 +757,26 @@ session_start();
   // Apply initial filter state on page load so pre-checked boxes take effect
   applyAllFilters();
 
-  // ── Read URL city param from destination cards ──
-  (function applyURLParams() {
-    const params   = new URLSearchParams(window.location.search);
-    const city     = params.get('city');
-    const checkin  = params.get('checkin');
-    const checkout = params.get('checkout');
+  // Pre-fill hero search bar with city if set
+  <?php if ($city_param): ?>
+  const heroCity = document.getElementById('heroSearchCity');
+  if (heroCity) heroCity.value = '<?php echo addslashes($city_label); ?>';
+  <?php endif; ?>
 
-    if (city) {
-      const cityLabel = city.charAt(0).toUpperCase() + city.slice(1);
-      document.title = 'Hotels in ' + cityLabel + ' — bookHotel';
-
-      // Show city banner
-      const banner = document.getElementById('cityBanner');
-      const bannerTitle = document.getElementById('cityBannerTitle');
-      if (banner) banner.classList.remove('d-none');
-      if (bannerTitle) bannerTitle.textContent = 'Hotels in ' + cityLabel;
-
-      // Activate matching filter chip
-      document.querySelectorAll('.filter-chip').forEach(function(chip) {
-        chip.classList.remove('active');
-        if (chip.textContent.trim().toLowerCase() === city.toLowerCase()) {
-          chip.classList.add('active');
-          activeLocation = city.toLowerCase();
-        }
-      });
-
-      // Pre-fill location search box
-      const locInput = document.querySelector('.filter-card input[type=text]');
-      if (locInput) locInput.value = cityLabel;
-    }
-
-    // Pre-fill dates
-    if (checkin)  { const el = document.getElementById('checkin');  if (el) el.value = checkin; }
-    if (checkout) { const el = document.getElementById('checkout'); if (el) el.value = checkout; }
-
-    // Re-run filters
-    applyAllFilters();
-
-    // Show empty state if 0 results after filter
-    setTimeout(function() {
-      const visible = document.querySelectorAll('#hotelGrid [data-location]:not([style*="display: none"]):not([style*="display:none"])');
-      const empty = document.getElementById('emptyState');
-      const pagination = document.getElementById('paginationList');
-      if (empty) {
-        if (visible.length === 0 && city) {
-          empty.classList.remove('d-none');
-          const msg = document.getElementById('emptyStateMsg');
-          if (msg) msg.innerHTML = 'We couldn\'t find any hotels in <strong>' + city.charAt(0).toUpperCase() + city.slice(1) + '</strong>.<br/>Try a different city or browse all available hotels.';
-          if (pagination) pagination.closest('nav').closest('div').style.display = 'none';
-        }
-      }
-    }, 100);
-  })();
+  // Hero search bar — redirect to hotels.php?city=X
+  const heroSearchBtn = document.querySelector('.listing-search-bar .btn-warning');
+  if (heroSearchBtn) {
+    heroSearchBtn.addEventListener('click', function() {
+      const city = (document.getElementById('heroSearchCity')?.value || '').trim().toLowerCase();
+      const ci   = document.getElementById('checkin')?.value  || '';
+      const co   = document.getElementById('checkout')?.value || '';
+      const qs   = [];
+      if (city) qs.push('city=' + encodeURIComponent(city));
+      if (ci)   qs.push('checkin=' + encodeURIComponent(ci));
+      if (co)   qs.push('checkout=' + encodeURIComponent(co));
+      window.location.href = 'hotels.php' + (qs.length ? '?' + qs.join('&') : '');
+    });
+  }
 </script>
 </body>
 </html>
