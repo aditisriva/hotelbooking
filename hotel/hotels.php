@@ -119,10 +119,10 @@ $page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub
         <div class="col-6 col-md-2">
           <label class="form-label small fw-600 text-muted">ROOMS & GUESTS</label>
           <select class="form-select">
-            <?php $g=$guests_raw; ?><option value="2" <?php echo (!$g||$g==2)?'selected':'; ?>>1 Room, 2 Guests</option>
-            <option value="1" <?php echo ($g==1)?'selected':'; ?>>1 Room, 1 Guest</option>
-            <option value="4" <?php echo ($g==4)?'selected':'; ?>>2 Rooms, 4 Guests</option>
-            <option value="6" <?php echo ($g>=6)?'selected':'; ?>>3 Rooms, 6 Guests</option>
+            <?php $g=$guests_raw; ?><option value="2" <?php echo (!$g||$g==2)?"selected":""; ?>>1 Room, 2 Guests</option>
+            <option value="1" <?php echo ($g==1)?"selected":""; ?>>1 Room, 1 Guest</option>
+            <option value="4" <?php echo ($g==4)?"selected":""; ?>>2 Rooms, 4 Guests</option>
+            <option value="6" <?php echo ($g>=6)?"selected":""; ?>>3 Rooms, 6 Guests</option>
           </select>
         </div>
         <div class="col-6 col-md-2">
