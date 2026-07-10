@@ -1051,3 +1051,115 @@ a.se-footer__contact-val:hover { color: var(--f-accent-lt); }
   display:flex; align-items:center; gap:.5rem; margin-top:.75rem;
   font-size:.8rem; font-weight:700; color:#065f46;
 }
+
+
+/* ===== HOTEL DETAILS — STICKY SEARCH BAR ===== */
+.hd-search-bar {
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  padding: .75rem 0;
+  position: sticky;
+  top: 56px;
+  z-index: 999;
+  box-shadow: 0 4px 24px rgba(0,0,0,.2);
+}
+.hd-search-form {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,.25);
+}
+.hd-search-field {
+  flex: 1;
+  padding: .55rem .85rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .2s;
+  min-width: 0;
+}
+.hd-search-field:hover { background: #f8faff; }
+.hd-search-label {
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: #64748b;
+  margin-bottom: .15rem;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  white-space: nowrap;
+}
+.hd-search-label i { color: #1a56db; font-size: .7rem; }
+.hd-search-input {
+  border: none;
+  outline: none;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: .9rem;
+  font-weight: 700;
+  color: #0f172a;
+  background: transparent;
+  width: 100%;
+  cursor: pointer;
+}
+.hd-search-input:focus { outline: none; box-shadow: none; border: none; }
+.hd-search-sub {
+  font-size: .72rem;
+  color: #64748b;
+  margin-top: .1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hd-search-sep {
+  width: 1px;
+  background: #e2e8f0;
+  margin: .5rem 0;
+  flex-shrink: 0;
+}
+.hd-search-btn {
+  background: linear-gradient(135deg, #1a56db, #1141b0);
+  color: #fff;
+  border: none;
+  padding: 0 1.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: .875rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  border-radius: 0 12px 12px 0;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  min-width: 110px;
+  justify-content: center;
+}
+.hd-search-btn:hover {
+  background: linear-gradient(135deg, #1141b0, #0d2d8a);
+  box-shadow: -4px 0 20px rgba(26,86,219,.3);
+}
+/* select inside search bar */
+.hd-search-input.hd-sel {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .hd-search-form { flex-wrap: wrap; border-radius: 10px; }
+  .hd-search-field { flex: 1 1 45%; padding: .5rem .75rem; border-bottom: 1px solid #e2e8f0; }
+  .hd-search-sep { display: none; }
+  .hd-search-btn { flex: 1 1 100%; border-radius: 0 0 10px 10px; padding: .75rem; }
+}
+@media (max-width: 575px) {
+  .hd-search-field { flex: 1 1 100%; }
+  .hd-search-bar { top: 56px; padding: .5rem 0; }
+}

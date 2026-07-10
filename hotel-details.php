@@ -1,19 +1,27 @@
 ﻿<?php
 // Read booking params passed from search
+$city_hd      = isset($_GET['city'])     ? trim($_GET['city'])     : 'Jaipur';
+$city_hd_lbl  = ucfirst(strtolower($city_hd));
 $checkin_raw  = isset($_GET['checkin'])  ? trim($_GET['checkin'])  : '';
 $checkout_raw = isset($_GET['checkout']) ? trim($_GET['checkout']) : '';
-$guests_raw   = isset($_GET['guests'])   ? (int)$_GET['guests']   : 0;
+$guests_raw   = isset($_GET['guests'])   ? (int)$_GET['guests']   : 2;
 $nights       = 1;
 if ($checkin_raw && $checkout_raw) {
-    $diff = (strtotime($checkout_raw) - strtotime($checkin_raw)) / 86400;
+    $diff   = (strtotime($checkout_raw) - strtotime($checkin_raw)) / 86400;
     $nights = max(1, (int)$diff);
 }
 function hd_fmt(string $d): string { return $d ? date('d M Y', strtotime($d)) : ''; }
+$checkin_fmt  = hd_fmt($checkin_raw);
+$checkout_fmt = hd_fmt($checkout_raw);
+$guests_label = $guests_raw >= 6 ? '3 Rooms, 6 Guests' : ($guests_raw >= 4 ? '2 Rooms, 4 Guests' : ($guests_raw == 1 ? '1 Room, 1 Guest' : '1 Room, 2 Guests'));
 $qs_parts = [];
+if ($city_hd)      $qs_parts_city[] = 'city='     . urlencode(strtolower($city_hd));
 if ($checkin_raw)  $qs_parts[] = 'checkin='  . urlencode($checkin_raw);
 if ($checkout_raw) $qs_parts[] = 'checkout=' . urlencode($checkout_raw);
 if ($guests_raw)   $qs_parts[] = 'guests='   . $guests_raw;
 $booking_qs = $qs_parts ? '&' . implode('&', $qs_parts) : '';
+$full_qs    = array_merge($qs_parts_city ?? [], $qs_parts);
+$full_qs_str = $full_qs ? '?' . implode('&', $full_qs) : '';
 ?><?php require_once 'pricing.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -52,6 +60,60 @@ $booking_qs = $qs_parts ? '&' . implode('&', $qs_parts) : '';
     </div>
   </div>
 </nav>
+
+<!-- ========== STICKY SEARCH BAR ========== -->
+<div class="hd-search-bar" id="hdSearchBar">
+  <div class="container">
+    <form class="hd-search-form" onsubmit="hdSearch(event)">
+      <!-- Destination -->
+      <div class="hd-search-field">
+        <div class="hd-search-label"><i class="bi bi-geo-alt-fill"></i> Destination</div>
+        <input type="text" class="hd-search-input" id="hdCity"
+          value="<?php echo htmlspecialchars($city_hd_lbl . ', India'); ?>"
+          placeholder="City or Hotel"/>
+      </div>
+      <div class="hd-search-sep"></div>
+      <!-- Check-in -->
+      <div class="hd-search-field">
+        <div class="hd-search-label"><i class="bi bi-calendar-check"></i> Check-In</div>
+        <input type="date" class="hd-search-input" id="hdCheckin"
+          value="<?php echo htmlspecialchars($checkin_raw); ?>"/>
+        <?php if ($checkin_fmt): ?>
+        <div class="hd-search-sub"><?php echo htmlspecialchars($checkin_fmt); ?></div>
+        <?php endif; ?>
+      </div>
+      <div class="hd-search-sep"></div>
+      <!-- Check-out -->
+      <div class="hd-search-field">
+        <div class="hd-search-label"><i class="bi bi-calendar-x"></i> Check-Out</div>
+        <input type="date" class="hd-search-input" id="hdCheckout"
+          value="<?php echo htmlspecialchars($checkout_raw); ?>"/>
+        <?php if ($checkout_fmt): ?>
+        <div class="hd-search-sub"><?php echo htmlspecialchars($checkout_fmt); ?>
+          <?php if ($nights > 1): ?> · <strong><?php echo $nights; ?> Nights</strong><?php endif; ?>
+        </div>
+        <?php endif; ?>
+      </div>
+      <div class="hd-search-sep"></div>
+      <!-- Guests -->
+      <div class="hd-search-field">
+        <div class="hd-search-label"><i class="bi bi-people-fill"></i> Rooms & Guests</div>
+        <select class="hd-search-input" id="hdGuests">
+          <option value="1" <?php echo $guests_raw==1?'selected':''; ?>>1 Room, 1 Guest</option>
+          <option value="2" <?php echo (!$guests_raw||$guests_raw==2)?'selected':''; ?>>1 Room, 2 Guests</option>
+          <option value="3" <?php echo $guests_raw==3?'selected':''; ?>>1 Room, 3 Guests</option>
+          <option value="4" <?php echo $guests_raw==4?'selected':''; ?>>2 Rooms, 4 Guests</option>
+          <option value="6" <?php echo $guests_raw>=6?'selected':''; ?>>3 Rooms, 6 Guests</option>
+        </select>
+        <div class="hd-search-sub"><?php echo htmlspecialchars($guests_label); ?></div>
+      </div>
+      <!-- Search Button -->
+      <button type="submit" class="hd-search-btn">
+        <i class="bi bi-search me-1"></i>Search
+      </button>
+    </form>
+  </div>
+</div>
 
 <!-- ========== BREADCRUMB ========== -->
 <div class="bg-white border-bottom py-2">
@@ -633,18 +695,43 @@ $booking_qs = $qs_parts ? '&' . implode('&', $qs_parts) : '';
 </button>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="navbar.js"></script>
 <script>
-  window.addEventListener('scroll', () => {
-    document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 50);
-    document.getElementById('backToTop').classList.toggle('show', window.scrollY > 300);
+  window.addEventListener("scroll", () => {
+    document.getElementById("mainNav").classList.toggle("scrolled", window.scrollY > 50);
+    document.getElementById("backToTop")?.classList.toggle("show", window.scrollY > 300);
   });
-  document.querySelectorAll('.btn-wishlist').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const icon = btn.querySelector('i');
-      icon.classList.toggle('bi-heart');
-      icon.classList.toggle('bi-heart-fill');
-      icon.classList.toggle('text-danger');
+  document.querySelectorAll(".btn-wishlist").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const icon = btn.querySelector("i");
+      icon.classList.toggle("bi-heart");
+      icon.classList.toggle("bi-heart-fill");
+      icon.classList.toggle("text-danger");
     });
+  });
+  // Hotel Details top search bar
+  function hdSearch(e) {
+    e.preventDefault();
+    var city   = (document.getElementById("hdCity")?.value   || "").trim().toLowerCase().replace(/,.*$/, "").trim();
+    var ci     = document.getElementById("hdCheckin")?.value  || "";
+    var co     = document.getElementById("hdCheckout")?.value || "";
+    var guests = document.getElementById("hdGuests")?.value   || "2";
+    var qs = [];
+    if (city)   qs.push("city="     + encodeURIComponent(city));
+    if (ci)     qs.push("checkin="  + encodeURIComponent(ci));
+    if (co)     qs.push("checkout=" + encodeURIComponent(co));
+    if (guests) qs.push("guests="   + encodeURIComponent(guests));
+    window.location.href = "hotels.php" + (qs.length ? "?" + qs.join("&") : "");
+  }
+  // Sync top search dates with sidebar booking card
+  document.addEventListener("DOMContentLoaded", function() {
+    var hdCi = document.getElementById("hdCheckin");
+    var hdCo = document.getElementById("hdCheckout");
+    var bkCi = document.getElementById("bkCheckin");
+    var bkCo = document.getElementById("bkCheckout");
+    function sync() { if(bkCi&&hdCi)bkCi.value=hdCi.value; if(bkCo&&hdCo)bkCo.value=hdCo.value; }
+    if(hdCi) hdCi.addEventListener("change", sync);
+    if(hdCo) hdCo.addEventListener("change", sync);
   });
 </script>
 </body>
