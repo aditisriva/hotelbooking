@@ -85,59 +85,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login — bookHotel</title>
+  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="auth.css"/>
+  <!-- Original Login CSS -->
+  <link rel="stylesheet" href="../login.css"/>
 </head>
 <body class="auth-body">
 
 <div class="auth-wrapper">
-
   <!-- ===== LEFT PANEL ===== -->
   <div class="auth-left d-none d-lg-flex">
-    <div class="auth-left-inner">
-      <a href="index.php" class="brand-logo">
-        <i class="bi bi-building-fill"></i>
-        <span>bookHotel</span>
-      </a>
-
-      <div class="left-content">
-        <div class="travel-illustration">
-          <div class="illus-circle illus-circle--1"></div>
-          <div class="illus-circle illus-circle--2"></div>
-          <div class="illus-circle illus-circle--3"></div>
-          <div class="illus-hotel-img">
-            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=520&q=85"
-                 alt="Luxury Hotel" class="illus-photo"/>
-            <div class="illus-badge illus-badge--top">
-              <i class="bi bi-star-fill text-warning me-1"></i>
-              <span>4.9 / 5.0 Rating</span>
-            </div>
-            <div class="illus-badge illus-badge--bottom">
-              <i class="bi bi-shield-check-fill text-success me-1"></i>
-              <span>Verified Stays</span>
-            </div>
+    <div class="auth-left-overlay"></div>
+    <div class="auth-left-content text-white">
+      <h1 class="fw-bold mb-4"><i class="fa fa-hotel me-2 text-warning"></i>bookHotel</h1>
+      <h2 class="fw-bold mb-3">Your Next Adventure Awaits</h2>
+      <p class="mb-4 text-white-50">Join millions of travelers who trust bookHotel for seamless hotel bookings at the best prices.</p>
+      
+      <div class="auth-features">
+        <div class="auth-feature-item">
+          <div class="auth-feature-icon"><i class="fa fa-shield-alt"></i></div>
+          <div>
+            <h6 class="mb-0 fw-bold">Secure Booking</h6>
+            <small class="text-white-50">256-bit encrypted security</small>
           </div>
         </div>
-
-        <h2 class="left-heading">Your Next Adventure<br/>Awaits You</h2>
-        <p class="left-subtext">Join 10M+ travellers who trust bookHotel for seamless hotel bookings at the best prices.</p>
-
-        <div class="left-stats">
-          <div class="stat-item">
-            <span class="stat-num">1M+</span>
-            <span class="stat-label">Properties</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-num">200+</span>
-            <span class="stat-label">Countries</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-num">24/7</span>
-            <span class="stat-label">Support</span>
+        <div class="auth-feature-item">
+          <div class="auth-feature-icon"><i class="fa fa-tags"></i></div>
+          <div>
+            <h6 class="mb-0 fw-bold">Best Prices</h6>
+            <small class="text-white-50">Guaranteed price match</small>
           </div>
         </div>
       </div>
@@ -146,111 +126,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <!-- ===== RIGHT PANEL ===== -->
   <div class="auth-right">
-    <div class="auth-form-wrap">
-
-      <!-- Mobile brand -->
-      <a href="index.php" class="brand-logo brand-logo--mobile d-flex d-lg-none">
-        <i class="bi bi-building-fill"></i>
-        <span>bookHotel</span>
-      </a>
-
-      <div class="form-header">
-        <h1 class="form-title">Welcome back</h1>
-        <p class="form-subtitle">Sign in to continue booking amazing stays</p>
+    <div class="auth-form-box">
+      
+      <div class="text-center mb-4">
+        <h2 class="fw-bold">Welcome Back</h2>
+        <p class="text-muted">Sign in to continue booking amazing stays</p>
       </div>
 
       <?php if ($error): ?>
-      <div class="alert-msg alert-msg--error" role="alert">
-        <i class="bi bi-exclamation-circle-fill me-2"></i><?= htmlspecialchars($error) ?>
+      <div class="alert alert-danger" role="alert">
+        <i class="fa fa-exclamation-circle me-2"></i><?= htmlspecialchars($error) ?>
       </div>
       <?php endif; ?>
 
       <?php if (isset($_GET['registered']) && $_GET['registered'] == 1): ?>
-      <div class="alert-msg alert-msg--success" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i>Account created successfully! Please sign in.
+      <div class="alert alert-success" role="alert">
+        <i class="fa fa-check-circle me-2"></i>Account created successfully! Please sign in.
       </div>
       <?php endif; ?>
 
       <form method="POST" action="login.php" id="loginForm" novalidate>
-
-        <div class="field-group">
-          <label class="field-label" for="identifier">Email or Mobile Number</label>
-          <div class="field-wrap">
-            <span class="field-icon"><i class="bi bi-person-fill"></i></span>
-            <input
-              type="text"
-              id="identifier"
-              name="identifier"
-              class="field-input"
-              placeholder="Enter email or mobile number"
-              value="<?= htmlspecialchars($email_val) ?>"
-              autocomplete="username"
-              required
-            />
+        
+        <!-- Email/Mobile -->
+        <div class="mb-3">
+          <label class="auth-label" for="identifier">EMAIL OR MOBILE NUMBER</label>
+          <div class="input-group auth-input-group">
+            <span class="input-group-text"><i class="fa fa-user"></i></span>
+            <input type="text" id="identifier" name="identifier" class="form-control auth-input" placeholder="Enter email or mobile" value="<?= htmlspecialchars($email_val) ?>" required/>
           </div>
-          <span class="field-error" id="identifierError"></span>
         </div>
 
-        <div class="field-group">
-          <div class="d-flex justify-content-between align-items-center mb-1">
-            <label class="field-label mb-0" for="password">Password</label>
+        <!-- Password -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <label class="auth-label mb-0" for="password">PASSWORD</label>
             <a href="forgot-password.php" class="forgot-link">Forgot password?</a>
           </div>
-          <div class="field-wrap">
-            <span class="field-icon"><i class="bi bi-lock-fill"></i></span>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              class="field-input"
-              placeholder="Enter your password"
-              autocomplete="current-password"
-              required
-            />
-            <button type="button" class="toggle-password" id="togglePassword" aria-label="Show/hide password">
-              <i class="bi bi-eye-fill" id="toggleIcon"></i>
-            </button>
+          <div class="input-group auth-input-group mt-1">
+            <span class="input-group-text"><i class="fa fa-lock"></i></span>
+            <input type="password" id="password" name="password" class="form-control auth-input" placeholder="Enter your password" required/>
+            <span class="input-group-text" id="togglePassword"><i class="fa fa-eye" id="toggleIcon"></i></span>
           </div>
-          <span class="field-error" id="passwordError"></span>
         </div>
 
-        <div class="remember-row">
-          <label class="remember-label">
-            <input type="checkbox" name="remember_me" class="remember-check"
-              <?= !empty($email_val) ? 'checked' : '' ?>/>
-            <span class="remember-custom"></span>
-            Remember me for 30 days
-          </label>
+        <!-- Remember Me -->
+        <div class="mb-4 form-check">
+          <input type="checkbox" class="form-check-input" id="remember_me" name="remember_me" <?= !empty($email_val) ? 'checked' : '' ?>>
+          <label class="form-check-label text-muted" style="font-size: 0.85rem;" for="remember_me">Remember me for 30 days</label>
         </div>
 
-        <button type="submit" class="btn-auth" id="loginBtn">
-          <span class="btn-auth-text">Sign In</span>
-          <i class="bi bi-arrow-right-circle-fill ms-2"></i>
+        <!-- Sign In Button -->
+        <button type="submit" class="auth-submit-btn w-100 py-2 mb-4" id="loginBtn">
+          Sign In <i class="fa fa-arrow-right ms-2"></i>
         </button>
 
-        <div class="divider-or">
-          <span>or continue with</span>
+        <div class="auth-divider">
+          <span>or sign in with</span>
         </div>
 
-        <div class="social-auth">
-          <button type="button" class="btn-social">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            Google
-          </button>
-          <button type="button" class="btn-social">
-            <i class="bi bi-facebook" style="color:#1877f2;font-size:1.1rem"></i>
-            Facebook
-          </button>
+        <!-- Social Buttons -->
+        <div class="row g-2 mb-4">
+          <div class="col-6">
+            <button type="button" class="social-btn w-100">
+              <i class="fab fa-google text-danger me-2"></i> Google
+            </button>
+          </div>
+          <div class="col-6">
+            <button type="button" class="social-btn w-100">
+              <i class="fab fa-facebook text-primary me-2"></i> Facebook
+            </button>
+          </div>
         </div>
 
-        <p class="switch-auth">
-          Don't have an account?
-          <a href="signup.php" class="switch-link">Create account</a>
+        <p class="text-center text-muted mb-0" style="font-size: 0.9rem;">
+          Don't have an account? <a href="signup.php" class="text-danger fw-bold text-decoration-none">Create Account</a>
         </p>
 
       </form>
@@ -258,7 +207,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </div>
 </div>
 
-<script src="auth.js?v=3"></script>
+<!-- Bootstrap Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Simple Password Toggle
+  const toggleBtn = document.getElementById('togglePassword');
+  const pwdInput = document.getElementById('password');
+  const toggleIcon = document.getElementById('toggleIcon');
+  if(toggleBtn && pwdInput) {
+    toggleBtn.addEventListener('click', () => {
+      const type = pwdInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      pwdInput.setAttribute('type', type);
+      toggleIcon.className = type === 'password' ? 'fa fa-eye' : 'fa fa-eye-slash';
+    });
+  }
+</script>
 </body>
 </html>
 

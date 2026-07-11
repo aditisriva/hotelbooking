@@ -65,68 +65,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-?>
-<!DOCTYPE html>
+?><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Create Account — bookHotel</title>
+  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="auth.css"/>
+  <!-- Original Login CSS -->
+  <link rel="stylesheet" href="login.css"/>
 </head>
 <body class="auth-body">
 
 <div class="auth-wrapper">
-
   <!-- ===== LEFT PANEL ===== -->
   <div class="auth-left d-none d-lg-flex">
-    <div class="auth-left-inner">
-      <a href="index.php" class="brand-logo">
-        <i class="bi bi-building-fill"></i>
-        <span>bookHotel</span>
-      </a>
-
-      <div class="left-content">
-        <div class="travel-illustration signup-illus">
-          <div class="illus-circle illus-circle--1"></div>
-          <div class="illus-circle illus-circle--2"></div>
-          <div class="illus-circle illus-circle--3"></div>
-          <div class="illus-hotel-img">
-            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=520&q=85"
-                 alt="Luxury Resort" class="illus-photo"/>
-            <div class="illus-badge illus-badge--top">
-              <i class="bi bi-percent text-warning me-1"></i>
-              <span>Up to 50% Off</span>
-            </div>
-            <div class="illus-badge illus-badge--bottom">
-              <i class="bi bi-gift-fill text-danger me-1"></i>
-              <span>₹1000 Welcome Bonus</span>
-            </div>
+    <div class="auth-left-overlay"></div>
+    <div class="auth-left-content text-white">
+      <h1 class="fw-bold mb-4"><i class="fa fa-hotel me-2 text-warning"></i>bookHotel</h1>
+      <h2 class="fw-bold mb-3">Start Your Journey Today</h2>
+      <p class="mb-4 text-white-50">Create an account and unlock exclusive deals, personalized recommendations, and much more.</p>
+      
+      <div class="auth-features">
+        <div class="auth-feature-item">
+          <div class="auth-feature-icon"><i class="fa fa-gift"></i></div>
+          <div>
+            <h6 class="mb-0 fw-bold">Member Only Deals</h6>
+            <small class="text-white-50">Get up to 50% off on premium stays</small>
           </div>
         </div>
-
-        <h2 class="left-heading">Unlock Exclusive<br/>Member Benefits</h2>
-        <p class="left-subtext">Create your free account and get instant access to member-only deals and early bird offers.</p>
-
-        <div class="benefit-list">
-          <div class="benefit-item">
-            <div class="benefit-icon"><i class="bi bi-tag-fill"></i></div>
-            <span>Member-only prices up to 50% off</span>
-          </div>
-          <div class="benefit-item">
-            <div class="benefit-icon"><i class="bi bi-bookmark-star-fill"></i></div>
-            <span>Save favourite hotels & wishlists</span>
-          </div>
-          <div class="benefit-item">
-            <div class="benefit-icon"><i class="bi bi-receipt-cutoff"></i></div>
-            <span>Track all bookings in one place</span>
-          </div>
-          <div class="benefit-item">
-            <div class="benefit-icon"><i class="bi bi-bell-fill"></i></div>
-            <span>Price drop alerts on saved hotels</span>
+        <div class="auth-feature-item">
+          <div class="auth-feature-icon"><i class="fa fa-headset"></i></div>
+          <div>
+            <h6 class="mb-0 fw-bold">24/7 Support</h6>
+            <small class="text-white-50">We're always here to help you</small>
           </div>
         </div>
       </div>
@@ -135,153 +112,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <!-- ===== RIGHT PANEL ===== -->
   <div class="auth-right">
-    <div class="auth-form-wrap">
-
-      <!-- Mobile brand -->
-      <a href="index.php" class="brand-logo brand-logo--mobile d-flex d-lg-none">
-        <i class="bi bi-building-fill"></i>
-        <span>bookHotel</span>
-      </a>
-
-      <div class="form-header">
-        <h1 class="form-title">Create account</h1>
-        <p class="form-subtitle">Start booking your dream stays today</p>
+    <div class="auth-form-box">
+      
+      <div class="text-center mb-4">
+        <h2 class="fw-bold">Create Account</h2>
+        <p class="text-muted">Sign up to get started</p>
       </div>
 
       <?php if ($error): ?>
-      <div class="alert-msg alert-msg--error" role="alert">
-        <i class="bi bi-exclamation-circle-fill me-2"></i><?= $error ?>
+      <div class="alert alert-danger" role="alert">
+        <i class="fa fa-exclamation-circle me-2"></i><?= $error ?>
       </div>
       <?php endif; ?>
 
       <form method="POST" action="signup.php" id="signupForm" novalidate>
-
-        <div class="field-group">
-          <label class="field-label" for="full_name">Full Name</label>
-          <div class="field-wrap">
-            <span class="field-icon"><i class="bi bi-person-fill"></i></span>
-            <input
-              type="text"
-              id="full_name"
-              name="full_name"
-              class="field-input"
-              placeholder="Enter your full name"
-              value="<?= htmlspecialchars($form['full_name']) ?>"
-              autocomplete="name"
-              required
-            />
+        
+        <!-- Name -->
+        <div class="mb-3">
+          <label class="auth-label" for="full_name">FULL NAME</label>
+          <div class="input-group auth-input-group">
+            <span class="input-group-text"><i class="fa fa-user"></i></span>
+            <input type="text" id="full_name" name="full_name" class="form-control auth-input" placeholder="e.g. John Doe" value="<?= htmlspecialchars($form['full_name']) ?>" required/>
           </div>
-          <span class="field-error" id="fullNameError"></span>
         </div>
 
-        <div class="field-group">
-          <label class="field-label" for="email">Email Address</label>
-          <div class="field-wrap">
-            <span class="field-icon"><i class="bi bi-envelope-fill"></i></span>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              class="field-input"
-              placeholder="Enter your email"
-              value="<?= htmlspecialchars($form['email']) ?>"
-              autocomplete="email"
-              required
-            />
-          </div>
-          <span class="field-error" id="emailError"></span>
-        </div>
-
-        <div class="field-group">
-          <label class="field-label" for="mobile">Mobile Number</label>
-          <div class="field-wrap">
-            <span class="field-icon"><i class="bi bi-phone-fill"></i></span>
-            <span class="field-prefix">+91</span>
-            <input
-              type="tel"
-              id="mobile"
-              name="mobile"
-              class="field-input field-input--prefix"
-              placeholder="10-digit mobile number"
-              value="<?= htmlspecialchars($form['mobile']) ?>"
-              autocomplete="tel"
-              maxlength="10"
-              required
-            />
-          </div>
-          <span class="field-error" id="mobileError"></span>
-        </div>
-
-        <div class="row g-3">
-          <div class="col-12 col-sm-6">
-            <div class="field-group mb-0">
-              <label class="field-label" for="password">Password</label>
-              <div class="field-wrap">
-                <span class="field-icon"><i class="bi bi-lock-fill"></i></span>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  class="field-input"
-                  placeholder="Min. 8 characters"
-                  autocomplete="new-password"
-                  required
-                />
-                <button type="button" class="toggle-password" id="togglePassword" aria-label="Show/hide password">
-                  <i class="bi bi-eye-fill" id="toggleIcon"></i>
-                </button>
-              </div>
-              <span class="field-error" id="passwordError"></span>
+        <div class="row g-2 mb-3">
+          <!-- Email -->
+          <div class="col-md-6">
+            <label class="auth-label" for="email">EMAIL ADDRESS</label>
+            <div class="input-group auth-input-group">
+              <span class="input-group-text"><i class="fa fa-envelope"></i></span>
+              <input type="email" id="email" name="email" class="form-control auth-input" placeholder="name@example.com" value="<?= htmlspecialchars($form['email']) ?>" required/>
             </div>
           </div>
-          <div class="col-12 col-sm-6">
-            <div class="field-group mb-0">
-              <label class="field-label" for="confirm_password">Confirm Password</label>
-              <div class="field-wrap">
-                <span class="field-icon"><i class="bi bi-lock-fill"></i></span>
-                <input
-                  type="password"
-                  id="confirm_password"
-                  name="confirm_password"
-                  class="field-input"
-                  placeholder="Re-enter password"
-                  autocomplete="new-password"
-                  required
-                />
-                <button type="button" class="toggle-password" id="toggleConfirmPassword" aria-label="Show/hide password">
-                  <i class="bi bi-eye-fill" id="toggleConfirmIcon"></i>
-                </button>
-              </div>
-              <span class="field-error" id="confirmPasswordError"></span>
+          <!-- Mobile -->
+          <div class="col-md-6">
+            <label class="auth-label" for="mobile">MOBILE NUMBER</label>
+            <div class="input-group auth-input-group">
+              <span class="input-group-text"><i class="fa fa-phone"></i></span>
+              <input type="tel" id="mobile" name="mobile" class="form-control auth-input" placeholder="10-digit number" value="<?= htmlspecialchars($form['mobile']) ?>" required/>
             </div>
           </div>
         </div>
 
-        <!-- Password strength -->
-        <div class="password-strength mt-2" id="strengthContainer" style="display:none">
-          <div class="strength-bar">
-            <div class="strength-fill" id="strengthFill"></div>
+        <div class="row g-2 mb-3">
+          <!-- Password -->
+          <div class="col-md-6">
+            <label class="auth-label" for="password">PASSWORD</label>
+            <div class="input-group auth-input-group">
+              <span class="input-group-text"><i class="fa fa-lock"></i></span>
+              <input type="password" id="password" name="password" class="form-control auth-input" placeholder="Min 8 chars" required/>
+            </div>
           </div>
-          <span class="strength-label" id="strengthLabel"></span>
+          <!-- Confirm Password -->
+          <div class="col-md-6">
+            <label class="auth-label" for="confirm_password">CONFIRM PASSWORD</label>
+            <div class="input-group auth-input-group">
+              <span class="input-group-text"><i class="fa fa-check-circle"></i></span>
+              <input type="password" id="confirm_password" name="confirm_password" class="form-control auth-input" placeholder="Repeat password" required/>
+            </div>
+          </div>
         </div>
 
-        <div class="terms-row mt-3">
-          <label class="remember-label">
-            <input type="checkbox" name="agree_terms" id="agree_terms" class="remember-check" required/>
-            <span class="remember-custom"></span>
-            I agree to the <a href="#" class="switch-link">Terms of Service</a> and <a href="#" class="switch-link">Privacy Policy</a>
-          </label>
-          <span class="field-error" id="termsError"></span>
+        <!-- Terms & Conditions -->
+        <div class="mb-4 form-check">
+          <input type="checkbox" class="form-check-input" id="terms" name="terms" required>
+          <label class="form-check-label text-muted" style="font-size: 0.85rem;" for="terms">I agree to the <a href="#" class="text-danger">Terms & Conditions</a></label>
         </div>
 
-        <button type="submit" class="btn-auth mt-3" id="signupBtn">
-          <span class="btn-auth-text">Create Account</span>
-          <i class="bi bi-person-check-fill ms-2"></i>
+        <!-- Create Account Button -->
+        <button type="submit" class="auth-submit-btn w-100 py-2 mb-4" id="signupBtn">
+          Create Account <i class="fa fa-arrow-right ms-2"></i>
         </button>
 
-        <p class="switch-auth">
-          Already have an account?
-          <a href="login.php" class="switch-link">Sign in</a>
+        <p class="text-center text-muted mb-0" style="font-size: 0.9rem;">
+          Already have an account? <a href="login.php" class="text-danger fw-bold text-decoration-none">Sign In</a>
         </p>
 
       </form>
@@ -289,7 +194,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </div>
 </div>
 
-<script src="auth.js?v=3"></script>
+<!-- Bootstrap Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Simple validation check before submitting
+  document.getElementById('signupForm').addEventListener('submit', function(e) {
+    const pwd = document.getElementById('password').value;
+    const cpwd = document.getElementById('confirm_password').value;
+    if(pwd !== cpwd && pwd !== '') {
+      e.preventDefault();
+      alert('Passwords do not match!');
+    }
+  });
+</script>
 </body>
 </html>
-
