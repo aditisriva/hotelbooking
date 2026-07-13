@@ -782,11 +782,10 @@ $id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) :
 </button>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <script src="navbar.js"></script>
 <script>
 // State — persisted from URL
-var _hdCity    = "<?php echo addslashes($city_hd_lbl ? $city_hd_lbl . ', India' : '); ?>";
+var _hdCity    = "<?php echo addslashes($city_hd_lbl ? $city_hd_lbl . ', India' : ''); ?>";
 var _hdCheckin = "<?php echo addslashes($checkin_raw); ?>";
 var _hdCheckout= "<?php echo addslashes($checkout_raw); ?>";
 var _hdGuests  = "<?php echo $guests_raw ?: 2; ?>";
