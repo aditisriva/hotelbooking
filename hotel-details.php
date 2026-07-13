@@ -626,7 +626,7 @@ $id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) :
   <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h2 class="fw-800 mb-1">Similar Hotels in <?php echo htmlspecialchars(\); ?></h2>
+        <h2 class="fw-800 mb-1">Similar Hotels in <?php echo htmlspecialchars($hotel_city); ?></h2>
         <p class="text-muted mb-0">You might also like these properties</p>
       </div>
       <a href="hotels.php" class="btn btn-outline-primary btn-sm">View All</a>
