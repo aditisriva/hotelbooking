@@ -12,8 +12,13 @@ $ucount_res = mysqli_query($conn, "SELECT COUNT(*) AS cnt FROM users WHERE statu
 $user_count = $ucount_res ? (int)mysqli_fetch_assoc($ucount_res)['cnt'] : 0;
 
 // Get booking count (if table exists)
-$bcount_res = mysqli_query($conn, "SELECT COUNT(*) AS cnt FROM bookings");
-$booking_count = $bcount_res ? (int)mysqli_fetch_assoc($bcount_res)['cnt'] : 0;
+$bcount_res = mysqli_query($conn, "SELECT COUNT(*) AS cnt FROM information_schema.tables WHERE table_schema = '" . DB_NAME . "' AND table_name = 'bookings'");
+$bookings_table_exists = $bcount_res && (int)mysqli_fetch_assoc($bcount_res)['cnt'] > 0;
+$booking_count = 0;
+if ($bookings_table_exists) {
+    $b = mysqli_query($conn, "SELECT COUNT(*) AS cnt FROM bookings");
+    if ($b) $booking_count = (int)mysqli_fetch_assoc($b)['cnt'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
