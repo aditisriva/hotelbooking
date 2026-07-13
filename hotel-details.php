@@ -1,7 +1,44 @@
 ﻿<?php
-// Read booking params passed from search
-$city_hd      = isset($_GET['city'])     ? trim($_GET['city'])     : 'Jaipur';
-$city_hd_lbl  = ucfirst(strtolower($city_hd));
+require_once 'db.php';
+require_once 'hotel_functions.php';
+require_once 'pricing.php';
+
+// ── Fetch hotel from DB ──────────────────────────────────────────────────
+$hotel_id_req = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$hotel = $hotel_id_req ? bhGetHotelById($hotel_id_req) : null;
+
+// Fallback: try to get first hotel for demo if no id given
+if (!$hotel) {
+    $all = bhGetHotels();
+    $hotel = $all ? $all[0] : null;
+}
+
+if (!$hotel) {
+    die('<div style="text-align:center;padding:4rem;font-family:sans-serif"><h2>Hotel not found</h2><a href="hotels.php">← Browse hotels</a></div>');
+}
+
+// ── Extract hotel data ───────────────────────────────────────────────────
+$hotel_id   = (int)$hotel['hotel_id'];
+$hotel_name = $hotel['hotel_name'];
+$hotel_city = ucfirst($hotel['city']);
+$hotel_loc  = $hotel['location'];
+$hotel_state= $hotel['state'] ?? '';
+$hotel_desc = $hotel['description'] ?? '';
+$hotel_price= (float)$hotel['price_per_night'];
+$hotel_orig = (float)($hotel['original_price'] ?? 0);
+$hotel_rating=(float)$hotel['rating'];
+$hotel_stars= (int)($hotel['star_rating'] ?? 3);
+$hotel_type = $hotel['property_type'];
+$hotel_cap  = (int)$hotel['capacity'];
+$hotel_amenities = $hotel['amenities'] ?? '';
+$hotel_images_arr = bhAllImages($hotel['hotel_images'] ?? '');
+$hotel_img  = $hotel_images_arr ? $hotel_images_arr[0] : 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80';
+$checkin_time  = $hotel['checkin_time'] ?? '14:00';
+$checkout_time = $hotel['checkout_time'] ?? '11:00';
+
+// ── Booking params from URL ───────────────────────────────────────────────
+$city_hd      = isset($_GET['city'])     ? trim($_GET['city'])     : strtolower($hotel['city']);
+$city_hd_lbl  = $hotel_city;
 $checkin_raw  = isset($_GET['checkin'])  ? trim($_GET['checkin'])  : '';
 $checkout_raw = isset($_GET['checkout']) ? trim($_GET['checkout']) : '';
 $guests_raw   = isset($_GET['guests'])   ? (int)$_GET['guests']   : 2;
@@ -22,14 +59,15 @@ if ($guests_raw)   $qs_parts[] = 'guests='   . $guests_raw;
 $booking_qs = $qs_parts ? '&' . implode('&', $qs_parts) : '';
 $full_qs    = array_merge($qs_parts_city ?? [], $qs_parts);
 $full_qs_str = $full_qs ? '?' . implode('&', $full_qs) : '';
-?><?php require_once 'pricing.php'; ?>
+$id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) : '');
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a56db'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='18' font-family='system-ui' fill='%23f59e0b'%3E&#x1F3E8;%3C/text%3E%3C/svg%3E"/>
-  <title>Heritage Haveli – bookHotel</title>
+  <title><?php echo htmlspecialchars($hotel_name); ?> – bookHotel</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" crossorigin="anonymous"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" crossorigin="anonymous"/>
@@ -173,7 +211,7 @@ $full_qs_str = $full_qs ? '?' . implode('&', $full_qs) : '';
       <ol class="breadcrumb mb-0 small">
         <li class="breadcrumb-item"><a href="index.php" class="text-danger text-decoration-none">Home</a></li>
         <li class="breadcrumb-item"><a href="hotels.php" class="text-danger text-decoration-none">Hotels</a></li>
-        <li class="breadcrumb-item active text-muted">Heritage Haveli, Jaipur</li>
+        <li class="breadcrumb-item active text-muted"><?php echo htmlspecialchars($hotel_name); ?>, <?php echo htmlspecialchars($hotel_city); ?></li>
       </ol>
     </nav>
   </div>
@@ -184,16 +222,25 @@ $full_qs_str = $full_qs ? '?' . implode('&', $full_qs) : '';
   <div class="container-fluid px-0">
     <div class="gallery-grid">
       <div class="gallery-main">
-        <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=1000&q=85" alt="Heritage Haveli Main"/>
+        <img src="<?php echo htmlspecialchars($hotel_img); ?>" alt="<?php echo htmlspecialchars($hotel_name); ?>"/>
         <button class="btn btn-light btn-sm gallery-all-btn" data-bs-toggle="modal" data-bs-target="#galleryModal">
-          <i class="bi bi-images me-1"></i>View All 24 Photos
+          <i class="bi bi-images me-1"></i>View All Photos
         </button>
       </div>
       <div class="gallery-thumbs">
-        <img src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&q=80" alt="Deluxe Room"/>
-        <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&q=80" alt="Suite"/>
-        <img src="https://images.unsplash.com/photo-1540541338537-1220059ddcdd?w=400&q=80" alt="Restaurant"/>
-        <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&q=80" alt="Pool"/>
+        <?php
+        $thumbs = count($hotel_images_arr) > 1 ? array_slice($hotel_images_arr, 1, 4) : [];
+        $fallbacks = [
+            'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&q=80',
+            'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&q=80',
+            'https://images.unsplash.com/photo-1540541338537-1220059ddcdd?w=400&q=80',
+            'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&q=80',
+        ];
+        for ($ti = 0; $ti < 4; $ti++) {
+            $tsrc = $thumbs[$ti] ?? $fallbacks[$ti];
+            echo '<img src="' . htmlspecialchars($tsrc) . '" alt="' . htmlspecialchars($hotel_name) . '" onerror="this.src=\'' . $fallbacks[$ti % 4] . '\'"/>';
+        }
+        ?>
       </div>
     </div>
   </div>
@@ -216,30 +263,28 @@ $full_qs_str = $full_qs ? '?' . implode('&', $full_qs) : '';
                 <span class="badge bg-warning text-dark">Luxury</span>
                 <span class="badge bg-success">Free Cancellation</span>
               </div>
-              <h1 class="fw-800 fs-3 mb-1">Heritage Haveli</h1>
-              <p class="text-muted mb-0"><i class="bi bi-geo-alt-fill text-danger me-1"></i>M.I. Road, Pink City, Jaipur, Rajasthan 302001
+              <h1 class="fw-800 fs-3 mb-1"><?php echo htmlspecialchars($hotel_name); ?></h1>
+              <p class="text-muted mb-0"><i class="bi bi-geo-alt-fill text-danger me-1"></i><?php echo htmlspecialchars($hotel_loc . ($hotel_state ? ', ' . $hotel_state : '')); ?>
                 <a href="#" class="text-primary ms-2 small">View on Map</a>
               </p>
             </div>
             <div class="text-end">
               <div class="d-flex align-items-center gap-2 justify-content-end mb-1">
-                <div class="rating-big">4.9</div>
-                <div>
-                  <div class="fw-700 small">Exceptional</div>
-                  <div class="text-muted" style="font-size:0.75rem">1,284 reviews</div>
-                </div>
+                <div class="rating-big"><?php echo number_format($hotel_rating, 1); ?></div>
               </div>
               <button class="btn-wishlist-lg"><i class="bi bi-heart me-1"></i>Save</button>
             </div>
           </div>
           <!-- Quick amenity icons -->
           <div class="d-flex flex-wrap gap-3">
-            <span class="quick-amenity"><i class="bi bi-wifi text-primary"></i> Free WiFi</span>
-            <span class="quick-amenity"><i class="bi bi-droplet-fill text-info"></i> Pool</span>
-            <span class="quick-amenity"><i class="bi bi-cup-hot text-warning"></i> Breakfast</span>
-            <span class="quick-amenity"><i class="bi bi-car-front text-success"></i> Free Parking</span>
-            <span class="quick-amenity"><i class="bi bi-flower1 text-danger"></i> Spa</span>
-            <span class="quick-amenity"><i class="bi bi-dumbbell text-secondary"></i> Gym</span>
+            <?php
+            $amenList = array_filter(array_map('trim', explode(',', $hotel_amenities)));
+            foreach ($amenList as $am):
+              $ic = bhAmenityIcon($am);
+              $lbl = ucfirst($am);
+            ?>
+            <span class="quick-amenity"><i class="bi <?php echo $ic; ?>"></i> <?php echo htmlspecialchars($lbl); ?></span>
+            <?php endforeach; ?>
           </div>
 
           <!-- Availability Summary Strip -->
@@ -279,9 +324,7 @@ $full_qs_str = $full_qs ? '?' . implode('&', $full_qs) : '';
         <!-- Description -->
         <div class="detail-card mb-4">
           <h5 class="fw-700 mb-3"><i class="bi bi-info-circle text-primary me-2"></i>About This Property</h5>
-          <p class="text-muted">Heritage Haveli is a magnificent royal property nestled in the heart of Jaipur's Pink City. Built in the 18th century, this stunning haveli has been lovingly restored to its former glory while offering every modern luxury.</p>
-          <p class="text-muted">Each room is uniquely decorated with original frescoes, antique furniture, and hand-crafted Rajasthani textiles. Guests can enjoy the rooftop terrace with panoramic views of the Amber Fort, dine at our award-winning restaurant serving authentic Rajasthani cuisine, or unwind at the Ananda Spa.</p>
-          <p class="text-muted mb-0">Located just 500 meters from the famous Hawa Mahal and a short walk from the bustling bazaars, Heritage Haveli is the perfect base for exploring Jaipur's rich cultural heritage.</p>
+          <p class="text-muted"><?php echo nl2br(htmlspecialchars($hotel_desc ?: 'A premium property offering world-class amenities and an unforgettable stay experience.')); ?></p>
         </div>
 
         <!-- Amenities -->
@@ -343,16 +386,9 @@ $full_qs_str = $full_qs ? '?' . implode('&', $full_qs) : '';
                     </div>
                     <div class="d-flex justify-content-between align-items-center mt-2">
                       <div>
-                        <?php bhPriceBlock(4680, 7200); ?>
+                        <?php bhPriceBlock($hotel_price, $hotel_orig); ?>
                       </div>
-                      <a href="review-booking.php?room=deluxe<?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-4">Select</a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Room 2: Royal Suite -->
+                      <a href="review-booking.php?room=deluxe&id=<?php echo $hotel_id; ?><?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-4">Select</a>
             <div class="room-card">
               <div class="row g-0">
                 <div class="col-4 col-md-3">
@@ -373,7 +409,7 @@ $full_qs_str = $full_qs ? '?' . implode('&', $full_qs) : '';
                       <div>
                         <?php bhPriceBlock(9800, 14000); ?>
                       </div>
-                      <a href="review-booking.php?room=royal<?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-4">Select</a>
+                      <a href="review-booking.php?room=royal&id=<?php echo $hotel_id; ?><?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-4">Select</a>
                     </div>
                   </div>
                 </div>
@@ -401,7 +437,7 @@ $full_qs_str = $full_qs ? '?' . implode('&', $full_qs) : '';
                       <div>
                         <?php bhPriceBlock(19500, 28000); ?>
                       </div>
-                      <a href="review-booking.php?room=maharaja<?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-4">Select</a>
+                      <a href="review-booking.php?room=maharaja&id=<?php echo $hotel_id; ?><?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-4">Select</a>
                     </div>
                   </div>
                 </div>
@@ -532,7 +568,7 @@ $full_qs_str = $full_qs ? '?' . implode('&', $full_qs) : '';
               <h6 class="fw-700 mb-0"><i class="bi bi-calendar2-check me-2"></i>Book This Hotel</h6>
               <span class="badge bg-success small">Free Cancellation</span>
             </div>
-            <?php bhPriceBlock(4680, 7200, false); ?>
+            <?php bhPriceBlock($hotel_price, $hotel_orig, false); ?>
           </div>
           <div class="booking-card-body">
             <!-- Dates -->
@@ -559,21 +595,21 @@ $full_qs_str = $full_qs ? '?' . implode('&', $full_qs) : '';
             <!-- Price Breakdown -->
             <div class="price-breakdown-box mb-3" id="bkBreakdown">
               <?php
-                $p_calc = bhCalcPricing(4680);
-                $room_cost = 4680 * $nights;
-                $tax_amt   = round($room_cost * bhTaxRate(4680));
+                $p_calc = bhCalcPricing($hotel_price);
+                $room_cost = $hotel_price * $nights;
+                $tax_amt   = round($room_cost * bhTaxRate($hotel_price));
                 $disc      = round($room_cost * 0.35);
                 $grand     = $room_cost - $disc + $tax_amt + SERVICE_CHARGE;
               ?>
-              <div class="row-item"><span class="label">₹4,680 × <?php echo $nights; ?> night<?php echo $nights>1?'s':''; ?></span><span class="value">₹<?php echo number_format($room_cost); ?></span></div>
-              <div class="row-item"><span class="label" style="color:#059669">Discount (35%)</span><span class="value" style="color:#059669">− ₹<?php echo number_format($disc); ?></span></div>
+              <div class="row-item"><span class="label">₹<?php echo number_format($hotel_price); ?> × <?php echo $nights; ?> night<?php echo $nights>1?'s':''; ?></span><span class="value">₹<?php echo number_format($room_cost); ?></span></div>
+              <div class="row-item"><span class="label" style="color:#059669">Discount</span><span class="value" style="color:#059669">− ₹<?php echo number_format($disc); ?></span></div>
               <div class="row-item"><span class="label">GST (12%)</span><span class="value">₹<?php echo number_format($tax_amt); ?></span></div>
               <div class="row-item"><span class="label">Service Charge</span><span class="value">₹200</span></div>
               <div class="row-item total"><span>Total Payable</span><span class="value">₹<?php echo number_format($grand); ?></span></div>
               <div class="savings-row"><i class="bi bi-piggy-bank-fill"></i>You save ₹<?php echo number_format($disc); ?> on this booking!</div>
             </div>
             <!-- CTA -->
-            <a href="review-booking.php?room=deluxe<?php echo $booking_qs; ?>" class="btn book-now-btn w-100 fw-700 py-3 mb-2">
+            <a href="review-booking.php?room=deluxe&id=<?php echo $hotel_id; ?><?php echo $booking_qs; ?>" class="btn book-now-btn w-100 fw-700 py-3 mb-2">
               <i class="bi bi-calendar2-check me-2"></i>Book Now
             </a>
             <p class="text-muted text-center" style="font-size:.75rem"><i class="bi bi-shield-check text-success me-1"></i>Secure booking · No hidden charges</p>
@@ -590,7 +626,7 @@ $full_qs_str = $full_qs ? '?' . implode('&', $full_qs) : '';
   <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h2 class="fw-800 mb-1">Similar Hotels in Jaipur</h2>
+        <h2 class="fw-800 mb-1">Similar Hotels in <?php echo htmlspecialchars(\); ?></h2>
         <p class="text-muted mb-0">You might also like these properties</p>
       </div>
       <a href="hotels.php" class="btn btn-outline-primary btn-sm">View All</a>
@@ -750,7 +786,7 @@ $full_qs_str = $full_qs ? '?' . implode('&', $full_qs) : '';
 <script src="navbar.js"></script>
 <script>
 // State — persisted from URL
-var _hdCity    = "<?php echo addslashes($city_hd_lbl ? $city_hd_lbl . ', India' : ''); ?>";
+var _hdCity    = "<?php echo addslashes($city_hd_lbl ? $city_hd_lbl . ', India' : '); ?>";
 var _hdCheckin = "<?php echo addslashes($checkin_raw); ?>";
 var _hdCheckout= "<?php echo addslashes($checkout_raw); ?>";
 var _hdGuests  = "<?php echo $guests_raw ?: 2; ?>";

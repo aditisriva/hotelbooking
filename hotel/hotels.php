@@ -1,6 +1,7 @@
 ﻿<?php
 session_start();
 require_once 'pricing.php';
+require_once 'hotel_functions.php';
 
 // Read all URL params
 $city_param   = isset($_GET['city'])     ? strtolower(trim($_GET['city']))  : '';
@@ -8,12 +9,16 @@ $city_label   = $city_param ? ucfirst($city_param) : '';
 $checkin_raw  = isset($_GET['checkin'])  ? trim($_GET['checkin'])  : '';
 $checkout_raw = isset($_GET['checkout']) ? trim($_GET['checkout']) : '';
 $guests_raw   = isset($_GET['guests'])   ? (int)$_GET['guests']   : 0;
+$max_price    = isset($_GET['max_price'])? (float)$_GET['max_price'] : 0;
+$min_rating   = isset($_GET['min_rating'])?(float)$_GET['min_rating']: 0;
 
-function bhFmtDate(string $d): string {
-    if (!$d) return ''; $ts = strtotime($d); return $ts ? date('d M Y', $ts) : $d;
-}
-function bhCalcNights(string $ci, string $co): int {
-    if (!$ci || !$co) return 1; $diff = (strtotime($co) - strtotime($ci)) / 86400; return max(1,(int)$diff);
+if (!function_exists('bhFmtDate')) {
+    function bhFmtDate(string $d): string {
+        if (!$d) return ''; $ts = strtotime($d); return $ts ? date('d M Y', $ts) : $d;
+    }
+    function bhCalcNights(string $ci, string $co): int {
+        if (!$ci || !$co) return 1; $diff = (strtotime($co) - strtotime($ci)) / 86400; return max(1,(int)$diff);
+    }
 }
 $nights       = bhCalcNights($checkin_raw, $checkout_raw);
 $checkin_fmt  = bhFmtDate($checkin_raw);
@@ -25,21 +30,8 @@ if ($checkout_raw) $qs_parts[] = 'checkout=' . urlencode($checkout_raw);
 if ($guests_raw)   $qs_parts[] = 'guests='   . $guests_raw;
 $booking_qs = $qs_parts ? '&' . implode('&', $qs_parts) : '';
 
-$all_hotels = [
-  ['name'=>'The Grand Palace',       'location'=>'mumbai',  'price'=>4299,  'rating'=>4.8, 'type'=>'hotel',          'capacity'=>4],
-  ['name'=>'Sunset Beach Resort',    'location'=>'goa',     'price'=>5499,  'rating'=>4.6, 'type'=>'resort',         'capacity'=>4],
-  ['name'=>'Heritage Haveli',        'location'=>'jaipur',  'price'=>4680,  'rating'=>4.9, 'type'=>'boutique-hotel', 'capacity'=>4],
-  ['name'=>'Mountain View Lodge',    'location'=>'manali',  'price'=>3299,  'rating'=>4.7, 'type'=>'hotel',          'capacity'=>2],
-  ['name'=>'Lake Palace Udaipur',    'location'=>'udaipur', 'price'=>12499, 'rating'=>4.9, 'type'=>'resort',         'capacity'=>6],
-  ['name'=>'Kerala Backwater Resort','location'=>'kerala',  'price'=>6799,  'rating'=>4.8, 'type'=>'resort',         'capacity'=>4],
-  ['name'=>'Zen Garden Resort',      'location'=>'kerala',  'price'=>4100,  'rating'=>4.5, 'type'=>'boutique-hotel', 'capacity'=>2],
-  ['name'=>'The Imperial Delhi',     'location'=>'delhi',   'price'=>8799,  'rating'=>4.7, 'type'=>'hotel',          'capacity'=>4],
-  ['name'=>'The Grand Palace Mumbai','location'=>'mumbai',  'price'=>4299,  'rating'=>4.8, 'type'=>'hotel',          'capacity'=>4],
-];
-
-$filtered = $city_param ? array_values(array_filter($all_hotels, fn($h) => $h['location'] === $city_param)) : $all_hotels;
-if ($guests_raw > 0) $filtered = array_values(array_filter($filtered, fn($h) => $h['capacity'] >= $guests_raw));
-
+// ── Fetch hotels from DB ──────────────────────────────────────────────────
+$filtered    = bhGetHotels($city_param, $guests_raw, $max_price, $min_rating);
 $hotel_count = count($filtered);
 $page_title  = $city_param ? "Hotels in $city_label" : "Find Your Perfect Hotel";
 $count_text  = $hotel_count . ' hotel' . ($hotel_count !== 1 ? 's' : '');
@@ -278,328 +270,107 @@ $page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub
         <!-- Hotel Cards Grid -->
         <div class="row g-4" id="hotelGrid">
 
-          <!-- Card 1 -->
-          <?php if (!$city_param || $city_param === 'mumbai'): ?>
-          <div class="col-12 col-md-6 col-xl-4" data-price="4299" data-rating="4.8" data-name="The Grand Palace" data-location="mumbai" data-type="hotel">
-            <div class="hotel-card card border-0 shadow-sm h-100">
-              <div class="position-relative">
-                <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=80" class="card-img-top hotel-img" alt="The Grand Palace"/>
-                <span class="badge bg-success position-absolute top-0 start-0 m-2">Free Cancellation</span>
-                <button class="btn-wishlist" aria-label="Wishlist"><i class="bi bi-heart"></i></button>
-                <span class="stars-badge"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></span>
+          <?php if (empty($filtered)): ?>
+          <!-- No hotels found -->
+          <div class="col-12">
+            <div class="text-center py-5 my-3">
+              <div style="width:100px;height:100px;background:#e8f0fe;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem">
+                <i class="bi bi-building-x" style="font-size:2.5rem;color:#1a56db"></i>
               </div>
-              <div class="card-body d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-start mb-1">
-                  <h6 class="fw-700 mb-0">The Grand Palace</h6>
-                  <span class="rating-badge">4.8 <i class="bi bi-star-fill"></i></span>
-                </div>
-                <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill me-1 text-danger"></i>Mumbai, Maharashtra</p>
-                <p class="text-muted small mb-3 flex-grow-1">Iconic luxury hotel overlooking the Arabian Sea with world-class dining and premium spa facilities.</p>
-                <div class="d-flex gap-1 flex-wrap mb-3">
-                  <span class="amenity-tag"><i class="bi bi-wifi"></i> WiFi</span>
-                  <span class="amenity-tag"><i class="bi bi-droplet-fill"></i> Pool</span>
-                  <span class="amenity-tag"><i class="bi bi-cup-hot"></i> Breakfast</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mt-auto">
-                  <div>
-                    <?php bhPriceBlock(4299, 6500); ?>
-                  </div>
-                  <a href="hotel-details.php?city=<?php echo urlencode($city_param); ?><?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-3">View Details</a>
-                </div>
-              </div>
+              <h4 class="fw-800 mb-2" style="color:#1a1a2e">No Hotels Found<?php echo $city_param ? ' in ' . htmlspecialchars($city_label) : ''; ?></h4>
+              <p class="text-muted mb-4">Try a different city or browse all available hotels.</p>
+              <a href="hotels.php" class="btn btn-primary px-4 me-2"><i class="bi bi-search me-2"></i>Browse All Hotels</a>
+              <a href="index.php" class="btn btn-outline-secondary px-4"><i class="bi bi-house me-2"></i>Back to Home</a>
             </div>
           </div>
-          <?php endif; ?>
 
-          <!-- Card 2 -->
-          <?php if (!$city_param || $city_param === 'goa'): ?>
-          <div class="col-12 col-md-6 col-xl-4" data-price="5499" data-rating="4.6" data-name="Sunset Beach Resort" data-location="goa" data-type="resort">
+          <?php else: ?>
+          <?php foreach ($filtered as $h):
+            $hid      = (int)$h['hotel_id'];
+            $hname    = htmlspecialchars($h['hotel_name']);
+            $hcity    = htmlspecialchars(ucfirst($h['city']));
+            $hloc     = htmlspecialchars($h['location']);
+            $hstate   = htmlspecialchars($h['state'] ?? '');
+            $hdesc    = htmlspecialchars($h['description'] ?? '');
+            $hprice   = (float)$h['price_per_night'];
+            $horig    = (float)($h['original_price'] ?? 0);
+            $hrating  = (float)$h['rating'];
+            $hstars   = (int)($h['star_rating'] ?? 3);
+            $htype    = $h['property_type'];
+            $hcap     = (int)$h['capacity'];
+            $hfeatured= (int)($h['featured'] ?? 0);
+            $hstatus  = $h['availability_status'];
+            $hamenity = $h['amenities'] ?? '';
+            $amenTags = array_slice(array_filter(array_map('trim', explode(',', $hamenity))), 0, 3);
+            $img      = bhFirstImage($h['hotel_images'] ?? '', 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=80');
+            $discPct  = $horig > $hprice ? round(($horig - $hprice) / $horig * 100) : 0;
+            // Badge
+            if ($hfeatured && $discPct >= 30) $badge = ['bg-danger', $discPct . '% OFF'];
+            elseif ($hfeatured)               $badge = ['bg-warning text-dark', 'Best Seller'];
+            elseif ($discPct >= 20)           $badge = ['bg-danger', $discPct . '% OFF'];
+            else                              $badge = ['bg-success', 'Free Cancellation'];
+            // Stars HTML
+            $starsHtml = '';
+            for ($s = 1; $s <= 5; $s++) {
+              if ($s <= $hstars) $starsHtml .= '<i class="bi bi-star-fill"></i>';
+            }
+            // Detail link with hotel_id
+            $detailUrl = 'hotel-details.php?id=' . $hid . '&city=' . urlencode($h['city']) . $booking_qs;
+          ?>
+          <div class="col-12 col-md-6 col-xl-4"
+               data-price="<?php echo $hprice; ?>"
+               data-rating="<?php echo $hrating; ?>"
+               data-name="<?php echo $hname; ?>"
+               data-location="<?php echo htmlspecialchars($h['city']); ?>"
+               data-type="<?php echo htmlspecialchars($htype); ?>">
             <div class="hotel-card card border-0 shadow-sm h-100">
               <div class="position-relative">
-                <img src="https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=500&q=80" class="card-img-top hotel-img" alt="Sunset Beach Resort"/>
-                <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">Best Seller</span>
+                <img src="<?php echo htmlspecialchars($img); ?>" class="card-img-top hotel-img" alt="<?php echo $hname; ?>"
+                     onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=80'"/>
+                <span class="badge <?php echo $badge[0]; ?> position-absolute top-0 start-0 m-2"><?php echo $badge[1]; ?></span>
                 <button class="btn-wishlist" aria-label="Wishlist"><i class="bi bi-heart"></i></button>
-                <span class="stars-badge"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></span>
+                <span class="stars-badge"><?php echo $starsHtml; ?></span>
               </div>
               <div class="card-body d-flex flex-column">
                 <div class="d-flex justify-content-between align-items-start mb-1">
-                  <h6 class="fw-700 mb-0">Sunset Beach Resort</h6>
-                  <span class="rating-badge">4.6 <i class="bi bi-star-fill"></i></span>
+                  <h6 class="fw-700 mb-0"><?php echo $hname; ?></h6>
+                  <span class="rating-badge"><?php echo number_format($hrating,1); ?> <i class="bi bi-star-fill"></i></span>
                 </div>
-                <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill me-1 text-danger"></i>Goa, North Goa</p>
-                <p class="text-muted small mb-3 flex-grow-1">Beachfront resort with stunning ocean views, water sports, and award-winning seafood restaurant.</p>
+                <p class="text-muted small mb-2">
+                  <i class="bi bi-geo-alt-fill me-1 text-danger"></i>
+                  <?php echo $hcity; ?><?php echo $hstate ? ', ' . $hstate : ''; ?>
+                </p>
+                <p class="text-muted small mb-3 flex-grow-1"><?php echo $hdesc ?: 'A premium stay awaits you.'; ?></p>
                 <div class="d-flex gap-1 flex-wrap mb-3">
-                  <span class="amenity-tag"><i class="bi bi-wifi"></i> WiFi</span>
-                  <span class="amenity-tag"><i class="bi bi-droplet-fill"></i> Pool</span>
-                  <span class="amenity-tag"><i class="bi bi-car-front"></i> Parking</span>
+                  <?php foreach ($amenTags as $tag):
+                    $icon = bhAmenityIcon($tag);
+                    $label = ucfirst($tag);
+                  ?>
+                  <span class="amenity-tag"><i class="bi <?php echo $icon; ?>"></i> <?php echo $label; ?></span>
+                  <?php endforeach; ?>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mt-auto">
                   <div>
-                    <?php bhPriceBlock(5499, 8000); ?>
+                    <?php bhPriceBlock($hprice, $horig); ?>
                   </div>
-                  <a href="hotel-details.php?city=<?php echo urlencode($city_param); ?><?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-3">View Details</a>
+                  <a href="<?php echo $detailUrl; ?>" class="btn btn-primary btn-sm px-3">View Details</a>
                 </div>
               </div>
             </div>
           </div>
-          <?php endif; ?>
-
-          <!-- Card 3 -->
-          <?php if (!$city_param || $city_param === 'jaipur'): ?>
-          <div class="col-12 col-md-6 col-xl-4" data-price="4680" data-rating="4.9" data-name="Heritage Haveli" data-location="jaipur" data-type="boutique-hotel">
-            <div class="hotel-card card border-0 shadow-sm h-100">
-              <div class="position-relative">
-                <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=500&q=80" class="card-img-top hotel-img" alt="Heritage Haveli"/>
-                <span class="badge bg-danger position-absolute top-0 start-0 m-2">35% OFF</span>
-                <button class="btn-wishlist" aria-label="Wishlist"><i class="bi bi-heart"></i></button>
-                <span class="stars-badge"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></span>
-              </div>
-              <div class="card-body d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-start mb-1">
-                  <h6 class="fw-700 mb-0">Heritage Haveli</h6>
-                  <span class="rating-badge">4.9 <i class="bi bi-star-fill"></i></span>
-                </div>
-                <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill me-1 text-danger"></i>Jaipur, Rajasthan</p>
-                <p class="text-muted small mb-3 flex-grow-1">Royal heritage property with authentic Rajasthani architecture, cultural performances and royal dining.</p>
-                <div class="d-flex gap-1 flex-wrap mb-3">
-                  <span class="amenity-tag"><i class="bi bi-wifi"></i> WiFi</span>
-                  <span class="amenity-tag"><i class="bi bi-cup-hot"></i> Breakfast</span>
-                  <span class="amenity-tag"><i class="bi bi-fan"></i> AC</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mt-auto">
-                  <div>
-                    <?php bhPriceBlock(4680, 7200); ?>
-                  </div>
-                  <a href="hotel-details.php?city=<?php echo urlencode($city_param); ?><?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-3">View Details</a>
-                </div>
-              </div>
-            </div>
-          </div>
-          <?php endif; ?>
-
-          <!-- Card 4 -->
-          <?php if (!$city_param || $city_param === 'manali'): ?>
-          <div class="col-12 col-md-6 col-xl-4" data-price="3299" data-rating="4.7" data-name="Mountain View Lodge" data-location="manali" data-type="hotel">
-            <div class="hotel-card card border-0 shadow-sm h-100">
-              <div class="position-relative">
-                <img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=500&q=80" class="card-img-top hotel-img" alt="Mountain View Lodge"/>
-                <span class="badge bg-info text-dark position-absolute top-0 start-0 m-2">New</span>
-                <button class="btn-wishlist" aria-label="Wishlist"><i class="bi bi-heart"></i></button>
-                <span class="stars-badge"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></span>
-              </div>
-              <div class="card-body d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-start mb-1">
-                  <h6 class="fw-700 mb-0">Mountain View Lodge</h6>
-                  <span class="rating-badge">4.7 <i class="bi bi-star-fill"></i></span>
-                </div>
-                <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill me-1 text-danger"></i>Manali, Himachal Pradesh</p>
-                <p class="text-muted small mb-3 flex-grow-1">Cosy mountain retreat with panoramic Himalayan views, wood-fired fireplaces and adventure activities.</p>
-                <div class="d-flex gap-1 flex-wrap mb-3">
-                  <span class="amenity-tag"><i class="bi bi-wifi"></i> WiFi</span>
-                  <span class="amenity-tag"><i class="bi bi-fire"></i> Fireplace</span>
-                  <span class="amenity-tag"><i class="bi bi-cup-hot"></i> Breakfast</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mt-auto">
-                  <div>
-                    <?php bhPriceBlock(3299, 5500); ?>
-                  </div>
-                  <a href="hotel-details.php?city=<?php echo urlencode($city_param); ?><?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-3">View Details</a>
-                </div>
-              </div>
-            </div>
-          </div>
-          <?php endif; ?>
-
-          <!-- Card 5 -->
-          <?php if (!$city_param || $city_param === 'udaipur'): ?>
-          <div class="col-12 col-md-6 col-xl-4" data-price="12499" data-rating="4.9" data-name="Lake Palace Udaipur" data-location="udaipur" data-type="resort">
-            <div class="hotel-card card border-0 shadow-sm h-100">
-              <div class="position-relative">
-                <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=500&q=80" class="card-img-top hotel-img" alt="Lake Palace Udaipur"/>
-                <span class="badge bg-success position-absolute top-0 start-0 m-2">Free Cancellation</span>
-                <button class="btn-wishlist" aria-label="Wishlist"><i class="bi bi-heart"></i></button>
-                <span class="stars-badge"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></span>
-              </div>
-              <div class="card-body d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-start mb-1">
-                  <h6 class="fw-700 mb-0">Lake Palace Udaipur</h6>
-                  <span class="rating-badge">4.9 <i class="bi bi-star-fill"></i></span>
-                </div>
-                <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill me-1 text-danger"></i>Udaipur, Rajasthan</p>
-                <p class="text-muted small mb-3 flex-grow-1">Floating palace on Lake Pichola offering unparalleled royal luxury with stunning sunset views.</p>
-                <div class="d-flex gap-1 flex-wrap mb-3">
-                  <span class="amenity-tag"><i class="bi bi-wifi"></i> WiFi</span>
-                  <span class="amenity-tag"><i class="bi bi-droplet-fill"></i> Pool</span>
-                  <span class="amenity-tag"><i class="bi bi-flower1"></i> Spa</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mt-auto">
-                  <div>
-                    <?php bhPriceBlock(12499, 18000); ?>
-                  </div>
-                  <a href="hotel-details.php?city=<?php echo urlencode($city_param); ?><?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-3">View Details</a>
-                </div>
-              </div>
-            </div>
-          </div>
-          <?php endif; ?>
-
-          <!-- Card 6 -->
-          <?php if (!$city_param || $city_param === 'kerala'): ?>
-          <div class="col-12 col-md-6 col-xl-4" data-price="6799" data-rating="4.8" data-name="Kerala Backwater Resort" data-location="kerala" data-type="resort">
-            <div class="hotel-card card border-0 shadow-sm h-100">
-              <div class="position-relative">
-                <img src="https://images.unsplash.com/photo-1582610116397-edb318620f90?w=500&q=80" class="card-img-top hotel-img" alt="Kerala Backwater Resort"/>
-                <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">Top Rated</span>
-                <button class="btn-wishlist" aria-label="Wishlist"><i class="bi bi-heart"></i></button>
-                <span class="stars-badge"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></span>
-              </div>
-              <div class="card-body d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-start mb-1">
-                  <h6 class="fw-700 mb-0">Kerala Backwater Resort</h6>
-                  <span class="rating-badge">4.8 <i class="bi bi-star-fill"></i></span>
-                </div>
-                <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill me-1 text-danger"></i>Alleppey, Kerala</p>
-                <p class="text-muted small mb-3 flex-grow-1">Serene resort on the famous backwaters with houseboat experiences and Ayurvedic treatments.</p>
-                <div class="d-flex gap-1 flex-wrap mb-3">
-                  <span class="amenity-tag"><i class="bi bi-wifi"></i> WiFi</span>
-                  <span class="amenity-tag"><i class="bi bi-flower1"></i> Ayurveda</span>
-                  <span class="amenity-tag"><i class="bi bi-cup-hot"></i> Breakfast</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mt-auto">
-                  <div>
-                    <?php bhPriceBlock(6799, 9000); ?>
-                  </div>
-                  <a href="hotel-details.php?city=<?php echo urlencode($city_param); ?><?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-3">View Details</a>
-                </div>
-              </div>
-            </div>
-          </div>
-          <?php endif; ?>
-
-          <!-- Card 7 -->
-          <?php if (!$city_param || $city_param === 'delhi'): ?>
-          <div class="col-12 col-md-6 col-xl-4" data-price="8799" data-rating="4.7" data-name="The Imperial Delhi" data-location="delhi" data-type="hotel">
-            <div class="hotel-card card border-0 shadow-sm h-100">
-              <div class="position-relative">
-                <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=500&q=80" class="card-img-top hotel-img" alt="Imperial Delhi"/>
-                <span class="badge bg-danger position-absolute top-0 start-0 m-2">20% OFF</span>
-                <button class="btn-wishlist" aria-label="Wishlist"><i class="bi bi-heart"></i></button>
-                <span class="stars-badge"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></span>
-              </div>
-              <div class="card-body d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-start mb-1">
-                  <h6 class="fw-700 mb-0">The Imperial Delhi</h6>
-                  <span class="rating-badge">4.7 <i class="bi bi-star-fill"></i></span>
-                </div>
-                <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill me-1 text-danger"></i>New Delhi, Delhi</p>
-                <p class="text-muted small mb-3 flex-grow-1">Historic luxury hotel in the heart of New Delhi with colonial charm and modern five-star amenities.</p>
-                <div class="d-flex gap-1 flex-wrap mb-3">
-                  <span class="amenity-tag"><i class="bi bi-wifi"></i> WiFi</span>
-                  <span class="amenity-tag"><i class="bi bi-droplet-fill"></i> Pool</span>
-                  <span class="amenity-tag"><i class="bi bi-car-front"></i> Parking</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mt-auto">
-                  <div>
-                    <?php bhPriceBlock(8799, 11000); ?>
-                  </div>
-                  <a href="hotel-details.php?city=<?php echo urlencode($city_param); ?><?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-3">View Details</a>
-                </div>
-              </div>
-            </div>
-          </div>
-          <?php endif; ?>
-
-          <!-- Card 8 -->
-          <?php if (!$city_param || $city_param === 'kerala'): ?>
-          <div class="col-12 col-md-6 col-xl-4" data-price="4100" data-rating="4.5" data-name="Zen Garden Resort" data-location="kerala" data-type="boutique-hotel">
-            <div class="hotel-card card border-0 shadow-sm h-100">
-              <div class="position-relative">
-                <img src="https://images.unsplash.com/photo-1561501900-3701fa6a0864?w=500&q=80" class="card-img-top hotel-img" alt="Zen Garden Resort"/>
-                <span class="badge bg-success position-absolute top-0 start-0 m-2">Free Cancellation</span>
-                <button class="btn-wishlist" aria-label="Wishlist"><i class="bi bi-heart"></i></button>
-                <span class="stars-badge"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></span>
-              </div>
-              <div class="card-body d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-start mb-1">
-                  <h6 class="fw-700 mb-0">Zen Garden Resort</h6>
-                  <span class="rating-badge">4.5 <i class="bi bi-star-fill"></i></span>
-                </div>
-                <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill me-1 text-danger"></i>Munnar, Kerala</p>
-                <p class="text-muted small mb-3 flex-grow-1">Nestled in lush tea plantations with valley views, yoga retreats, and organic farm dining experiences.</p>
-                <div class="d-flex gap-1 flex-wrap mb-3">
-                  <span class="amenity-tag"><i class="bi bi-wifi"></i> WiFi</span>
-                  <span class="amenity-tag"><i class="bi bi-flower1"></i> Yoga</span>
-                  <span class="amenity-tag"><i class="bi bi-cup-hot"></i> Breakfast</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mt-auto">
-                  <div>
-                    <span class="text-muted text-decoration-line-through small">₹6,200</span>
-                    <?php bhPriceBlock(4100); ?>
-                  </div>
-                  <a href="hotel-details.php?city=<?php echo urlencode($city_param); ?><?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-3">View Details</a>
-                </div>
-              </div>
-            </div>
-          </div>
-          <?php endif; ?>
-
-          <!-- Card 9 -->
-          <?php if (!$city_param || $city_param === 'jaipur'): ?>
-          <div class="col-12 col-md-6 col-xl-4" data-price="5200" data-rating="4.8" data-name="Desert Bloom Luxury Camp" data-location="jaipur" data-type="resort">
-            <div class="hotel-card card border-0 shadow-sm h-100">
-              <div class="position-relative">
-                <img src="https://images.unsplash.com/photo-1549294413-26f195200c16?w=500&q=80" class="card-img-top hotel-img" alt="Desert Bloom Camp"/>
-                <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">Unique Stay</span>
-                <button class="btn-wishlist" aria-label="Wishlist"><i class="bi bi-heart"></i></button>
-                <span class="stars-badge"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></span>
-              </div>
-              <div class="card-body d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-start mb-1">
-                  <h6 class="fw-700 mb-0">Desert Bloom Luxury Camp</h6>
-                  <span class="rating-badge">4.8 <i class="bi bi-star-fill"></i></span>
-                </div>
-                <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill me-1 text-danger"></i>Jaisalmer, Rajasthan</p>
-                <p class="text-muted small mb-3 flex-grow-1">Luxury desert camp under a blanket of stars with camel safaris, folk music and traditional Rajasthani cuisine.</p>
-                <div class="d-flex gap-1 flex-wrap mb-3">
-                  <span class="amenity-tag"><i class="bi bi-wifi"></i> WiFi</span>
-                  <span class="amenity-tag"><i class="bi bi-music-note"></i> Folk Show</span>
-                  <span class="amenity-tag"><i class="bi bi-cup-hot"></i> All Meals</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mt-auto">
-                  <div>
-                    <span class="text-muted text-decoration-line-through small">₹7,800</span>
-                    <?php bhPriceBlock(5200); ?>
-                  </div>
-                  <a href="hotel-details.php?city=<?php echo urlencode($city_param); ?><?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-3">View Details</a>
-                </div>
-              </div>
-            </div>
-          </div>
+          <?php endforeach; ?>
           <?php endif; ?>
 
         </div><!-- end #hotelGrid -->
 
-        <!-- Empty State — shown when no hotels match the city filter -->
-        <?php if ($city_param && $hotel_count === 0): ?>
-        <div class="text-center py-5 my-3">
-          <div style="width:100px;height:100px;background:#e8f0fe;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem">
-            <i class="bi bi-building-x" style="font-size:2.5rem;color:#1a56db"></i>
-          </div>
-          <h4 class="fw-800 mb-2" style="color:#1a1a2e">No Hotels Found in <?php echo htmlspecialchars($city_label); ?></h4>
-          <p class="text-muted mb-4">We couldn't find any hotels in <strong><?php echo htmlspecialchars($city_label); ?></strong>.<br/>Try a different city or browse all available hotels.</p>
-          <a href="hotels.php" class="btn btn-primary px-4 me-2"><i class="bi bi-search me-2"></i>Browse All Hotels</a>
-          <a href="index.php" class="btn btn-outline-secondary px-4"><i class="bi bi-house me-2"></i>Back to Home</a>
-        </div>
-        <?php else: ?>
         <div id="emptyState" class="d-none text-center py-5 my-3">
           <div style="width:100px;height:100px;background:#e8f0fe;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem">
             <i class="bi bi-building-x" style="font-size:2.5rem;color:#1a56db"></i>
           </div>
-          <h4 class="fw-800 mb-2" style="color:#1a1a2e">No Hotels Found</h4>
-          <p class="text-muted mb-4" id="emptyStateMsg">No hotels match your current filters.<br/>Try adjusting your search criteria.</p>
+          <h4 class="fw-800 mb-2" style="color:#1a1a2e">No Hotels Match Your Filters</h4>
+          <p class="text-muted mb-4" id="emptyStateMsg">Try adjusting your search criteria.</p>
           <a href="hotels.php" class="btn btn-primary px-4 me-2"><i class="bi bi-search me-2"></i>Browse All Hotels</a>
         </div>
-        <?php endif; ?>
 
         <!-- Pagination — rendered dynamically by pagination.js -->
         <div class="d-flex justify-content-center mt-5">
@@ -621,13 +392,11 @@ $page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub
     <div class="row g-4 mb-4">
       <div class="col-12 col-md-4">
         <h5 class="fw-800 mb-3"><i class="bi bi-building-fill text-warning me-1"></i>bookHotel</h5>
-        <p class="text-white-50 small">Your trusted travel partner since 2015. We make hotel booking simple, affordable, and enjoyable for millions of travellers.</p>
+        <p class="text-white-50 small">Your trusted travel partner. We make hotel booking simple, affordable, and enjoyable.</p>
         <div class="d-flex gap-3 mt-3">
-          <a href="#" class="text-white-50 social-icon"><i class="bi bi-facebook fs-5"></i></a>
-          <a href="#" class="text-white-50 social-icon"><i class="bi bi-twitter-x fs-5"></i></a>
-          <a href="#" class="text-white-50 social-icon"><i class="bi bi-instagram fs-5"></i></a>
-          <a href="#" class="text-white-50 social-icon"><i class="bi bi-youtube fs-5"></i></a>
-          <a href="#" class="text-white-50 social-icon"><i class="bi bi-linkedin fs-5"></i></a>
+          <a href="#" class="text-white-50"><i class="bi bi-facebook fs-5"></i></a>
+          <a href="#" class="text-white-50"><i class="bi bi-twitter-x fs-5"></i></a>
+          <a href="#" class="text-white-50"><i class="bi bi-instagram fs-5"></i></a>
         </div>
       </div>
       <div class="col-6 col-md-2">
@@ -635,26 +404,14 @@ $page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub
         <ul class="list-unstyled footer-links">
           <li><a href="#">About Us</a></li>
           <li><a href="#">Careers</a></li>
-          <li><a href="#">Press</a></li>
-          <li><a href="#">Blog</a></li>
-        </ul>
-      </div>
-      <div class="col-6 col-md-2">
-        <h6 class="fw-700 mb-3">Support</h6>
-        <ul class="list-unstyled footer-links">
-          <li><a href="#">Help Center</a></li>
-          <li><a href="contact.php">Contact Us</a></li>
-          <li><a href="#">Cancellation Policy</a></li>
-          <li><a href="#">Safety Info</a></li>
+          <li><a href="contact.php">Contact</a></li>
         </ul>
       </div>
       <div class="col-6 col-md-2">
         <h6 class="fw-700 mb-3">Explore</h6>
         <ul class="list-unstyled footer-links">
           <li><a href="hotels.php">Hotels</a></li>
-          <li><a href="#">Destinations</a></li>
           <li><a href="my-bookings.php">My Bookings</a></li>
-          <li><a href="#">Car Rentals</a></li>
         </ul>
       </div>
       <div class="col-6 col-md-2">
@@ -663,19 +420,12 @@ $page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub
           <li><a href="privacy-policy.php">Privacy Policy</a></li>
           <li><a href="terms-of-service.php">Terms of Use</a></li>
           <li><a href="cookie-policy.php">Cookie Policy</a></li>
-          <li><a href="#">Sitemap</a></li>
         </ul>
       </div>
     </div>
     <hr class="border-secondary"/>
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
       <p class="text-white-50 small mb-0">© 2026 bookHotel Technologies Pvt. Ltd. All rights reserved.</p>
-      <div class="d-flex gap-2">
-        <img src="https://img.shields.io/badge/Visa-1A1F71?style=flat&logo=visa&logoColor=white" height="20" alt="Visa"/>
-        <img src="https://img.shields.io/badge/Mastercard-EB001B?style=flat&logo=mastercard&logoColor=white" height="20" alt="Mastercard"/>
-        <img src="https://img.shields.io/badge/UPI-1a73e8?style=flat&logo=google-pay&logoColor=white" height="20" alt="UPI"/>
-        <img src="https://img.shields.io/badge/PayPal-003087?style=flat&logo=paypal&logoColor=white" height="20" alt="PayPal"/>
-      </div>
     </div>
   </div>
 </footer>
@@ -687,12 +437,14 @@ $page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <script src="navbar.js"></script>
+<script src="search-state.js"></script>
 <script src="pagination.js"></script>
 <script>
   // Navbar scroll + back-to-top
   window.addEventListener('scroll', () => {
     document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 50);
-    document.getElementById('backToTop').classList.toggle('show', window.scrollY > 300);
+    const btt = document.getElementById('backToTop');
+    if (btt) btt.classList.toggle('show', window.scrollY > 300);
   });
 
   // Wishlist toggle
@@ -705,129 +457,93 @@ $page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub
     });
   });
 
-  // Default dates
-  const t = new Date(), t1 = new Date(t), t2 = new Date(t);
-  t1.setDate(t.getDate() + 1); t2.setDate(t.getDate() + 2);
-  const fmt = d => d.toISOString().split('T')[0];
-  document.getElementById('checkin').value  = fmt(t1);
-  document.getElementById('checkout').value = fmt(t2);
+  // Restore search state from sessionStorage if not in URL
+  (function() {
+    const p = new URLSearchParams(window.location.search);
+    const ci = document.getElementById('checkin');
+    const co = document.getElementById('checkout');
+    if (ci && !p.get('checkin')) {
+      const saved = bhSearch ? bhSearch.get('checkin') : sessionStorage.getItem('bh_checkin');
+      if (saved) ci.value = saved;
+    }
+    if (co && !p.get('checkout')) {
+      const saved = bhSearch ? bhSearch.get('checkout') : sessionStorage.getItem('bh_checkout');
+      if (saved) co.value = saved;
+    }
+  })();
 
-  // ============================================================
-  //  FILTER & SORT — delegates show/hide to pagination.js
-  // ============================================================
+  // Hero search button
+  document.querySelector('.listing-search-bar .btn-warning')?.addEventListener('click', function() {
+    const city     = document.getElementById('heroSearchCity').value.trim().toLowerCase();
+    const checkin  = document.getElementById('checkin').value;
+    const checkout = document.getElementById('checkout').value;
+    const guests   = document.querySelector('.listing-search-bar select').value;
+    if (window.bhSearch) { bhSearch.save({city, checkin, checkout, guests}); }
+    let url = 'hotels.php?';
+    if (city)     url += 'city='     + encodeURIComponent(city)    + '&';
+    if (checkin)  url += 'checkin='  + encodeURIComponent(checkin) + '&';
+    if (checkout) url += 'checkout=' + encodeURIComponent(checkout)+ '&';
+    if (guests)   url += 'guests='   + guests;
+    window.location.href = url;
+  });
+
+  // Filter chips (city)
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', function() {
+      const city = this.dataset.city;
+      const p    = new URLSearchParams(window.location.search);
+      if (city) p.set('city', city); else p.delete('city');
+      window.location.href = 'hotels.php?' + p.toString();
+    });
+  });
+
+  // ── Client-side filter/sort on already-fetched cards ─────────────────────
   let maxPrice = 25000;
 
-  function allCards() {
-    return [...document.querySelectorAll('[data-location]')];
-  }
-
-  function applyAllFilters() {
-    const checkedRatings = [...document.querySelectorAll('.guest-rating-check:checked')]
-      .map(cb => parseFloat(cb.dataset.minrating));
-    const ratingEnabled = checkedRatings.length > 0;
-
-    const checkedTypes = [...document.querySelectorAll('.prop-type-check:checked')]
-      .map(cb => cb.dataset.proptype);
-    const typeEnabled = checkedTypes.length > 0;
-
-    const filtered = allCards().filter(card => {
-      const loc    = card.getAttribute('data-location') || '';
-      const price  = parseInt(card.getAttribute('data-price'))   || 0;
-      const rating = parseFloat(card.getAttribute('data-rating')) || 0;
-      const type   = card.getAttribute('data-type') || 'hotel';
-
-      const locOk    = (activeLocation === 'all') || (loc === activeLocation);
-      const priceOk  = price <= maxPrice;
-      const ratingOk = !ratingEnabled || checkedRatings.some(minR => rating >= minR);
-      const typeOk   = !typeEnabled   || checkedTypes.includes(type);
-
-      return locOk && priceOk && ratingOk && typeOk;
-    });
-
-    if (window.Pagination) {
-      window.Pagination.setFiltered(filtered);
-    }
-  }
-
-  // Location chips — redirect to hotels.php?city=X for server-side filtering
-  document.querySelectorAll('.filter-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const city = (chip.dataset.city || '').trim().toLowerCase();
-      if (city === '' || city === 'all') {
-        window.location.href = 'hotels.php';
-      } else {
-        window.location.href = 'hotels.php?city=' + encodeURIComponent(city);
-      }
-    });
-  });
-
-  // Set activeLocation from PHP city param (for JS-side filters like price/rating)
-  let activeLocation = '<?php echo addslashes($city_param); ?>' || 'all';  // Price range slider
-  document.getElementById('priceRange').addEventListener('input', function () {
+  document.getElementById('priceRange')?.addEventListener('input', function() {
     maxPrice = parseInt(this.value);
-    applyAllFilters();
+    applyFilters();
   });
 
-  // Guest Rating checkboxes
-  document.querySelectorAll('.guest-rating-check').forEach(function (cb) {
-    cb.addEventListener('change', applyAllFilters);
+  document.querySelectorAll('.guest-rating-check').forEach(cb => {
+    cb.addEventListener('change', applyFilters);
+  });
+  document.querySelectorAll('.prop-type-check').forEach(cb => {
+    cb.addEventListener('change', applyFilters);
   });
 
-  // Property Type checkboxes
-  document.querySelectorAll('.prop-type-check').forEach(function (cb) {
-    cb.addEventListener('change', applyAllFilters);
-  });
-
-  // Sort by
-  document.querySelector('.sort-select').addEventListener('change', function () {
-    const val  = this.value;
-    const grid = document.getElementById('hotelGrid');
-    const cards = allCards();
-
+  document.querySelector('.sort-select')?.addEventListener('change', function() {
+    const cards = [...document.querySelectorAll('#hotelGrid .col-12[data-price]')];
+    const val   = this.value;
     cards.sort((a, b) => {
-      const pa = parseInt(a.getAttribute('data-price'));
-      const pb = parseInt(b.getAttribute('data-price'));
-      const ra = parseFloat(a.getAttribute('data-rating'));
-      const rb = parseFloat(b.getAttribute('data-rating'));
-      const na = (a.getAttribute('data-name') || '').toLowerCase();
-      const nb = (b.getAttribute('data-name') || '').toLowerCase();
-      if (val === 'Price: Low to High')  return pa - pb;
-      if (val === 'Price: High to Low')  return pb - pa;
-      if (val === 'Rating: High to Low') return rb - ra;
-      if (val === 'Newest First')        return na.localeCompare(nb);
+      if (val === 'Price: Low to High')  return a.dataset.price - b.dataset.price;
+      if (val === 'Price: High to Low')  return b.dataset.price - a.dataset.price;
+      if (val === 'Rating: High to Low') return b.dataset.rating - a.dataset.rating;
       return 0;
     });
-
-    cards.forEach(card => grid.appendChild(card));
-    applyAllFilters();
+    const grid = document.getElementById('hotelGrid');
+    cards.forEach(c => grid.appendChild(c));
   });
 
-  // Apply initial filter state on page load so pre-checked boxes take effect
-  applyAllFilters();
+  function applyFilters() {
+    const minRatings = [...document.querySelectorAll('.guest-rating-check:checked')].map(c => parseFloat(c.dataset.minrating));
+    const minRating  = minRatings.length ? Math.min(...minRatings) : 0;
+    const propTypes  = [...document.querySelectorAll('.prop-type-check:checked')].map(c => c.dataset.proptype);
 
-  // Pre-fill hero search bar with city if set
-  <?php if ($city_param): ?>
-  const heroCity = document.getElementById('heroSearchCity');
-  if (heroCity) heroCity.value = '<?php echo addslashes($city_label); ?>';
-  <?php endif; ?>
-
-  // Hero search bar — full search with all params
-  const heroSearchBtn = document.querySelector('.listing-search-bar .btn-warning');
-  if (heroSearchBtn) {
-    heroSearchBtn.addEventListener('click', function() {
-      const city   = (document.getElementById('heroSearchCity')?.value || '').trim().toLowerCase();
-      const ci     = document.getElementById('checkin')?.value   || '';
-      const co     = document.getElementById('checkout')?.value  || '';
-      const guests = document.querySelector('.listing-search-bar select')?.value || '';
-      const qs = [];
-      if (city)   qs.push('city='     + encodeURIComponent(city));
-      if (ci)     qs.push('checkin='  + encodeURIComponent(ci));
-      if (co)     qs.push('checkout=' + encodeURIComponent(co));
-      if (guests) qs.push('guests='   + encodeURIComponent(guests));
-      window.location.href = 'hotels.php' + (qs.length ? '?' + qs.join('&') : '');
+    let visible = 0;
+    document.querySelectorAll('#hotelGrid .col-12[data-price]').forEach(card => {
+      const price  = parseFloat(card.dataset.price);
+      const rating = parseFloat(card.dataset.rating);
+      const type   = card.dataset.type;
+      const show   = price <= maxPrice
+        && (minRatings.length === 0 || rating >= minRating)
+        && (propTypes.length === 0  || propTypes.includes(type));
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
     });
+    const empty = document.getElementById('emptyState');
+    if (empty) empty.classList.toggle('d-none', visible > 0);
   }
 </script>
-<script src="search-state.js"></script>
 </body>
 </html>
