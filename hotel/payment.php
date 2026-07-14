@@ -1,4 +1,73 @@
-﻿<?php require_once 'pricing.php'; ?>
+﻿<?php
+session_start();
+require_once 'db.php';
+require_once 'hotel_functions.php';
+require_once 'pricing.php';
+
+// ── Handle AJAX booking save ──────────────────────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_booking') {
+    header('Content-Type: application/json');
+    $required = ['hotel_id','guest_name','guest_email','checkin_date','checkout_date','total_amount'];
+    foreach ($required as $f) {
+        if (empty($_POST[$f])) {
+            echo json_encode(['success'=>false,'error'=>'Missing field: '.$f]);
+            exit;
+        }
+    }
+
+    // Generate booking ID
+    $booking_id = 'BH-' . date('Y') . '-' . strtoupper(substr(uniqid(),5,6));
+
+    // Sanitize inputs
+    $hotel_id       = (int)$_POST['hotel_id'];
+    $hotel          = bhGetHotelById($hotel_id);
+    $hotel_name     = $hotel ? $hotel['hotel_name'] : sanitize($_POST['hotel_name'] ?? 'Unknown Hotel');
+    $hotel_city     = $hotel ? $hotel['city'] : '';
+    $guest_name     = sanitize($_POST['guest_name']);
+    $guest_email    = sanitize($_POST['guest_email']);
+    $guest_phone    = sanitize($_POST['guest_phone'] ?? '');
+    $checkin        = sanitize($_POST['checkin_date']);
+    $checkout       = sanitize($_POST['checkout_date']);
+    $nights         = max(1, (int)($_POST['nights'] ?? 1));
+    $guests         = max(1, (int)($_POST['guests'] ?? 2));
+    $room_type      = sanitize($_POST['room_type'] ?? 'Deluxe Room');
+    $base_amount    = (float)$_POST['base_amount'];
+    $discount_amt   = (float)($_POST['discount_amount'] ?? 0);
+    $tax_amount     = (float)($_POST['tax_amount'] ?? 0);
+    $svc_charge     = (float)($_POST['service_charge'] ?? 200);
+    $coupon_disc    = (float)($_POST['coupon_discount'] ?? 0);
+    $total_amount   = (float)$_POST['total_amount'];
+    $pay_method     = sanitize($_POST['payment_method'] ?? 'UPI');
+    $special_req    = sanitize($_POST['special_requests'] ?? '');
+    $arrival_time   = sanitize($_POST['arrival_time'] ?? '');
+    $user_id        = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
+
+    $stmt = mysqli_prepare($conn,
+        "INSERT INTO bookings (booking_id,user_id,hotel_id,hotel_name,hotel_city,room_type,
+         guest_name,guest_email,guest_phone,checkin_date,checkout_date,nights,guests,
+         base_amount,discount_amount,tax_amount,service_charge,coupon_discount,
+         total_amount,payment_method,payment_status,booking_status,special_requests,arrival_time)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'paid','confirmed',?,?)"
+    );
+
+    mysqli_stmt_bind_param($stmt,'siissssssssiiddddddsss',
+        $booking_id,$user_id,$hotel_id,$hotel_name,$hotel_city,$room_type,
+        $guest_name,$guest_email,$guest_phone,$checkin,$checkout,$nights,$guests,
+        $base_amount,$discount_amt,$tax_amount,$svc_charge,$coupon_disc,
+        $total_amount,$pay_method,$special_req,$arrival_time
+    );
+
+    if (mysqli_stmt_execute($stmt)) {
+        mysqli_stmt_close($stmt);
+        echo json_encode(['success'=>true,'booking_id'=>$booking_id]);
+    } else {
+        $err = mysqli_error($conn);
+        mysqli_stmt_close($stmt);
+        echo json_encode(['success'=>false,'error'=>$err]);
+    }
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -311,7 +380,7 @@
       <div class="modal-body text-center p-5">
         <div class="confirm-icon mb-4"><i class="bi bi-check-lg"></i></div>
         <h4 class="fw-800 mb-2">Booking Confirmed!</h4>
-        <p class="text-muted mb-1">Your booking at <strong>Heritage Haveli, Jaipur</strong> is confirmed.</p>
+        <p class="text-muted mb-1">Your booking at <strong id="confirmHotelName">Heritage Haveli</strong> is confirmed.</p>
         <p class="text-muted mb-4">Confirmation sent to <strong id="confirmEmail">—</strong></p>
         <div class="booking-ref mb-4">
           Booking ID: <strong id="bookingId">BH-2026-XXXXX</strong>
@@ -346,8 +415,8 @@
   const params   = new URLSearchParams(window.location.search);
   const roomKey  = params.get('room')    || 'deluxe';
   const guests   = (typeof bhSearch !== 'undefined' ? bhSearch.guests() : parseInt(params.get('guests')||'2'));
-  const checkin  = (typeof bhSearch !== 'undefined' ? bhSearch.checkin() : params.get('checkin')) || ''; d.setDate(d.getDate()+1); return d.toISOString().split('T')[0]; })();
-  const checkout = (typeof bhSearch !== 'undefined' ? bhSearch.checkout() : params.get('checkout')) || ''; d.setDate(d.getDate()+2); return d.toISOString().split('T')[0]; })();
+  const checkin  = (typeof bhSearch !== 'undefined' ? bhSearch.checkin()  : params.get('checkin'))  || (() => { let d=new Date(); d.setDate(d.getDate()+1); return d.toISOString().split('T')[0]; })();
+  const checkout = (typeof bhSearch !== 'undefined' ? bhSearch.checkout() : params.get('checkout')) || (() => { let d=new Date(); d.setDate(d.getDate()+2); return d.toISOString().split('T')[0]; })();
   const room     = rooms[roomKey] || rooms['deluxe'];
 
   const ci = new Date(checkin), co = new Date(checkout);
@@ -452,20 +521,68 @@
     }
   }
 
-  // Pay Now
+  // Pay Now — saves booking to DB then shows confirmation
   function payNow() {
     const btn = document.querySelector('.book-now-btn');
     btn.innerHTML='<span class="spinner-border spinner-border-sm me-2"></span>Processing Payment...';
     btn.disabled = true;
-    setTimeout(() => {
-      const email = params.get('email') || 'you@email.com';
-      const id    = 'BH-2026-' + Math.floor(10000+Math.random()*90000);
-      document.getElementById('confirmEmail').textContent = email;
-      document.getElementById('bookingId').textContent    = id;
-      new bootstrap.Modal(document.getElementById('confirmModal')).show();
-      btn.innerHTML='<i class="bi bi-lock-fill me-2"></i>Pay Now';
-      btn.disabled=false;
-    }, 2200);
+
+    // Collect guest details passed from previous page
+    const guestName  = params.get('name')    || sessionStorage.getItem('bh_guest_name')  || 'Guest';
+    const guestEmail = params.get('email')   || sessionStorage.getItem('bh_guest_email') || '';
+    const guestPhone = params.get('phone')   || sessionStorage.getItem('bh_guest_phone') || '';
+    const hotelId    = params.get('id')      || sessionStorage.getItem('bh_hotel_id')    || '1';
+    const hotelName  = params.get('hotel')   || sessionStorage.getItem('bh_hotel_name')  || 'Hotel';
+    const specialReq = params.get('special') || sessionStorage.getItem('bh_special_req') || '';
+    const arrivalTime= params.get('arrival') || sessionStorage.getItem('bh_arrival_time')|| '';
+
+    // Determine active payment method
+    const activeTab  = document.querySelector('.pay-tab.active');
+    const payMethod  = activeTab ? activeTab.textContent.trim() : 'UPI';
+
+    const formData = new FormData();
+    formData.append('action',         'save_booking');
+    formData.append('hotel_id',       hotelId);
+    formData.append('hotel_name',     hotelName);
+    formData.append('guest_name',     guestName);
+    formData.append('guest_email',    guestEmail);
+    formData.append('guest_phone',    guestPhone);
+    formData.append('checkin_date',   checkin);
+    formData.append('checkout_date',  checkout);
+    formData.append('nights',         nights);
+    formData.append('guests',         guests);
+    formData.append('room_type',      room.name);
+    formData.append('base_amount',    base);
+    formData.append('discount_amount',disc);
+    formData.append('tax_amount',     tax);
+    formData.append('service_charge', svc);
+    formData.append('coupon_discount',extraDisc);
+    formData.append('total_amount',   total);
+    formData.append('payment_method', payMethod);
+    formData.append('special_requests', specialReq);
+    formData.append('arrival_time',   arrivalTime);
+
+    fetch('payment.php', { method:'POST', body: formData })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          // Store booking id for confirmation page
+          sessionStorage.setItem('bh_last_booking_id', data.booking_id);
+          document.getElementById('confirmEmail').textContent = guestEmail || 'your registered email';
+          document.getElementById('bookingId').textContent    = data.booking_id;
+          document.getElementById('confirmHotelName').textContent = hotelName;
+          new bootstrap.Modal(document.getElementById('confirmModal')).show();
+        } else {
+          alert('Booking failed: ' + (data.error || 'Unknown error. Please try again.'));
+        }
+        btn.innerHTML='<i class="bi bi-lock-fill me-2"></i>Pay Now';
+        btn.disabled=false;
+      })
+      .catch(() => {
+        alert('Network error. Please check your connection and try again.');
+        btn.innerHTML='<i class="bi bi-lock-fill me-2"></i>Pay Now';
+        btn.disabled=false;
+      });
   }
 </script>
 <script src="search-state.js"></script>

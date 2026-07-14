@@ -9,7 +9,7 @@ define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', ''); // Set your local DB password here
 define('DB_NAME', 'bookhotel_db');
-define('DB_PORT', 3307);
+define('DB_PORT', 3306);
 
 // Create connection without selecting database first
 $conn = mysqli_connect(DB_HOST, DB_USER, DB_PASS, null, DB_PORT);
@@ -267,5 +267,54 @@ function initializeHotelsTable() {
 // Initialize database on first run
 initializeDatabase();
 initializeHotelsTable();
+initializeBookingsTable();
+
+/**
+ * Auto-create bookings table
+ */
+function initializeBookingsTable() {
+    global $conn;
+    $sql = "CREATE TABLE IF NOT EXISTS `bookings` (
+      `booking_id`       VARCHAR(20) PRIMARY KEY,
+      `user_id`          INT(11) UNSIGNED DEFAULT NULL,
+      `hotel_id`         INT(11) UNSIGNED DEFAULT NULL,
+      `hotel_name`       VARCHAR(255) NOT NULL,
+      `hotel_city`       VARCHAR(100) DEFAULT NULL,
+      `room_type`        VARCHAR(100) DEFAULT 'Standard Room',
+      `guest_name`       VARCHAR(255) NOT NULL,
+      `guest_email`      VARCHAR(255) NOT NULL,
+      `guest_phone`      VARCHAR(30) DEFAULT NULL,
+      `checkin_date`     DATE NOT NULL,
+      `checkout_date`    DATE NOT NULL,
+      `nights`           TINYINT(3) DEFAULT 1,
+      `guests`           TINYINT(3) DEFAULT 2,
+      `base_amount`      DECIMAL(10,2) DEFAULT 0.00,
+      `discount_amount`  DECIMAL(10,2) DEFAULT 0.00,
+      `tax_amount`       DECIMAL(10,2) DEFAULT 0.00,
+      `service_charge`   DECIMAL(10,2) DEFAULT 200.00,
+      `coupon_discount`  DECIMAL(10,2) DEFAULT 0.00,
+      `total_amount`     DECIMAL(10,2) NOT NULL,
+      `payment_method`   VARCHAR(50) DEFAULT 'UPI',
+      `payment_status`   ENUM('pending','paid','failed','refunded') DEFAULT 'pending',
+      `booking_status`   ENUM('pending','confirmed','checked_in','checked_out','cancelled') DEFAULT 'confirmed',
+      `special_requests` TEXT DEFAULT NULL,
+      `arrival_time`     VARCHAR(30) DEFAULT NULL,
+      `created_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      `updated_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX `idx_user`   (`user_id`),
+      INDEX `idx_hotel`  (`hotel_id`),
+      INDEX `idx_status` (`booking_status`),
+      INDEX `idx_checkin`(`checkin_date`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    mysqli_query($conn, $sql);
+
+    // Add approval_status to hotels if missing
+    $check = mysqli_query($conn, "SHOW COLUMNS FROM hotels LIKE 'approval_status'");
+    if ($check && mysqli_num_rows($check) === 0) {
+        mysqli_query($conn, "ALTER TABLE hotels ADD COLUMN `approval_status` ENUM('pending','approved','rejected') DEFAULT 'approved' AFTER `availability_status`");
+        // Mark existing hotels as approved
+        mysqli_query($conn, "UPDATE hotels SET approval_status='approved' WHERE approval_status IS NULL OR approval_status=''");
+    }
+}
 
 ?>

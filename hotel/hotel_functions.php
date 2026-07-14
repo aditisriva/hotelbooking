@@ -41,7 +41,7 @@ function bhSeedHotels(): void {
 // ── Fetch all active hotels (with optional filters) ───────────────────────
 function bhGetHotels(string $city = '', int $guests = 0, float $maxPrice = 0, float $minRating = 0): array {
     global $conn;
-    $where = ["availability_status = 'active'"];
+    $where = ["availability_status = 'active'", "approval_status = 'approved'"];
     $params = [];
     $types  = '';
 
