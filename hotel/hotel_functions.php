@@ -39,7 +39,7 @@ function bhSeedHotels(): void {
 }
 
 // ── Fetch all active hotels (with optional filters) ───────────────────────
-function bhGetHotels(string $city = '', int $guests = 0, float $maxPrice = 0, float $minRating = 0): array {
+function bhGetHotels(string $city = '', int $guests = 0, float $maxPrice = 0, float $minRating = 0, int $assignedTo = 0): array {
     global $conn;
     $where = ["availability_status = 'active'", "approval_status = 'approved'"];
     $params = [];
@@ -64,6 +64,11 @@ function bhGetHotels(string $city = '', int $guests = 0, float $maxPrice = 0, fl
         $where[] = "rating >= ?";
         $params[] = $minRating;
         $types   .= 'd';
+    }
+    if ($assignedTo > 0) {
+        $where[] = "assigned_to = ?";
+        $params[] = $assignedTo;
+        $types   .= 'i';
     }
 
     $sql = "SELECT * FROM hotels WHERE " . implode(' AND ', $where) . " ORDER BY featured DESC, rating DESC";

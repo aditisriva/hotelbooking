@@ -8,6 +8,21 @@ $amenity_list = ['wifi','pool','breakfast','parking','ac','gym','spa','bar','res
 $cur_amenities = $eh ? array_map('trim', explode(',', $eh['amenities'] ?? '')) : [];
 ?>
 <div class="row g-3">
+  <?php if (isset($users_list) && is_array($users_list)): ?>
+  <div class="col-12 mb-2 pb-3 border-bottom">
+    <label class="ds-lbl text-primary"><i class="bi bi-person-badge me-1"></i>Assign Hotel Manager (Owner)</label>
+    <select class="ds-inp ds-sel" name="assigned_to">
+      <option value="">-- No Manager (Admin Only) --</option>
+      <?php foreach($users_list as $u): ?>
+      <option value="<?php echo $u['id']; ?>" <?php echo ($eh && ($eh['assigned_to'] ?? '') == $u['id']) ? 'selected' : ''; ?>>
+        <?php echo htmlspecialchars($u['first_name'] . ' ' . $u['last_name'] . ' (' . $u['email'] . ')'); ?>
+      </option>
+      <?php endforeach; ?>
+    </select>
+    <small class="text-muted">The selected user will be able to manage this hotel from the Hotel Operations panel.</small>
+  </div>
+  <?php endif; ?>
+
   <div class="col-md-8">
     <label class="ds-lbl">Hotel Name <span class="text-danger">*</span></label>
     <input class="ds-inp" name="hotel_name" required value="<?php echo $v('hotel_name'); ?>" placeholder="e.g. The Grand Palace"/>

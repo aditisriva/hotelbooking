@@ -1,4 +1,5 @@
 <?php
+require_once 'auth_guard.php';
 session_start();
 require_once 'db.php';
 require_once 'hotel_functions.php';
@@ -9,7 +10,7 @@ $msg = ''; $msg_type = 'success';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
-    if ($action === 'add' || $action === 'edit') {
+    if ($action === 'edit') {
         $hotel_id_edit = (int)($_POST['hotel_id'] ?? 0);
         $amenities_arr = isset($_POST['amenities']) && is_array($_POST['amenities']) ? $_POST['amenities'] : [];
         $amenities_str = implode(',', array_map('trim', $amenities_arr));
@@ -50,22 +51,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($data['hotel_name']) || empty($data['city']) || $data['price_per_night'] <= 0) {
             $msg = 'Hotel name, city, and price are required.';
             $msg_type = 'danger';
-        } elseif ($action === 'add') {
-            $new_id = bhInsertHotel($data);
-            $msg = $new_id ? 'Hotel added successfully! ID: ' . $new_id : 'Error adding hotel.';
-            $msg_type = $new_id ? 'success' : 'danger';
         } else {
             $ok = bhUpdateHotel($hotel_id_edit, $data);
             $msg = $ok ? 'Hotel updated successfully!' : 'Error updating hotel.';
             $msg_type = $ok ? 'success' : 'danger';
         }
-    }
-
-    if ($action === 'delete') {
-        $del_id = (int)($_POST['hotel_id'] ?? 0);
-        $ok = $del_id ? bhDeleteHotel($del_id) : false;
-        $msg = $ok ? 'Hotel deleted.' : 'Error deleting hotel.';
-        $msg_type = $ok ? 'success' : 'danger';
     }
 
     if ($action === 'toggle_status') {
@@ -80,8 +70,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// ── Fetch all hotels ──────────────────────────────────────────────────────
-$hotels = bhGetHotels();
+// ── Fetch assigned hotels ───────────────────────────────────────────────────
+$user_id = $_SESSION['user_id'] ?? 0;
+// We pass 0 for guests, maxPrice, minRating, and pass the user_id for assignedTo
+$hotels = bhGetHotels('', 0, 0, 0, $user_id);
 $stats  = bhHotelStats();
 
 // Edit mode: load hotel for editing
@@ -145,38 +137,47 @@ if (isset($_GET['edit'])) {
       <div class="ds-av">AD</div><span class="ds-avname d-none d-sm-block">Admin</span>
       <div class="ds-dropdown" id="dsAvMenu">
         <a href="admin-settings.php" class="ds-drop-item"><i class="bi bi-gear-fill text-primary"></i> Settings</a>
-        <hr class="my-1 mx-2"/><a href="login.php" class="ds-drop-item danger"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
+        <hr class="my-1 mx-2"/><a href="logout.php" class="ds-drop-item danger"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
       </div>
     </div>
   </div>
 </header>
 <main class="ds-main">
 
-<?php if ($msg): ?>
-<div class="alert alert-<?php echo $msg_type; ?> alert-dismissible fade show mx-3 mt-2" role="alert">
-  <i class="bi bi-<?php echo $msg_type==='success'?'check-circle-fill':'exclamation-triangle-fill'; ?> me-2"></i>
-  <?php echo htmlspecialchars($msg); ?>
+<?php
+require_once 'auth_guard.php'; if ($msg): ?>
+<div class="alert alert-<?php
+require_once 'auth_guard.php'; echo $msg_type; ?> alert-dismissible fade show mx-3 mt-2" role="alert">
+  <i class="bi bi-<?php
+require_once 'auth_guard.php'; echo $msg_type==='success'?'check-circle-fill':'exclamation-triangle-fill'; ?> me-2"></i>
+  <?php
+require_once 'auth_guard.php'; echo htmlspecialchars($msg); ?>
   <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
-<?php endif; ?>
+<?php
+require_once 'auth_guard.php'; endif; ?>
 
 <!-- Stat cards -->
 <div class="row g-3 mb-4">
   <div class="col-6 col-lg-3">
     <div class="ds-stat blue"><div class="ds-si"><i class="bi bi-building-fill"></i></div>
-      <div class="ds-sn"><?php echo $stats['total']; ?></div><div class="ds-sl">Total Hotels</div></div>
+      <div class="ds-sn"><?php
+require_once 'auth_guard.php'; echo $stats['total']; ?></div><div class="ds-sl">Total Hotels</div></div>
   </div>
   <div class="col-6 col-lg-3">
     <div class="ds-stat green"><div class="ds-si"><i class="bi bi-check-circle-fill"></i></div>
-      <div class="ds-sn"><?php echo $stats['active']; ?></div><div class="ds-sl">Active</div></div>
+      <div class="ds-sn"><?php
+require_once 'auth_guard.php'; echo $stats['active']; ?></div><div class="ds-sl">Active</div></div>
   </div>
   <div class="col-6 col-lg-3">
     <div class="ds-stat gold"><div class="ds-si"><i class="bi bi-star-fill"></i></div>
-      <div class="ds-sn"><?php echo $stats['featured']; ?></div><div class="ds-sl">Featured</div></div>
+      <div class="ds-sn"><?php
+require_once 'auth_guard.php'; echo $stats['featured']; ?></div><div class="ds-sl">Featured</div></div>
   </div>
   <div class="col-6 col-lg-3">
     <div class="ds-stat purple"><div class="ds-si"><i class="bi bi-geo-alt-fill"></i></div>
-      <div class="ds-sn"><?php echo $stats['cities']; ?></div><div class="ds-sl">Cities</div></div>
+      <div class="ds-sn"><?php
+require_once 'auth_guard.php'; echo $stats['cities']; ?></div><div class="ds-sl">Cities</div></div>
   </div>
 </div>
 
@@ -186,9 +187,10 @@ if (isset($_GET['edit'])) {
   <div class="col-12 col-xl-7">
     <div class="ds-card">
       <div class="ds-ch">
-        <div class="ds-ct"><i class="bi bi-list-ul me-2"></i>All Hotels (<?php echo count($hotels); ?>)</div>
-        <button class="ds-btn prim sm" data-bs-toggle="modal" data-bs-target="#addHotelModal">
-          <i class="bi bi-plus-lg"></i> Add Hotel
+        <div class="ds-ct"><i class="bi bi-list-ul me-2"></i>All Hotels (<?php
+require_once 'auth_guard.php'; echo count($hotels); ?>)</div>
+        <button class="ds-btn prim sm" onclick="alert('Please contact the Main Admin to request hotel changes.')">
+          <i class="bi bi-envelope-fill"></i> Request Hotel Changes
         </button>
       </div>
       <div class="ds-cb p-0">
@@ -212,41 +214,54 @@ if (isset($_GET['edit'])) {
               </tr>
             </thead>
             <tbody>
-              <?php foreach ($hotels as $h):
+              <?php
+require_once 'auth_guard.php'; foreach ($hotels as $h):
                 $himg = bhFirstImage($h['hotel_images'] ?? '', 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=100&q=60');
                 $statusClass = 'status-' . $h['availability_status'];
               ?>
-              <tr class="hotel-row" data-name="<?php echo strtolower($h['hotel_name']); ?>" data-city="<?php echo strtolower($h['city']); ?>">
+              <tr class="hotel-row" data-name="<?php
+require_once 'auth_guard.php'; echo strtolower($h['hotel_name']); ?>" data-city="<?php
+require_once 'auth_guard.php'; echo strtolower($h['city']); ?>">
                 <td class="ps-3">
                   <div class="d-flex align-items-center gap-2">
-                    <img src="<?php echo htmlspecialchars($himg); ?>" class="hotel-thumb" alt=""
+                    <img src="<?php
+require_once 'auth_guard.php'; echo htmlspecialchars($himg); ?>" class="hotel-thumb" alt=""
                          onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=100&q=60'"/>
                     <div>
-                      <div class="fw-700" style="font-size:.875rem"><?php echo htmlspecialchars($h['hotel_name']); ?></div>
-                      <div class="text-muted" style="font-size:.75rem"><?php echo htmlspecialchars($h['property_type']); ?></div>
+                      <div class="fw-700" style="font-size:.875rem"><?php
+require_once 'auth_guard.php'; echo htmlspecialchars($h['hotel_name']); ?></div>
+                      <div class="text-muted" style="font-size:.75rem"><?php
+require_once 'auth_guard.php'; echo htmlspecialchars($h['property_type']); ?></div>
                     </div>
                   </div>
                 </td>
-                <td class="small"><?php echo htmlspecialchars(ucfirst($h['city'])); ?></td>
-                <td class="small fw-700">₹<?php echo number_format($h['price_per_night']); ?></td>
-                <td><span class="badge bg-warning text-dark"><?php echo $h['rating']; ?> ★</span></td>
+                <td class="small"><?php
+require_once 'auth_guard.php'; echo htmlspecialchars(ucfirst($h['city'])); ?></td>
+                <td class="small fw-700">₹<?php
+require_once 'auth_guard.php'; echo number_format($h['price_per_night']); ?></td>
+                <td><span class="badge bg-warning text-dark"><?php
+require_once 'auth_guard.php'; echo $h['rating']; ?> ★</span></td>
                 <td>
-                  <span class="status-dot <?php echo $statusClass; ?>"></span>
-                  <span style="font-size:.8rem"><?php echo ucfirst($h['availability_status']); ?></span>
+                  <span class="status-dot <?php
+require_once 'auth_guard.php'; echo $statusClass; ?>"></span>
+                  <span style="font-size:.8rem"><?php
+require_once 'auth_guard.php'; echo ucfirst($h['availability_status']); ?></span>
                 </td>
                 <td class="text-center">
-                  <a href="?edit=<?php echo $h['hotel_id']; ?>" class="action-btn text-primary" title="Edit"><i class="bi bi-pencil-fill"></i></a>
-                  <button class="action-btn text-danger" title="Delete"
-                    onclick="confirmDelete(<?php echo $h['hotel_id']; ?>,'<?php echo htmlspecialchars(addslashes($h['hotel_name'])); ?>')">
-                    <i class="bi bi-trash-fill"></i>
-                  </button>
-                  <a href="../hotel-details.php?id=<?php echo $h['hotel_id']; ?>" target="_blank" class="action-btn text-success" title="View on site"><i class="bi bi-eye-fill"></i></a>
+                  <a href="?edit=<?php
+require_once 'auth_guard.php'; echo $h['hotel_id']; ?>" class="action-btn text-primary" title="Edit"><i class="bi bi-pencil-fill"></i></a>
+                  <!-- Delete button removed per new workflow -->
+                  <a href="../hotel-details.php?id=<?php
+require_once 'auth_guard.php'; echo $h['hotel_id']; ?>" target="_blank" class="action-btn text-success" title="View on site"><i class="bi bi-eye-fill"></i></a>
                 </td>
               </tr>
-              <?php endforeach; ?>
-              <?php if (empty($hotels)): ?>
+              <?php
+require_once 'auth_guard.php'; endforeach; ?>
+              <?php
+require_once 'auth_guard.php'; if (empty($hotels)): ?>
               <tr><td colspan="6" class="text-center py-4 text-muted">No hotels found. Add your first hotel!</td></tr>
-              <?php endif; ?>
+              <?php
+require_once 'auth_guard.php'; endif; ?>
             </tbody>
           </table>
         </div>
@@ -256,7 +271,8 @@ if (isset($_GET['edit'])) {
 
   <!-- RIGHT: Edit or Quick Stats -->
   <div class="col-12 col-xl-5">
-    <?php if ($edit_hotel): ?>
+    <?php
+require_once 'auth_guard.php'; if ($edit_hotel): ?>
     <!-- Edit Form -->
     <div class="ds-card">
       <div class="ds-ch">
@@ -266,9 +282,12 @@ if (isset($_GET['edit'])) {
       <div class="ds-cb">
         <form method="POST" enctype="multipart/form-data">
           <input type="hidden" name="action" value="edit"/>
-          <input type="hidden" name="hotel_id" value="<?php echo $edit_hotel['hotel_id']; ?>"/>
-          <input type="hidden" name="existing_images" value="<?php echo htmlspecialchars($edit_hotel['hotel_images'] ?? '[]'); ?>"/>
-          <?php $eh = $edit_hotel; include '_hotel_form_fields.php'; ?>
+          <input type="hidden" name="hotel_id" value="<?php
+require_once 'auth_guard.php'; echo $edit_hotel['hotel_id']; ?>"/>
+          <input type="hidden" name="existing_images" value="<?php
+require_once 'auth_guard.php'; echo htmlspecialchars($edit_hotel['hotel_images'] ?? '[]'); ?>"/>
+          <?php
+require_once 'auth_guard.php'; $eh = $edit_hotel; include '_hotel_form_fields.php'; ?>
           <div class="d-flex gap-2 mt-3">
             <button type="submit" class="ds-btn prim flex-grow-1"><i class="bi bi-check-lg me-1"></i> Save Changes</button>
             <a href="admin-hotel-profile.php" class="ds-btn gho">Cancel</a>
@@ -276,14 +295,15 @@ if (isset($_GET['edit'])) {
         </form>
       </div>
     </div>
-    <?php else: ?>
+    <?php
+require_once 'auth_guard.php'; else: ?>
     <!-- Quick stats panel -->
     <div class="ds-card mb-4">
       <div class="ds-ch"><div class="ds-ct"><i class="bi bi-lightning-fill me-2"></i>Quick Actions</div></div>
       <div class="ds-cb">
         <div class="d-grid gap-2">
-          <button class="ds-btn prim" data-bs-toggle="modal" data-bs-target="#addHotelModal">
-            <i class="bi bi-plus-circle-fill me-2"></i>Add New Hotel
+          <button class="ds-btn prim" onclick="alert('Please contact the Main Admin to add a new hotel.')">
+            <i class="bi bi-envelope-fill me-2"></i>Request Hotel Addition
           </button>
           <a href="../hotels.php" target="_blank" class="ds-btn outl">
             <i class="bi bi-eye me-2"></i>View User Hotel Page
@@ -291,82 +311,43 @@ if (isset($_GET['edit'])) {
         </div>
         <hr/>
         <div class="row g-3 mt-1">
-          <?php foreach ($hotels as $h):
+          <?php
+require_once 'auth_guard.php'; foreach ($hotels as $h):
             $si = bhFirstImage($h['hotel_images']??'','https://images.unsplash.com/photo-1566073771259-6a8506099945?w=80&q=60');
           ?>
           <div class="col-12">
             <div class="d-flex align-items-center gap-3 p-2 rounded-3 border">
-              <img src="<?php echo htmlspecialchars($si); ?>" style="width:50px;height:38px;object-fit:cover;border-radius:6px" alt=""
+              <img src="<?php
+require_once 'auth_guard.php'; echo htmlspecialchars($si); ?>" style="width:50px;height:38px;object-fit:cover;border-radius:6px" alt=""
                    onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=80&q=60'"/>
               <div class="flex-grow-1">
-                <div class="fw-700" style="font-size:.8rem"><?php echo htmlspecialchars($h['hotel_name']); ?></div>
-                <div class="text-muted" style="font-size:.72rem"><?php echo ucfirst($h['city']); ?> · ₹<?php echo number_format($h['price_per_night']); ?>/night</div>
+                <div class="fw-700" style="font-size:.8rem"><?php
+require_once 'auth_guard.php'; echo htmlspecialchars($h['hotel_name']); ?></div>
+                <div class="text-muted" style="font-size:.72rem">ID: <?php
+require_once 'auth_guard.php'; echo $h['hotel_id']; ?> · <?php
+require_once 'auth_guard.php'; echo ucfirst($h['approval_status'] ?? 'Approved'); ?></div>
+                <div class="text-primary mt-1" style="font-size:.65rem; font-weight:600;"><i class="bi bi-person-check-fill"></i> Assigned By Admin</div>
               </div>
-              <a href="?edit=<?php echo $h['hotel_id']; ?>" class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size:.75rem">Edit</a>
+              <a href="?edit=<?php
+require_once 'auth_guard.php'; echo $h['hotel_id']; ?>" class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size:.75rem">Edit</a>
             </div>
           </div>
-          <?php endforeach; ?>
+          <?php
+require_once 'auth_guard.php'; endforeach; ?>
         </div>
       </div>
     </div>
-    <?php endif; ?>
+    <?php
+require_once 'auth_guard.php'; endif; ?>
   </div>
 </div><!-- end row -->
 
-<!-- ───────── ADD HOTEL MODAL ───────── -->
-<div class="modal fade ds-modal" id="addHotelModal" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-plus-circle-fill me-2"></i>Add New Hotel</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <form method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="action" value="add"/>
-        <div class="modal-body p-4">
-          <?php $eh = null; include '_hotel_form_fields.php'; ?>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="ds-btn gho" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="ds-btn prim"><i class="bi bi-check-lg me-1"></i> Add Hotel</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- ───────── DELETE CONFIRM MODAL ───────── -->
-<div class="modal fade ds-modal" id="deleteModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header"><h5 class="modal-title text-danger"><i class="bi bi-trash-fill me-2"></i>Delete Hotel</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body p-4">
-        <p>Are you sure you want to delete <strong id="deleteHotelName"></strong>? This action cannot be undone.</p>
-      </div>
-      <div class="modal-footer">
-        <button class="ds-btn gho" data-bs-dismiss="modal">Cancel</button>
-        <form method="POST" style="display:inline">
-          <input type="hidden" name="action" value="delete"/>
-          <input type="hidden" name="hotel_id" id="deleteHotelId"/>
-          <button type="submit" class="ds-btn" style="background:#ef4444;color:#fff"><i class="bi bi-trash-fill me-1"></i>Delete</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
+<!-- Modals removed per new workflow -->
 
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <script src="dashboard.js"></script>
 <script>
-function confirmDelete(id, name) {
-  document.getElementById('deleteHotelId').value = id;
-  document.getElementById('deleteHotelName').textContent = name;
-  new bootstrap.Modal(document.getElementById('deleteModal')).show();
-}
-
 // Live search
 document.getElementById('hotelSearch').addEventListener('input', function() {
   const q = this.value.toLowerCase();
@@ -386,4 +367,5 @@ function previewImage(input, previewId) {
 </script>
 </body>
 </html>
+
 

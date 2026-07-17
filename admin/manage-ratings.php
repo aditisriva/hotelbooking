@@ -1,4 +1,5 @@
 <?php
+require_once 'auth_guard.php';
 $pageTitle = 'Review Moderation';
 $pageSubtitle = 'Guest feedback, content quality, and trust signals';
 include 'partials/header.php';
@@ -15,4 +16,5 @@ include 'partials/header.php';
     <div style="overflow-x:auto"><table class="ds-tbl"><thead><tr><th>Review</th><th>Hotel</th><th>Rating</th><th>Status</th><th>Actions</th></tr></thead><tbody><tr><td>Excellent service and spotless rooms.</td><td>Blue Peak Retreat</td><td>5 ★</td><td><span class="ds-badge confirmed">Published</span></td><td><button class="ds-btn gho sm">Review</button></td></tr><tr><td>Unprofessional staff and misleading photos.</td><td>Grand Horizon</td><td>1 ★</td><td><span class="ds-badge pending">Reported</span></td><td><button class="ds-btn gho sm">Inspect</button></td></tr></tbody></table></div>
   </div>
 </div>
-<?php include 'partials/footer.php'; ?>
+<?php
+require_once 'auth_guard.php'; include 'partials/footer.php'; ?>

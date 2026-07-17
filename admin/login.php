@@ -3,27 +3,17 @@
  * Login Page — bookHotel Authentication
  */
 session_start();
-require_once 'db.php';
+require_once '../hotel/db.php';
 
-// Redirect if already logged in based on role
+// Redirect if already logged in
 if (isset($_SESSION['user_id'])) {
-    $role = $_SESSION['role'] ?? 'user';
-    header('Location: ' . ($role === 'hotel_manager' || $role === 'admin' ? 'admin-dashboard.php' : 'index.php'));
+    header('Location: admin-dashboard.php');
     exit();
 }
 
-$error     = '';
-$success   = '';
+$error   = '';
+$success = '';
 $email_val = '';
-
-// Show access denied message if redirected from auth_guard
-if (isset($_GET['denied'])) {
-    $error = 'Access Denied: This panel is for Hotel Managers only. Please log in with a Hotel Manager account.';
-}
-
-if (isset($_GET['logout'])) {
-    $success = 'You have been logged out successfully.';
-}
 
 // Handle Remember Me cookie
 if (isset($_COOKIE['remember_email'])) {
@@ -77,13 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     setcookie('remember_email', '', time() - 3600, '/');
                 }
 
-                // Role-based redirect: hotel_manager/admin → Hotel Operations panel, user → homepage
-                if ($user['role'] === 'hotel_manager' || $user['role'] === 'admin') {
-                    header('Location: admin-dashboard.php');
-                } else {
-                    // Regular user: redirect to the main hotel browsing site
-                    header('Location: index.php');
-                }
+                header('Location: admin-dashboard.php');
                 exit();
             } else {
                 $error = 'Invalid email/mobile or password.';
@@ -153,12 +137,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <?php if ($error): ?>
       <div class="alert alert-danger" role="alert">
         <i class="fa fa-exclamation-circle me-2"></i><?= htmlspecialchars($error) ?>
-      </div>
-      <?php endif; ?>
-
-      <?php if ($success): ?>
-      <div class="alert alert-success" role="alert">
-        <i class="fa fa-check-circle me-2"></i><?= htmlspecialchars($success) ?>
       </div>
       <?php endif; ?>
 
@@ -247,5 +225,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </script>
 </body>
 </html>
+
 
 

@@ -1,4 +1,5 @@
 <?php
+require_once 'auth_guard.php';
 $pageTitle = 'Top Rated Hotels';
 $pageSubtitle = 'View and manage top rated hotels';
 include 'partials/header.php';
@@ -23,4 +24,6 @@ include 'partials/header.php';
     </div>
   </div>
 </div>
-<?php include 'partials/footer.php'; ?>
+<?php
+require_once 'auth_guard.php'; include 'partials/footer.php'; ?>
+

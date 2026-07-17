@@ -49,6 +49,7 @@ function initializeDatabase() {
         password VARCHAR(255) NOT NULL,
         profile_image VARCHAR(255) DEFAULT NULL,
         status ENUM('active', 'inactive', 'suspended') DEFAULT 'active',
+        role ENUM('user', 'admin', 'hotel_manager') DEFAULT 'user',
         email_verified TINYINT(1) DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -249,7 +250,7 @@ function initializeHotelsTable() {
       `gst_percentage`      DECIMAL(5,2) DEFAULT 12.00,
       `rating`              DECIMAL(3,1) DEFAULT 0.0,
       `star_rating`         TINYINT(1) DEFAULT 3,
-      `property_type`       ENUM('hotel','resort','villa','homestay','boutique-hotel') DEFAULT 'hotel',
+      `property_type`       VARCHAR(50) DEFAULT 'hotel',
       `amenities`           TEXT DEFAULT NULL,
       `capacity`            TINYINT(3) DEFAULT 2,
       `availability_status` ENUM('active','inactive','maintenance') DEFAULT 'active',
@@ -259,13 +260,15 @@ function initializeHotelsTable() {
       `checkout_time`       VARCHAR(10) DEFAULT '11:00',
       `phone`               VARCHAR(30) DEFAULT NULL,
       `email`               VARCHAR(255) DEFAULT NULL,
+      `assigned_to`         INT(11) UNSIGNED DEFAULT NULL,
       `created_at`          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       `updated_at`          TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       INDEX `idx_city`      (`city`),
       INDEX `idx_status`    (`availability_status`),
       INDEX `idx_rating`    (`rating`),
       INDEX `idx_price`     (`price_per_night`),
-      INDEX `idx_featured`  (`featured`)
+      INDEX `idx_featured`  (`featured`),
+      INDEX `idx_assigned`  (`assigned_to`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     mysqli_query($conn, $sql);
 }
@@ -419,6 +422,31 @@ function initializeBookingsTable() {
         mysqli_query($conn, "ALTER TABLE hotels ADD COLUMN `approval_status` ENUM('pending','approved','rejected') DEFAULT 'approved' AFTER `availability_status`");
         // Mark existing hotels as approved
         mysqli_query($conn, "UPDATE hotels SET approval_status='approved' WHERE approval_status IS NULL OR approval_status=''");
+    }
+
+    // Add assigned_to to hotels if missing
+    $checkAssigned = mysqli_query($conn, "SHOW COLUMNS FROM hotels LIKE 'assigned_to'");
+    if ($checkAssigned && mysqli_num_rows($checkAssigned) === 0) {
+        mysqli_query($conn, "ALTER TABLE hotels ADD COLUMN `assigned_to` INT(11) UNSIGNED DEFAULT NULL AFTER `approval_status`");
+        mysqli_query($conn, "ALTER TABLE hotels ADD INDEX `idx_assigned` (`assigned_to`)");
+    }
+
+    // Fix property_type ENUM truncation issues by altering it to VARCHAR
+    mysqli_query($conn, "ALTER TABLE hotels MODIFY COLUMN `property_type` VARCHAR(50) DEFAULT 'hotel'");
+
+    // Add role to users if missing, and extend ENUM to include hotel_manager
+    $checkRole = mysqli_query($conn, "SHOW COLUMNS FROM users LIKE 'role'");
+    if ($checkRole && mysqli_num_rows($checkRole) === 0) {
+        mysqli_query($conn, "ALTER TABLE users ADD COLUMN `role` ENUM('user', 'admin', 'hotel_manager') DEFAULT 'user' AFTER `status`");
+    } else {
+        mysqli_query($conn, "ALTER TABLE users MODIFY COLUMN `role` ENUM('user', 'admin', 'hotel_manager') DEFAULT 'user'");
+    }
+
+    // Insert default admin if it doesn't exist
+    $checkAdmin = mysqli_query($conn, "SELECT id FROM users WHERE email = 'admin@bookhotel.com'");
+    if ($checkAdmin && mysqli_num_rows($checkAdmin) === 0) {
+        $admin_pw = password_hash('admin', PASSWORD_DEFAULT);
+        mysqli_query($conn, "INSERT INTO users (first_name, last_name, email, mobile, password, role, status) VALUES ('Main', 'Admin', 'admin@bookhotel.com', '0000000000', '$admin_pw', 'admin', 'active')");
     }
 }
 

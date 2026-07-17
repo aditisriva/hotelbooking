@@ -1,4 +1,5 @@
 <?php
+require_once 'auth_guard.php';
 $pageTitle = 'Manage Cities';
 $pageSubtitle = 'Manage operational cities for hotels';
 include 'partials/header.php';
@@ -29,4 +30,6 @@ include 'partials/header.php';
     </div>
   </div>
 </div>
-<?php include 'partials/footer.php'; ?>
+<?php
+require_once 'auth_guard.php'; include 'partials/footer.php'; ?>
+

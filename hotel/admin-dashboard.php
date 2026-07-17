@@ -1,4 +1,5 @@
 <?php
+require_once 'auth_guard.php';
 require_once 'db.php';
 require_once 'hotel_functions.php';
 // Assuming logged in manager manages hotel_id = 1
@@ -96,8 +97,10 @@ mysqli_stmt_close($ci_stmt);
       <a href="admin-hotel-profile.php" class="ds-hpill">
         <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=120&q=80" alt="Hotel" />
         <div>
-          <div class="ds-hpill-name"><?php echo htmlspecialchars($hotel_name); ?></div>
-          <div class="ds-hpill-status">● Active · <?php echo htmlspecialchars($hotel_city); ?></div>
+          <div class="ds-hpill-name"><?php
+require_once 'auth_guard.php'; echo htmlspecialchars($hotel_name); ?></div>
+          <div class="ds-hpill-status">● Active · <?php
+require_once 'auth_guard.php'; echo htmlspecialchars($hotel_city); ?></div>
         </div>
       </a>
     </div>
@@ -125,7 +128,7 @@ mysqli_stmt_close($ci_stmt);
           <a href="admin-settings.php" class="ds-drop-item"><i class="bi bi-person-fill text-primary"></i> My Profile</a>
           <a href="admin-settings.php" class="ds-drop-item"><i class="bi bi-gear-fill text-primary"></i> Settings</a>
           <hr class="my-1 mx-2" />
-          <a href="login.php" class="ds-drop-item danger"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
+          <a href="logout.php" class="ds-drop-item danger"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
         </div>
       </div>
     </div>
@@ -137,7 +140,8 @@ mysqli_stmt_close($ci_stmt);
         <div class="d-flex flex-column flex-lg-row justify-content-between gap-4">
           <div>
             <span class="hero-pill"><i class="bi bi-building-check"></i> Hotel Operations Console</span>
-            <h1 class="hero-title">Welcome back. <?php echo htmlspecialchars($hotel_name); ?> is running smoothly for today’s arrivals.</h1>
+            <h1 class="hero-title">Welcome back. <?php
+require_once 'auth_guard.php'; echo htmlspecialchars($hotel_name); ?> is running smoothly for today’s arrivals.</h1>
             <p class="hero-sub">Keep room readiness, guest stay quality, and revenue momentum on track from a refined property operations dashboard.</p>
             <div class="d-flex flex-wrap gap-2 mt-3">
               <a href="admin-bookings.php" class="ds-btn prim"><i class="bi bi-calendar2-check-fill"></i> View Today’s Arrivals</a>
@@ -153,11 +157,16 @@ mysqli_stmt_close($ci_stmt);
       </section>
 
       <div class="row g-3 mb-4">
-        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat blue"><div class="ds-si"><i class="bi bi-door-open-fill"></i></div><div class="ds-sn"><?php echo $total_rooms; ?></div><div class="ds-sl">Total Rooms</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>Available inventory</div></div></div>
-        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat green"><div class="ds-si"><i class="bi bi-calendar2-check-fill"></i></div><div class="ds-sn"><?php echo $booking_count; ?></div><div class="ds-sl">Total Bookings</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>All time</div></div></div>
-        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat gold"><div class="ds-si"><i class="bi bi-person-check-fill"></i></div><div class="ds-sn"><?php echo $checkins_today; ?></div><div class="ds-sl">Check-ins Today</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>Pending arrivals</div></div></div>
-        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat purple"><div class="ds-si"><i class="bi bi-cash-stack"></i></div><div class="ds-sn">₹<?php echo number_format($total_revenue, 2); ?></div><div class="ds-sl">Total Revenue</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>From paid bookings</div></div></div>
-        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat orange"><div class="ds-si"><i class="bi bi-percent"></i></div><div class="ds-sn"><?php echo $occupancy_rate; ?>%</div><div class="ds-sl">Occupancy Rate</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>Based on occupied rooms</div></div></div>
+        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat blue"><div class="ds-si"><i class="bi bi-door-open-fill"></i></div><div class="ds-sn"><?php
+require_once 'auth_guard.php'; echo $total_rooms; ?></div><div class="ds-sl">Total Rooms</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>Available inventory</div></div></div>
+        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat green"><div class="ds-si"><i class="bi bi-calendar2-check-fill"></i></div><div class="ds-sn"><?php
+require_once 'auth_guard.php'; echo $booking_count; ?></div><div class="ds-sl">Total Bookings</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>All time</div></div></div>
+        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat gold"><div class="ds-si"><i class="bi bi-person-check-fill"></i></div><div class="ds-sn"><?php
+require_once 'auth_guard.php'; echo $checkins_today; ?></div><div class="ds-sl">Check-ins Today</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>Pending arrivals</div></div></div>
+        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat purple"><div class="ds-si"><i class="bi bi-cash-stack"></i></div><div class="ds-sn">₹<?php
+require_once 'auth_guard.php'; echo number_format($total_revenue, 2); ?></div><div class="ds-sl">Total Revenue</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>From paid bookings</div></div></div>
+        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat orange"><div class="ds-si"><i class="bi bi-percent"></i></div><div class="ds-sn"><?php
+require_once 'auth_guard.php'; echo $occupancy_rate; ?>%</div><div class="ds-sl">Occupancy Rate</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>Based on occupied rooms</div></div></div>
         <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat red"><div class="ds-si"><i class="bi bi-bell-fill"></i></div><div class="ds-sn">0</div><div class="ds-sl">Pending Requests</div><div class="ds-tr down"><i class="bi bi-arrow-down-short"></i>0 urgent</div></div></div>
       </div>
 
@@ -227,5 +236,6 @@ mysqli_stmt_close($ci_stmt);
   <script>renderRevenue('revChart');renderOcc('occChart');</script>
 </body>
 </html>
+
 
 

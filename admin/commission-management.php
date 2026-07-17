@@ -1,4 +1,5 @@
 <?php
+require_once 'auth_guard.php';
 $pageTitle = 'Commission Management';
 $pageSubtitle = 'Manage platform commissions and payouts';
 include 'partials/header.php';
@@ -55,4 +56,6 @@ include 'partials/header.php';
     </div>
   </div>
 </div>
-<?php include 'partials/footer.php'; ?>
+<?php
+require_once 'auth_guard.php'; include 'partials/footer.php'; ?>
+

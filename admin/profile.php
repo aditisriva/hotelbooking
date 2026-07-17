@@ -1,4 +1,5 @@
 <?php
+require_once 'auth_guard.php';
 $pageTitle = 'Admin Profile';
 $pageSubtitle = 'Personal details, access preferences, and security';
 include 'partials/header.php';
@@ -27,4 +28,5 @@ include 'partials/header.php';
     </div>
   </div>
 </div>
-<?php include 'partials/footer.php'; ?>
+<?php
+require_once 'auth_guard.php'; include 'partials/footer.php'; ?>

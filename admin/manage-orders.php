@@ -1,4 +1,5 @@
 <?php
+require_once 'auth_guard.php';
 require_once '../hotel/db.php';
 
 // Handle status update
@@ -48,25 +49,36 @@ $pageSubtitle='Reservations, cancellations, and booking workflow · Live DB';
 include 'partials/header.php';
 ?>
 <section class="row g-3 mb-3">
-  <div class="col-12 col-md-6 col-xl-3"><div class="ds-stat blue"><div class="ds-si"><i class="bi bi-calendar2-check-fill"></i></div><div class="ds-sn"><?php echo (int)$stats['total']; ?></div><div class="ds-sl">Total Bookings</div></div></div>
-  <div class="col-12 col-md-6 col-xl-3"><div class="ds-stat green"><div class="ds-si"><i class="bi bi-check-circle-fill"></i></div><div class="ds-sn"><?php echo (int)$stats['confirmed']; ?></div><div class="ds-sl">Confirmed</div></div></div>
-  <div class="col-12 col-md-6 col-xl-3"><div class="ds-stat gold"><div class="ds-si"><i class="bi bi-hourglass-split"></i></div><div class="ds-sn"><?php echo (int)$stats['pending']; ?></div><div class="ds-sl">Pending</div></div></div>
-  <div class="col-12 col-md-6 col-xl-3"><div class="ds-stat red"><div class="ds-si"><i class="bi bi-x-circle-fill"></i></div><div class="ds-sn"><?php echo (int)$stats['cancelled']; ?></div><div class="ds-sl">Cancelled</div></div></div>
+  <div class="col-12 col-md-6 col-xl-3"><div class="ds-stat blue"><div class="ds-si"><i class="bi bi-calendar2-check-fill"></i></div><div class="ds-sn"><?php
+require_once 'auth_guard.php'; echo (int)$stats['total']; ?></div><div class="ds-sl">Total Bookings</div></div></div>
+  <div class="col-12 col-md-6 col-xl-3"><div class="ds-stat green"><div class="ds-si"><i class="bi bi-check-circle-fill"></i></div><div class="ds-sn"><?php
+require_once 'auth_guard.php'; echo (int)$stats['confirmed']; ?></div><div class="ds-sl">Confirmed</div></div></div>
+  <div class="col-12 col-md-6 col-xl-3"><div class="ds-stat gold"><div class="ds-si"><i class="bi bi-hourglass-split"></i></div><div class="ds-sn"><?php
+require_once 'auth_guard.php'; echo (int)$stats['pending']; ?></div><div class="ds-sl">Pending</div></div></div>
+  <div class="col-12 col-md-6 col-xl-3"><div class="ds-stat red"><div class="ds-si"><i class="bi bi-x-circle-fill"></i></div><div class="ds-sn"><?php
+require_once 'auth_guard.php'; echo (int)$stats['cancelled']; ?></div><div class="ds-sl">Cancelled</div></div></div>
 </section>
 
 <div class="ds-card">
   <div class="ds-ch">
-    <div class="ds-ct"><i class="bi bi-calendar2-check-fill"></i> Reservation Queue (<?php echo count($bookings); ?>)</div>
+    <div class="ds-ct"><i class="bi bi-calendar2-check-fill"></i> Reservation Queue (<?php
+require_once 'auth_guard.php'; echo count($bookings); ?>)</div>
     <div class="d-flex flex-wrap gap-2">
       <form method="GET" class="d-flex gap-2 flex-wrap">
         <div class="ds-sw"><i class="bi bi-search ds-si-ic"></i>
-          <input class="ds-inp search" name="q" placeholder="Search bookings..." value="<?php echo htmlspecialchars($fs); ?>" style="width:200px"/>
+          <input class="ds-inp search" name="q" placeholder="Search bookings..." value="<?php
+require_once 'auth_guard.php'; echo htmlspecialchars($fs); ?>" style="width:200px"/>
         </div>
         <select class="ds-inp ds-sel" name="status" style="width:140px" onchange="this.form.submit()">
           <option value="">All</option>
-          <?php foreach(['pending','confirmed','checked_in','checked_out','cancelled'] as $s): ?>
-          <option value="<?php echo $s;?>" <?php echo $fstat===$s?'selected':'';?>><?php echo ucwords(str_replace('_',' ',$s));?></option>
-          <?php endforeach; ?>
+          <?php
+require_once 'auth_guard.php'; foreach(['pending','confirmed','checked_in','checked_out','cancelled'] as $s): ?>
+          <option value="<?php
+require_once 'auth_guard.php'; echo $s;?>" <?php
+require_once 'auth_guard.php'; echo $fstat===$s?'selected':'';?>><?php
+require_once 'auth_guard.php'; echo ucwords(str_replace('_',' ',$s));?></option>
+          <?php
+require_once 'auth_guard.php'; endforeach; ?>
         </select>
         <button type="submit" class="ds-btn prim sm"><i class="bi bi-search"></i></button>
         <a href="bookings.php" class="ds-btn gho sm">Clear</a>
@@ -74,13 +86,16 @@ include 'partials/header.php';
     </div>
   </div>
   <div class="ds-cb">
-    <?php if(empty($bookings)): ?>
+    <?php
+require_once 'auth_guard.php'; if(empty($bookings)): ?>
     <div class="text-center py-5">
       <i class="bi bi-calendar-x" style="font-size:3rem;color:#cbd5e1"></i>
       <div class="fw-700 mt-3 text-muted">No bookings found</div>
-      <div class="text-muted small"><?php echo $fs||$fstat?'Try clearing filters.':'Bookings will appear once users complete payment.';?></div>
+      <div class="text-muted small"><?php
+require_once 'auth_guard.php'; echo $fs||$fstat?'Try clearing filters.':'Bookings will appear once users complete payment.';?></div>
     </div>
-    <?php else: ?>
+    <?php
+require_once 'auth_guard.php'; else: ?>
     <div style="overflow-x:auto">
       <table class="ds-tbl">
         <thead><tr>
@@ -89,40 +104,61 @@ include 'partials/header.php';
           <th>Payment</th><th>Status</th><th>Actions</th>
         </tr></thead>
         <tbody>
-        <?php foreach($bookings as $b):
+        <?php
+require_once 'auth_guard.php'; foreach($bookings as $b):
           $sc=['confirmed'=>'confirmed','pending'=>'pending','checked_in'=>'checkin','checked_out'=>'checkout','cancelled'=>'cancelled'];
           $pc=$b['payment_status']==='paid'?'confirmed':($b['payment_status']==='failed'?'cancelled':'pending');
         ?>
           <tr>
-            <td><span class="fw-700 small" style="color:#1a56db"><?php echo htmlspecialchars($b['booking_id']);?></span></td>
+            <td><span class="fw-700 small" style="color:#1a56db"><?php
+require_once 'auth_guard.php'; echo htmlspecialchars($b['booking_id']);?></span></td>
             <td>
-              <div class="fw-600 small"><?php echo htmlspecialchars($b['guest_name']);?></div>
-              <div style="font-size:.72rem;color:#64748b"><?php echo htmlspecialchars($b['guest_email']);?></div>
+              <div class="fw-600 small"><?php
+require_once 'auth_guard.php'; echo htmlspecialchars($b['guest_name']);?></div>
+              <div style="font-size:.72rem;color:#64748b"><?php
+require_once 'auth_guard.php'; echo htmlspecialchars($b['guest_email']);?></div>
             </td>
             <td>
-              <div class="fw-600 small"><?php echo htmlspecialchars($b['hotel_name']);?></div>
-              <div style="font-size:.72rem;color:#64748b"><?php echo htmlspecialchars(ucfirst($b['hotel_city']??''));?></div>
+              <div class="fw-600 small"><?php
+require_once 'auth_guard.php'; echo htmlspecialchars($b['hotel_name']);?></div>
+              <div style="font-size:.72rem;color:#64748b"><?php
+require_once 'auth_guard.php'; echo htmlspecialchars(ucfirst($b['hotel_city']??''));?></div>
             </td>
-            <td class="small"><?php echo htmlspecialchars($b['room_type']);?></td>
-            <td class="small fw-600"><?php echo date('d M Y',strtotime($b['checkin_date']));?></td>
-            <td class="small fw-600"><?php echo date('d M Y',strtotime($b['checkout_date']));?></td>
-            <td class="fw-700 small">₹<?php echo number_format((float)$b['total_amount']);?></td>
-            <td><span class="ds-badge <?php echo $pc;?>"><?php echo ucfirst($b['payment_status']);?></span></td>
+            <td class="small"><?php
+require_once 'auth_guard.php'; echo htmlspecialchars($b['room_type']);?></td>
+            <td class="small fw-600"><?php
+require_once 'auth_guard.php'; echo date('d M Y',strtotime($b['checkin_date']));?></td>
+            <td class="small fw-600"><?php
+require_once 'auth_guard.php'; echo date('d M Y',strtotime($b['checkout_date']));?></td>
+            <td class="fw-700 small">₹<?php
+require_once 'auth_guard.php'; echo number_format((float)$b['total_amount']);?></td>
+            <td><span class="ds-badge <?php
+require_once 'auth_guard.php'; echo $pc;?>"><?php
+require_once 'auth_guard.php'; echo ucfirst($b['payment_status']);?></span></td>
             <td>
               <select class="ds-inp ds-sel" style="font-size:.75rem;padding:2px 6px"
-                onchange="updateStatus('<?php echo $b['booking_id'];?>',this.value,this)">
-                <?php foreach(['pending','confirmed','checked_in','checked_out','cancelled'] as $s):?>
-                <option value="<?php echo $s;?>" <?php echo $b['booking_status']===$s?'selected':'';?>><?php echo ucwords(str_replace('_',' ',$s));?></option>
-                <?php endforeach;?>
+                onchange="updateStatus('<?php
+require_once 'auth_guard.php'; echo $b['booking_id'];?>',this.value,this)">
+                <?php
+require_once 'auth_guard.php'; foreach(['pending','confirmed','checked_in','checked_out','cancelled'] as $s):?>
+                <option value="<?php
+require_once 'auth_guard.php'; echo $s;?>" <?php
+require_once 'auth_guard.php'; echo $b['booking_status']===$s?'selected':'';?>><?php
+require_once 'auth_guard.php'; echo ucwords(str_replace('_',' ',$s));?></option>
+                <?php
+require_once 'auth_guard.php'; endforeach;?>
               </select>
             </td>
-            <td><button class="ds-btn gho sm" onclick='viewBooking(<?php echo json_encode($b);?>)'><i class="bi bi-eye-fill"></i> Details</button></td>
+            <td><button class="ds-btn gho sm" onclick='viewBooking(<?php
+require_once 'auth_guard.php'; echo json_encode($b);?>)'><i class="bi bi-eye-fill"></i> Details</button></td>
           </tr>
-        <?php endforeach;?>
+        <?php
+require_once 'auth_guard.php'; endforeach;?>
         </tbody>
       </table>
     </div>
-    <?php endif;?>
+    <?php
+require_once 'auth_guard.php'; endif;?>
   </div>
 </div>
 
@@ -172,4 +208,6 @@ function viewBooking(b){
   new bootstrap.Modal(document.getElementById('detailModal')).show();
 }
 </script>
-<?php include 'partials/footer.php'; ?>
+<?php
+require_once 'auth_guard.php'; include 'partials/footer.php'; ?>
+

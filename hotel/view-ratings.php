@@ -37,7 +37,7 @@
         <a href="admin-settings.php" class="ds-drop-item"><i class="bi bi-person-fill text-primary"></i> My Profile</a>
         <a href="admin-settings.php" class="ds-drop-item"><i class="bi bi-gear-fill text-primary"></i> Settings</a>
         <hr class="my-1 mx-2"/>
-        <a href="login.php" class="ds-drop-item danger"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
+        <a href="logout.php" class="ds-drop-item danger"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
       </div>
     </div>
   </div>
@@ -229,5 +229,6 @@ function filterRevs(f){
 }
 </script>
 </body></html>
+
 
 

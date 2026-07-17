@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Support login by email OR mobile
         $identifier_safe = sanitize($identifier);
-        $sql = "SELECT id, first_name, last_name, email, password, status
+        $sql = "SELECT id, first_name, last_name, email, password, status, role
                 FROM users
                 WHERE email = '$identifier_safe' OR mobile = '$identifier_safe'
                 LIMIT 1";
@@ -54,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['user_name']      = $user['first_name'] . ' ' . $user['last_name'];
                 $_SESSION['user_email']     = $user['email'];
                 $_SESSION['user_firstname'] = $user['first_name'];
+                $_SESSION['role']           = $user['role'];
 
                 // Update last login
                 $uid = (int)$user['id'];
