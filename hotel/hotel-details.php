@@ -1,9 +1,9 @@
-﻿<?php
+<?php
 require_once 'db.php';
 require_once 'hotel_functions.php';
 require_once 'pricing.php';
 
-// ── Fetch hotel from DB ──────────────────────────────────────────────────
+// -- Fetch hotel from DB --------------------------------------------------
 $hotel_id_req = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $hotel = $hotel_id_req ? bhGetHotelById($hotel_id_req) : null;
 
@@ -14,10 +14,10 @@ if (!$hotel) {
 }
 
 if (!$hotel) {
-    die('<div style="text-align:center;padding:4rem;font-family:sans-serif"><h2>Hotel not found</h2><a href="hotels.php">← Browse hotels</a></div>');
+    die('<div style="text-align:center;padding:4rem;font-family:sans-serif"><h2>Hotel not found</h2><a href="hotels.php">? Browse hotels</a></div>');
 }
 
-// ── Extract hotel data ───────────────────────────────────────────────────
+// -- Extract hotel data ---------------------------------------------------
 $hotel_id   = (int)$hotel['hotel_id'];
 $hotel_name = $hotel['hotel_name'];
 $hotel_city = ucfirst($hotel['city']);
@@ -36,7 +36,7 @@ $hotel_img  = $hotel_images_arr ? $hotel_images_arr[0] : 'https://images.unsplas
 $checkin_time  = $hotel['checkin_time'] ?? '14:00';
 $checkout_time = $hotel['checkout_time'] ?? '11:00';
 
-// ── Booking params from URL ───────────────────────────────────────────────
+// -- Booking params from URL -----------------------------------------------
 $city_hd      = isset($_GET['city'])     ? trim($_GET['city'])     : strtolower($hotel['city']);
 $city_hd_lbl  = $hotel_city;
 $checkin_raw  = isset($_GET['checkin'])  ? trim($_GET['checkin'])  : '';
@@ -67,7 +67,7 @@ $id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) :
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a56db'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='18' font-family='system-ui' fill='%23f59e0b'%3E&#x1F3E8;%3C/text%3E%3C/svg%3E"/>
-  <title><?php echo htmlspecialchars($hotel_name); ?> – bookHotel</title>
+  <title><?php echo htmlspecialchars($hotel_name); ?> � bookHotel</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" crossorigin="anonymous"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" crossorigin="anonymous"/>
@@ -88,7 +88,7 @@ $id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) :
     <div class="collapse navbar-collapse" id="navMenu">
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
         <li class="nav-item"><a class="nav-link active" href="hotels.php">Hotels</a></li>
-        <li class="nav-item"><a class="nav-link" href="index.php#destinations">Destinations</a></li>
+        <li class="nav-item"><a class="nav-link" href="destinations.php">Destinations</a></li>
         <li class="nav-item"><a class="nav-link" href="my-bookings.php">My Bookings</a></li>
         <li class="nav-item"><a class="nav-link" href="contact.php">Contact</a></li>
         <li class="nav-item ms-lg-3">
@@ -259,7 +259,7 @@ $id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) :
           <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
             <div>
               <div class="d-flex gap-2 align-items-center mb-2">
-                <span class="text-warning">★★★★★</span>
+                <span class="text-warning">?????</span>
                 <span class="badge bg-warning text-dark">Luxury</span>
                 <span class="badge bg-success">Free Cancellation</span>
               </div>
@@ -377,7 +377,7 @@ $id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) :
                   <div class="p-3 h-100 d-flex flex-column justify-content-between">
                     <div>
                       <h6 class="fw-700 mb-1">Deluxe Heritage Room</h6>
-                      <p class="text-muted small mb-2">30 m² · King Bed · City View · Non-smoking</p>
+                      <p class="text-muted small mb-2">30 m� � King Bed � City View � Non-smoking</p>
                       <div class="d-flex flex-wrap gap-1 mb-2">
                         <span class="amenity-tag"><i class="bi bi-wifi"></i> WiFi</span>
                         <span class="amenity-tag"><i class="bi bi-cup-hot"></i> Breakfast</span>
@@ -389,6 +389,11 @@ $id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) :
                         <?php bhPriceBlock($hotel_price, $hotel_orig); ?>
                       </div>
                       <a href="review-booking.php?room=deluxe&id=<?php echo $hotel_id; ?><?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-4">Select</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="room-card">
               <div class="row g-0">
                 <div class="col-4 col-md-3">
@@ -398,7 +403,7 @@ $id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) :
                   <div class="p-3 h-100 d-flex flex-column justify-content-between">
                     <div>
                       <h6 class="fw-700 mb-1">Royal Suite</h6>
-                      <p class="text-muted small mb-2">65 m² · King Bed · Fort View · Balcony</p>
+                      <p class="text-muted small mb-2">65 m� � King Bed � Fort View � Balcony</p>
                       <div class="d-flex flex-wrap gap-1 mb-2">
                         <span class="amenity-tag"><i class="bi bi-wifi"></i> WiFi</span>
                         <span class="amenity-tag"><i class="bi bi-cup-hot"></i> Breakfast</span>
@@ -426,7 +431,7 @@ $id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) :
                   <div class="p-3 h-100 d-flex flex-column justify-content-between">
                     <div>
                       <h6 class="fw-700 mb-1">Maharaja Presidential Suite</h6>
-                      <p class="text-muted small mb-2">120 m² · Private Terrace · Panoramic View</p>
+                      <p class="text-muted small mb-2">120 m� � Private Terrace � Panoramic View</p>
                       <div class="d-flex flex-wrap gap-1 mb-2">
                         <span class="amenity-tag"><i class="bi bi-wifi"></i> WiFi</span>
                         <span class="amenity-tag"><i class="bi bi-cup-hot"></i> All Meals</span>
@@ -502,52 +507,52 @@ $id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) :
           <div class="row g-3">
             <div class="col-12 col-md-6">
               <div class="review-card p-3 h-100">
-                <div class="d-flex gap-1 text-warning mb-2 small">★★★★★</div>
-                <p class="text-muted small mb-3">"Absolutely breathtaking property. The architecture, the food, the service — everything was flawless. Felt like a true Maharaja. Will definitely return!"</p>
+                <div class="d-flex gap-1 text-warning mb-2 small">?????</div>
+                <p class="text-muted small mb-3">"Absolutely breathtaking property. The architecture, the food, the service � everything was flawless. Felt like a true Maharaja. Will definitely return!"</p>
                 <div class="d-flex align-items-center gap-2">
                   <img src="https://i.pravatar.cc/40?img=5" class="rounded-circle" width="36" height="36" alt="Guest"/>
                   <div>
                     <div class="fw-700 small">Priya Sharma</div>
-                    <div class="text-muted" style="font-size:0.72rem">Mumbai · June 2026</div>
+                    <div class="text-muted" style="font-size:0.72rem">Mumbai � June 2026</div>
                   </div>
                 </div>
               </div>
             </div>
             <div class="col-12 col-md-6">
               <div class="review-card p-3 h-100">
-                <div class="d-flex gap-1 text-warning mb-2 small">★★★★★</div>
+                <div class="d-flex gap-1 text-warning mb-2 small">?????</div>
                 <p class="text-muted small mb-3">"The rooftop view of Amber Fort at sunset is something I will never forget. The Royal Suite was absolutely spectacular. Worth every rupee!"</p>
                 <div class="d-flex align-items-center gap-2">
                   <img src="https://i.pravatar.cc/40?img=12" class="rounded-circle" width="36" height="36" alt="Guest"/>
                   <div>
                     <div class="fw-700 small">Rahul Verma</div>
-                    <div class="text-muted" style="font-size:0.72rem">Delhi · May 2026</div>
+                    <div class="text-muted" style="font-size:0.72rem">Delhi � May 2026</div>
                   </div>
                 </div>
               </div>
             </div>
             <div class="col-12 col-md-6">
               <div class="review-card p-3 h-100">
-                <div class="d-flex gap-1 text-warning mb-2 small">★★★★⭐</div>
+                <div class="d-flex gap-1 text-warning mb-2 small">?????</div>
                 <p class="text-muted small mb-3">"The heritage tour organised by the hotel was exceptional. Our guide was knowledgeable and the haveli's history is fascinating. Excellent breakfast spread!"</p>
                 <div class="d-flex align-items-center gap-2">
                   <img src="https://i.pravatar.cc/40?img=21" class="rounded-circle" width="36" height="36" alt="Guest"/>
                   <div>
                     <div class="fw-700 small">Ananya Kapoor</div>
-                    <div class="text-muted" style="font-size:0.72rem">Bangalore · April 2026</div>
+                    <div class="text-muted" style="font-size:0.72rem">Bangalore � April 2026</div>
                   </div>
                 </div>
               </div>
             </div>
             <div class="col-12 col-md-6">
               <div class="review-card p-3 h-100">
-                <div class="d-flex gap-1 text-warning mb-2 small">★★★★★</div>
+                <div class="d-flex gap-1 text-warning mb-2 small">?????</div>
                 <p class="text-muted small mb-3">"Booked the Maharaja Suite for our anniversary. The butler service and personalised attention was beyond 5-star. The spa treatments are world-class."</p>
                 <div class="d-flex align-items-center gap-2">
                   <img src="https://i.pravatar.cc/40?img=33" class="rounded-circle" width="36" height="36" alt="Guest"/>
                   <div>
                     <div class="fw-700 small">Vikram Singh</div>
-                    <div class="text-muted" style="font-size:0.72rem">Pune · March 2026</div>
+                    <div class="text-muted" style="font-size:0.72rem">Pune � March 2026</div>
                   </div>
                 </div>
               </div>
@@ -601,18 +606,18 @@ $id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) :
                 $disc      = round($room_cost * 0.35);
                 $grand     = $room_cost - $disc + $tax_amt + SERVICE_CHARGE;
               ?>
-              <div class="row-item"><span class="label">₹<?php echo number_format($hotel_price); ?> × <?php echo $nights; ?> night<?php echo $nights>1?'s':''; ?></span><span class="value">₹<?php echo number_format($room_cost); ?></span></div>
-              <div class="row-item"><span class="label" style="color:#059669">Discount</span><span class="value" style="color:#059669">− ₹<?php echo number_format($disc); ?></span></div>
-              <div class="row-item"><span class="label">GST (12%)</span><span class="value">₹<?php echo number_format($tax_amt); ?></span></div>
-              <div class="row-item"><span class="label">Service Charge</span><span class="value">₹200</span></div>
-              <div class="row-item total"><span>Total Payable</span><span class="value">₹<?php echo number_format($grand); ?></span></div>
-              <div class="savings-row"><i class="bi bi-piggy-bank-fill"></i>You save ₹<?php echo number_format($disc); ?> on this booking!</div>
+              <div class="row-item"><span class="label">?<?php echo number_format($hotel_price); ?> � <?php echo $nights; ?> night<?php echo $nights>1?'s':''; ?></span><span class="value">?<?php echo number_format($room_cost); ?></span></div>
+              <div class="row-item"><span class="label" style="color:#059669">Discount</span><span class="value" style="color:#059669">- ?<?php echo number_format($disc); ?></span></div>
+              <div class="row-item"><span class="label">GST (12%)</span><span class="value">?<?php echo number_format($tax_amt); ?></span></div>
+              <div class="row-item"><span class="label">Service Charge</span><span class="value">?200</span></div>
+              <div class="row-item total"><span>Total Payable</span><span class="value">?<?php echo number_format($grand); ?></span></div>
+              <div class="savings-row"><i class="bi bi-piggy-bank-fill"></i>You save ?<?php echo number_format($disc); ?> on this booking!</div>
             </div>
             <!-- CTA -->
             <a href="review-booking.php?room=deluxe&id=<?php echo $hotel_id; ?><?php echo $booking_qs; ?>" class="btn book-now-btn w-100 fw-700 py-3 mb-2">
               <i class="bi bi-calendar2-check me-2"></i>Book Now
             </a>
-            <p class="text-muted text-center" style="font-size:.75rem"><i class="bi bi-shield-check text-success me-1"></i>Secure booking · No hidden charges</p>
+            <p class="text-muted text-center" style="font-size:.75rem"><i class="bi bi-shield-check text-success me-1"></i>Secure booking � No hidden charges</p>
           </div>
         </div>
       </div><!-- end right col -->
@@ -749,7 +754,7 @@ $id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) :
         <h6 class="fw-700 mb-3">Explore</h6>
         <ul class="list-unstyled footer-links">
           <li><a href="hotels.php">Hotels</a></li>
-          <li><a href="#">Destinations</a></li>
+          <li><a href="destinations.php">Destinations</a></li>
           <li><a href="my-bookings.php">My Bookings</a></li>
           <li><a href="#">Car Rentals</a></li>
         </ul>
@@ -766,7 +771,7 @@ $id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) :
     </div>
     <hr class="border-secondary"/>
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
-      <p class="text-white-50 small mb-0">© 2026 bookHotel Technologies Pvt. Ltd. All rights reserved.</p>
+      <p class="text-white-50 small mb-0">� 2026 bookHotel Technologies Pvt. Ltd. All rights reserved.</p>
       <div class="d-flex gap-2">
         <img src="https://img.shields.io/badge/Visa-1A1F71?style=flat&logo=visa&logoColor=white" height="20" alt="Visa"/>
         <img src="https://img.shields.io/badge/Mastercard-EB001B?style=flat&logo=mastercard&logoColor=white" height="20" alt="Mastercard"/>
@@ -784,7 +789,7 @@ $id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) :
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <script src="navbar.js"></script>
 <script>
-// State — persisted from URL
+// State � persisted from URL
 var _hdCity    = "<?php echo addslashes($city_hd_lbl ? $city_hd_lbl . ', India' : ''); ?>";
 var _hdCheckin = "<?php echo addslashes($checkin_raw); ?>";
 var _hdCheckout= "<?php echo addslashes($checkout_raw); ?>";
@@ -849,3 +854,4 @@ function hdDoSearch() { hdOpenModal("city"); }
 <script src="search-state.js"></script>
 </body>
 </html>
+

@@ -130,3 +130,4 @@ $cur_amenities = $eh ? array_map('trim', explode(',', $eh['amenities'] ?? '')) :
     </div>
   </div>
 </div>
+

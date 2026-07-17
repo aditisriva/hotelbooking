@@ -104,3 +104,4 @@ function bhPriceBreakdown(float $price, int $nights = 1, float $discount = 0, fl
     echo '</div>';
 }
 ?>
+

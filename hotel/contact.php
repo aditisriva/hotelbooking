@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 require_once 'db.php';
 
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Contact Us — bookHotel</title>
+  <title>Contact Us � bookHotel</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a56db'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='18' font-family='system-ui' fill='%23f59e0b'%3E&#x1F3E8;%3C/text%3E%3C/svg%3E"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" crossorigin="anonymous"/>
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="collapse navbar-collapse" id="navMenu">
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
         <li class="nav-item"><a class="nav-link" href="hotels.php">Hotels</a></li>
-        <li class="nav-item"><a class="nav-link" href="index.php#destinations">Destinations</a></li>
+        <li class="nav-item"><a class="nav-link" href="destinations.php">Destinations</a></li>
         <li class="nav-item"><a class="nav-link" href="my-bookings.php">My Bookings</a></li>
         <li class="nav-item"><a class="nav-link active" href="contact.php" class="nav-link active">Contact</a></li>
         <li class="nav-item ms-lg-3" id="navAuthSlot">
@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="ct-hero__content">
       <span class="ct-hero__badge"><i class="bi bi-headset me-2"></i>We're Here For You</span>
       <h1 class="ct-hero__title">Contact Us</h1>
-      <p class="ct-hero__sub">We're here to help you with your hotel bookings. Reach out anytime — our team is available 24/7.</p>
+      <p class="ct-hero__sub">We're here to help you with your hotel bookings. Reach out anytime � our team is available 24/7.</p>
     </div>
   </div>
 </section>
@@ -107,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </div>
           <h6 class="ct-info-card__title">Call Us</h6>
           <p class="ct-info-card__val">+91 9876543210</p>
-          <p class="ct-info-card__hint">Mon – Sun, 24 × 7</p>
+          <p class="ct-info-card__hint">Mon � Sun, 24 � 7</p>
         </div>
       </div>
 
@@ -129,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </div>
           <h6 class="ct-info-card__title">Visit Us</h6>
           <p class="ct-info-card__val">Lucknow, Uttar Pradesh</p>
-          <p class="ct-info-card__hint">India — 226001</p>
+          <p class="ct-info-card__hint">India � 226001</p>
         </div>
       </div>
 
@@ -211,7 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <div class="col-12">
                 <button type="submit" class="ct-submit-btn" id="ctSubmitBtn">
                   <span class="ct-submit-btn__text"><i class="bi bi-send-fill me-2"></i>Send Message</span>
-                  <span class="ct-submit-btn__loading d-none"><span class="spinner-border spinner-border-sm me-2"></span>Sending…</span>
+                  <span class="ct-submit-btn__loading d-none"><span class="spinner-border spinner-border-sm me-2"></span>Sending�</span>
                 </button>
               </div>
 
@@ -236,13 +236,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <li><i class="bi bi-check-circle-fill"></i>Have your Booking ID ready for faster support</li>
             <li><i class="bi bi-check-circle-fill"></i>Check our FAQ below for instant answers</li>
             <li><i class="bi bi-check-circle-fill"></i>For urgent help, call us directly at +91 9876543210</li>
-            <li><i class="bi bi-check-circle-fill"></i>Refund queries are usually resolved in 5–7 business days</li>
+            <li><i class="bi bi-check-circle-fill"></i>Refund queries are usually resolved in 5�7 business days</li>
           </ul>
           <div class="ct-response-badge">
             <i class="bi bi-lightning-charge-fill"></i>
             <div>
               <div class="fw-700 small" style="color:#1a1a2e">Average Response Time</div>
-              <div class="text-muted small">Under 2 hours · 24/7 support</div>
+              <div class="text-muted small">Under 2 hours � 24/7 support</div>
             </div>
           </div>
         </div>
@@ -343,7 +343,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </h2>
             <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
               <div class="ct-accordion__body accordion-body">
-                Once a cancellation is confirmed, refunds are processed within <strong>5–7 business days</strong> to your original payment method. UPI and wallet refunds are usually faster (1–3 days). You'll receive an email confirmation once the refund is initiated.
+                Once a cancellation is confirmed, refunds are processed within <strong>5�7 business days</strong> to your original payment method. UPI and wallet refunds are usually faster (1�3 days). You'll receive an email confirmation once the refund is initiated.
               </div>
             </div>
           </div>
@@ -394,7 +394,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="ct-map-pin">
           <i class="bi bi-building-fill"></i>
         </div>
-        <div class="ct-map-label">bookHotel HQ · Lucknow, UP</div>
+        <div class="ct-map-label">bookHotel HQ � Lucknow, UP</div>
       </div>
       <iframe
         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d114514.36220842898!2d80.84681729570312!3d26.846693999999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x399bfd991f32b16b%3A0x93ccba8909978be7!2sLucknow%2C%20Uttar%20Pradesh!5e0!3m2!1sen!2sin!4v1720000000000!5m2!1sen!2sin"
@@ -509,7 +509,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h6 class="fw-700 mb-3">Explore</h6>
         <ul class="list-unstyled footer-links">
           <li><a href="hotels.php">Hotels</a></li>
-          <li><a href="#">Destinations</a></li>
+          <li><a href="destinations.php">Destinations</a></li>
           <li><a href="my-bookings.php">My Bookings</a></li>
           <li><a href="#">Car Rentals</a></li>
         </ul>
@@ -526,7 +526,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     <hr class="border-secondary"/>
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
-      <p class="text-white-50 small mb-0">© 2026 bookHotel Technologies Pvt. Ltd. All rights reserved.</p>
+      <p class="text-white-50 small mb-0">� 2026 bookHotel Technologies Pvt. Ltd. All rights reserved.</p>
       <div class="d-flex gap-2">
         <img src="https://img.shields.io/badge/Visa-1A1F71?style=flat&logo=visa&logoColor=white" height="20" alt="Visa"/>
         <img src="https://img.shields.io/badge/Mastercard-EB001B?style=flat&logo=mastercard&logoColor=white" height="20" alt="Mastercard"/>
@@ -623,4 +623,5 @@ form.querySelectorAll('.ct-input').forEach(el => {
 </script>
 </body>
 </html>
+
 

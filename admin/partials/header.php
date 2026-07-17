@@ -30,14 +30,18 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       <a href="admin-dashboard.php" class="ds-link <?= $currentPage === 'admin-dashboard.php' ? 'active' : '' ?>"><i class="bi bi-grid-fill"></i> Dashboard</a>
       
       <div class="ds-sec">Management</div>
-      <a href="users.php" class="ds-link <?= $currentPage === 'users.php' ? 'active' : '' ?>"><i class="bi bi-people-fill"></i> Users</a>
-      <a href="managers.php" class="ds-link <?= $currentPage === 'managers.php' ? 'active' : '' ?>"><i class="bi bi-person-badge-fill"></i> Managers</a>
-      <a href="hotels.php" class="ds-link <?= $currentPage === 'hotels.php' ? 'active' : '' ?>"><i class="bi bi-building"></i> Hotels</a>
-      <a href="bookings.php" class="ds-link <?= $currentPage === 'bookings.php' ? 'active' : '' ?>"><i class="bi bi-calendar2-check-fill"></i> Bookings</a>
+      <a href="manage-users.php" class="ds-link <?= $currentPage === 'manage-users.php' ? 'active' : '' ?>"><i class="bi bi-people-fill"></i> Manage Users</a>
+      <a href="manage-hotels.php" class="ds-link <?= $currentPage === 'manage-hotels.php' ? 'active' : '' ?>"><i class="bi bi-building"></i> Manage Hotels</a>
+      <a href="manage-cities.php" class="ds-link <?= $currentPage === 'manage-cities.php' ? 'active' : '' ?>"><i class="bi bi-geo-alt-fill"></i> Manage Cities</a>
+      <a href="manage-orders.php" class="ds-link <?= $currentPage === 'manage-orders.php' ? 'active' : '' ?>"><i class="bi bi-receipt"></i> Manage Orders</a>
+      <a href="manage-ratings.php" class="ds-link <?= $currentPage === 'manage-ratings.php' ? 'active' : '' ?>"><i class="bi bi-star-fill"></i> Manage Ratings</a>
+      <a href="coupon-management.php" class="ds-link <?= $currentPage === 'coupon-management.php' ? 'active' : '' ?>"><i class="bi bi-tags-fill"></i> Coupon Management</a>
+      <a href="top-rated-hotels.php" class="ds-link <?= $currentPage === 'top-rated-hotels.php' ? 'active' : '' ?>"><i class="bi bi-award-fill"></i> Top Rated Hotels</a>
+      <a href="commission-management.php" class="ds-link <?= $currentPage === 'commission-management.php' ? 'active' : '' ?>"><i class="bi bi-wallet-fill"></i> Commission Management</a>
       
       <div class="ds-sec">System</div>
       <a href="settings.php" class="ds-link <?= $currentPage === 'settings.php' ? 'active' : '' ?>"><i class="bi bi-sliders"></i> Settings</a>
-      <a href="../index.php" class="ds-link"><i class="bi bi-box-arrow-left"></i> Website</a>
+      <a href="logout.php" class="ds-link <?= $currentPage === 'logout.php' ? 'active' : '' ?>"><i class="bi bi-box-arrow-left"></i> Logout</a>
     </nav>
     <div class="ds-foot">
       <a href="profile.php" class="ds-hpill">

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 require_once 'pricing.php';
 require_once 'hotel_functions.php';
@@ -30,7 +30,7 @@ if ($checkout_raw) $qs_parts[] = 'checkout=' . urlencode($checkout_raw);
 if ($guests_raw)   $qs_parts[] = 'guests='   . $guests_raw;
 $booking_qs = $qs_parts ? '&' . implode('&', $qs_parts) : '';
 
-// ── Fetch hotels from DB ──────────────────────────────────────────────────
+// -- Fetch hotels from DB --------------------------------------------------
 $filtered    = bhGetHotels($city_param, $guests_raw, $max_price, $min_rating);
 $hotel_count = count($filtered);
 $page_title  = $city_param ? "Hotels in $city_label" : "Find Your Perfect Hotel";
@@ -39,7 +39,7 @@ $sub_parts = [];
 if ($city_label)   $sub_parts[] = $city_label;
 if ($checkin_fmt && $checkout_fmt) $sub_parts[] = $checkin_fmt . " -> " . $checkout_fmt . " (" . $nights . " night" . ($nights>1?"s":"") . ")";
 if ($guests_label && $guests_raw)  $sub_parts[] = $guests_label;
-$page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub_parts) : ' across India');
+$page_sub = $count_text . ' found' . ($sub_parts ? ' � ' . implode(' � ', $sub_parts) : ' across India');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -47,7 +47,7 @@ $page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a56db'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='18' font-family='system-ui' fill='%23f59e0b'%3E&#x1F3E8;%3C/text%3E%3C/svg%3E"/>
-  <title><?php echo htmlspecialchars($page_title); ?> – bookHotel</title>
+  <title><?php echo htmlspecialchars($page_title); ?> � bookHotel</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" crossorigin="anonymous"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" crossorigin="anonymous"/>
@@ -68,7 +68,7 @@ $page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub
     <div class="collapse navbar-collapse" id="navMenu">
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
         <li class="nav-item"><a class="nav-link active" href="hotels.php">Hotels</a></li>
-        <li class="nav-item"><a class="nav-link" href="index.php#destinations">Destinations</a></li>
+        <li class="nav-item"><a class="nav-link" href="destinations.php">Destinations</a></li>
         <li class="nav-item"><a class="nav-link" href="my-bookings.php">My Bookings</a></li>
         <li class="nav-item"><a class="nav-link" href="contact.php">Contact</a></li>
         <li class="nav-item ms-lg-3" id="navAuthSlot">
@@ -163,11 +163,11 @@ $page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub
           <div class="filter-group">
             <h6 class="filter-title">Price Per Night</h6>
             <input type="range" class="form-range price-range" min="500" max="25000" value="15000" id="priceRange"
-              oninput="document.getElementById('priceVal').textContent='₹'+this.value.toLocaleString()"/>
+              oninput="document.getElementById('priceVal').textContent='?'+this.value.toLocaleString()"/>
             <div class="d-flex justify-content-between mt-1">
-              <span class="text-muted small">₹500</span>
-              <span class="fw-700 small text-danger" id="priceVal">₹15,000</span>
-              <span class="text-muted small">₹25,000</span>
+              <span class="text-muted small">?500</span>
+              <span class="fw-700 small text-danger" id="priceVal">?15,000</span>
+              <span class="text-muted small">?25,000</span>
             </div>
           </div>
 
@@ -175,10 +175,10 @@ $page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub
           <div class="filter-group">
             <h6 class="filter-title">Star Rating</h6>
             <div class="d-flex flex-column gap-2">
-              <label class="filter-check"><input type="checkbox" checked/><span class="ms-2">5 Star <span class="text-warning ms-1">★★★★★</span></span></label>
-              <label class="filter-check"><input type="checkbox" checked/><span class="ms-2">4 Star <span class="text-warning ms-1">★★★★</span></span></label>
-              <label class="filter-check"><input type="checkbox"/><span class="ms-2">3 Star <span class="text-warning ms-1">★★★</span></span></label>
-              <label class="filter-check"><input type="checkbox"/><span class="ms-2">2 Star <span class="text-warning ms-1">★★</span></span></label>
+              <label class="filter-check"><input type="checkbox" checked/><span class="ms-2">5 Star <span class="text-warning ms-1">?????</span></span></label>
+              <label class="filter-check"><input type="checkbox" checked/><span class="ms-2">4 Star <span class="text-warning ms-1">????</span></span></label>
+              <label class="filter-check"><input type="checkbox"/><span class="ms-2">3 Star <span class="text-warning ms-1">???</span></span></label>
+              <label class="filter-check"><input type="checkbox"/><span class="ms-2">2 Star <span class="text-warning ms-1">??</span></span></label>
             </div>
           </div>
 
@@ -244,7 +244,7 @@ $page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub
           <span class="badge" style="background:#1a56db;font-size:.75rem"><i class="bi bi-geo-alt-fill me-1"></i><?php echo htmlspecialchars($city_label); ?></span>
           <?php endif; ?>
           <?php if ($checkin_fmt && $checkout_fmt): ?>
-          <span class="badge bg-secondary" style="font-size:.75rem"><i class="bi bi-calendar3 me-1"></i><?php echo htmlspecialchars($checkin_fmt); ?> → <?php echo htmlspecialchars($checkout_fmt); ?> (<?php echo $nights; ?> night<?php echo $nights>1?'s':''; ?>)</span>
+          <span class="badge bg-secondary" style="font-size:.75rem"><i class="bi bi-calendar3 me-1"></i><?php echo htmlspecialchars($checkin_fmt); ?> ? <?php echo htmlspecialchars($checkout_fmt); ?> (<?php echo $nights; ?> night<?php echo $nights>1?'s':''; ?>)</span>
           <?php endif; ?>
           <?php if ($guests_raw > 0): ?>
           <span class="badge bg-dark" style="font-size:.75rem"><i class="bi bi-people-fill me-1"></i><?php echo htmlspecialchars($guests_label); ?></span>
@@ -372,7 +372,7 @@ $page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub
           <a href="hotels.php" class="btn btn-primary px-4 me-2"><i class="bi bi-search me-2"></i>Browse All Hotels</a>
         </div>
 
-        <!-- Pagination — rendered dynamically by pagination.js -->
+        <!-- Pagination � rendered dynamically by pagination.js -->
         <div class="d-flex justify-content-center mt-5">
           <nav aria-label="Hotel listing pagination">
             <ul class="pagination pagination-custom" id="paginationList">
@@ -425,7 +425,7 @@ $page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub
     </div>
     <hr class="border-secondary"/>
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
-      <p class="text-white-50 small mb-0">© 2026 bookHotel Technologies Pvt. Ltd. All rights reserved.</p>
+      <p class="text-white-50 small mb-0">� 2026 bookHotel Technologies Pvt. Ltd. All rights reserved.</p>
     </div>
   </div>
 </footer>
@@ -497,7 +497,7 @@ $page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub
     });
   });
 
-  // ── Client-side filter/sort on already-fetched cards ─────────────────────
+  // -- Client-side filter/sort on already-fetched cards ---------------------
   let maxPrice = 25000;
 
   document.getElementById('priceRange')?.addEventListener('input', function() {
@@ -547,3 +547,4 @@ $page_sub = $count_text . ' found' . ($sub_parts ? ' · ' . implode(' · ', $sub
 </script>
 </body>
 </html>
+

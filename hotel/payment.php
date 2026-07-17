@@ -1,10 +1,10 @@
-﻿<?php
+<?php
 session_start();
 require_once 'db.php';
 require_once 'hotel_functions.php';
 require_once 'pricing.php';
 
-// ── Handle AJAX booking save ──────────────────────────────────────────────
+// -- Handle AJAX booking save ----------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_booking') {
     header('Content-Type: application/json');
     $required = ['hotel_id','guest_name','guest_email','checkin_date','checkout_date','total_amount'];
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a56db'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='18' font-family='system-ui' fill='%23f59e0b'%3E&#x1F3E8;%3C/text%3E%3C/svg%3E"/>
-  <title>Payment – bookHotel</title>
+  <title>Payment � bookHotel</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" crossorigin="anonymous"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" crossorigin="anonymous"/>
@@ -134,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <!-- Security badge -->
         <div class="secure-banner mb-4">
           <i class="bi bi-lock-fill text-success me-2"></i>
-          <span class="fw-600 small">Secure Payment · 256-bit SSL Encryption · PCI DSS Compliant</span>
+          <span class="fw-600 small">Secure Payment � 256-bit SSL Encryption � PCI DSS Compliant</span>
         </div>
 
         <!-- Payment Method Tabs -->
@@ -205,7 +205,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 <div class="col-6">
                   <label class="form-label small fw-600 text-muted">CVV</label>
                   <div class="input-group">
-                    <input type="password" class="form-control" id="cvvInput" placeholder="•••" maxlength="4"/>
+                    <input type="password" class="form-control" id="cvvInput" placeholder="���" maxlength="4"/>
                     <span class="input-group-text bg-white cursor-pointer" onclick="toggleCVV()">
                       <i class="bi bi-eye" id="cvvEye"></i>
                     </span>
@@ -258,12 +258,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
             <!-- EMI -->
             <div class="pay-panel p-4" id="panel-emi" style="display:none">
-              <p class="small text-muted mb-3">EMI available on credit cards with 0% interest for 3–12 months.</p>
+              <p class="small text-muted mb-3">EMI available on credit cards with 0% interest for 3�12 months.</p>
               <div class="row g-2">
-                <div class="col-12 col-md-6"><label class="emi-tile"><input type="radio" name="emi" checked/><div><span class="fw-700">3 Months</span><div class="text-muted small" id="emi3">₹2,309 / month</div></div></label></div>
-                <div class="col-12 col-md-6"><label class="emi-tile"><input type="radio" name="emi"/><div><span class="fw-700">6 Months</span><div class="text-muted small" id="emi6">₹1,154 / month</div></div></label></div>
-                <div class="col-12 col-md-6"><label class="emi-tile"><input type="radio" name="emi"/><div><span class="fw-700">9 Months</span><div class="text-muted small" id="emi9">₹769 / month</div></div></label></div>
-                <div class="col-12 col-md-6"><label class="emi-tile"><input type="radio" name="emi"/><div><span class="fw-700">12 Months</span><div class="text-muted small" id="emi12">₹577 / month</div></div></label></div>
+                <div class="col-12 col-md-6"><label class="emi-tile"><input type="radio" name="emi" checked/><div><span class="fw-700">3 Months</span><div class="text-muted small" id="emi3">?2,309 / month</div></div></label></div>
+                <div class="col-12 col-md-6"><label class="emi-tile"><input type="radio" name="emi"/><div><span class="fw-700">6 Months</span><div class="text-muted small" id="emi6">?1,154 / month</div></div></label></div>
+                <div class="col-12 col-md-6"><label class="emi-tile"><input type="radio" name="emi"/><div><span class="fw-700">9 Months</span><div class="text-muted small" id="emi9">?769 / month</div></div></label></div>
+                <div class="col-12 col-md-6"><label class="emi-tile"><input type="radio" name="emi"/><div><span class="fw-700">12 Months</span><div class="text-muted small" id="emi12">?577 / month</div></div></label></div>
               </div>
               <p class="text-muted small mt-3 mb-0"><i class="bi bi-info-circle me-1"></i>Available on Visa, Mastercard & RuPay credit cards.</p>
             </div>
@@ -304,34 +304,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                    class="rounded-2" width="56" height="48" style="object-fit:cover" alt="Hotel"/>
               <div>
                 <div class="fw-700 small">Heritage Haveli, Jaipur</div>
-                <div class="text-warning small">★★★★★</div>
+                <div class="text-warning small">?????</div>
                 <div class="small text-muted" id="ordRoomName">Deluxe Heritage Room</div>
               </div>
             </div>
             <hr class="my-2"/>
-            <div class="d-flex justify-content-between mb-1"><span class="small text-muted">Check-in</span><span class="small fw-600" id="ordCheckin">—</span></div>
-            <div class="d-flex justify-content-between mb-1"><span class="small text-muted">Check-out</span><span class="small fw-600" id="ordCheckout">—</span></div>
+            <div class="d-flex justify-content-between mb-1"><span class="small text-muted">Check-in</span><span class="small fw-600" id="ordCheckin">�</span></div>
+            <div class="d-flex justify-content-between mb-1"><span class="small text-muted">Check-out</span><span class="small fw-600" id="ordCheckout">�</span></div>
             <div class="d-flex justify-content-between mb-3"><span class="small text-muted">Duration</span><span class="small fw-600" id="ordNights">2 Nights</span></div>
             <hr class="my-2"/>
-            <div class="d-flex justify-content-between mb-1"><span class="small text-muted" id="ordBaseLabel">Base</span><span class="small fw-600" id="ordBase">—</span></div>
-            <div class="d-flex justify-content-between mb-1"><span class="small text-muted" id="ordTaxLabel">GST (12%)</span><span class="small fw-600" id="ordTax">—</span></div>
-            <div class="d-flex justify-content-between mb-1"><span class="small text-muted">Service Charge</span><span class="small fw-600" id="ordService">₹200</span></div>
-            <div class="d-flex justify-content-between mb-1"><span class="small text-success fw-600">Discount</span><span class="small fw-600 text-success" id="ordDiscount">—</span></div>
+            <div class="d-flex justify-content-between mb-1"><span class="small text-muted" id="ordBaseLabel">Base</span><span class="small fw-600" id="ordBase">�</span></div>
+            <div class="d-flex justify-content-between mb-1"><span class="small text-muted" id="ordTaxLabel">GST (12%)</span><span class="small fw-600" id="ordTax">�</span></div>
+            <div class="d-flex justify-content-between mb-1"><span class="small text-muted">Service Charge</span><span class="small fw-600" id="ordService">?200</span></div>
+            <div class="d-flex justify-content-between mb-1"><span class="small text-success fw-600">Discount</span><span class="small fw-600 text-success" id="ordDiscount">�</span></div>
             <div class="d-flex justify-content-between mb-3" id="extraDiscRow" style="display:none!important">
               <span class="small text-success fw-600">Coupon</span>
-              <span class="small fw-600 text-success" id="ordCoupon">—</span>
+              <span class="small fw-600 text-success" id="ordCoupon">�</span>
             </div>
             <hr class="my-2"/>
             <div class="d-flex justify-content-between align-items-center mb-1">
               <span class="fw-700">Total Payable</span>
-              <span class="fw-800 text-primary fs-4" id="ordTotal">—</span>
+              <span class="fw-800 text-primary fs-4" id="ordTotal">�</span>
             </div>
             <p class="text-muted small mb-4">Inclusive of all taxes & fees</p>
             <button class="btn book-now-btn w-100 fw-700 py-3 mb-3" onclick="payNow()">
               <i class="bi bi-lock-fill me-2"></i>Pay Now
             </button>
             <p class="text-center text-muted small">
-              <i class="bi bi-shield-check-fill text-success me-1"></i>100% Secure · SSL Encrypted
+              <i class="bi bi-shield-check-fill text-success me-1"></i>100% Secure � SSL Encrypted
             </p>
             <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
               <img src="https://img.shields.io/badge/Visa-1A1F71?style=flat&logo=visa&logoColor=white" height="20" alt="Visa"/>
@@ -369,7 +369,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
       </div>
     </div>
     <hr class="border-secondary"/>
-    <p class="text-white-50 small text-center mb-0">© 2026 bookHotel Technologies Pvt. Ltd. All rights reserved.</p>
+    <p class="text-white-50 small text-center mb-0">� 2026 bookHotel Technologies Pvt. Ltd. All rights reserved.</p>
   </div>
 </footer>
 
@@ -381,7 +381,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <div class="confirm-icon mb-4"><i class="bi bi-check-lg"></i></div>
         <h4 class="fw-800 mb-2">Booking Confirmed!</h4>
         <p class="text-muted mb-1">Your booking at <strong id="confirmHotelName">Heritage Haveli</strong> is confirmed.</p>
-        <p class="text-muted mb-4">Confirmation sent to <strong id="confirmEmail">—</strong></p>
+        <p class="text-muted mb-4">Confirmation sent to <strong id="confirmEmail">�</strong></p>
         <div class="booking-ref mb-4">
           Booking ID: <strong id="bookingId">BH-2026-XXXXX</strong>
         </div>
@@ -436,22 +436,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
   document.getElementById('ordCheckin').textContent   = fmtDate(checkin);
   document.getElementById('ordCheckout').textContent  = fmtDate(checkout);
   document.getElementById('ordNights').textContent    = nights + ' Night'+(nights>1?'s':'');
-  document.getElementById('ordBaseLabel').textContent = '₹'+room.price.toLocaleString()+' × '+nights+' night'+(nights>1?'s':'');
-  document.getElementById('ordBase').textContent      = '₹'+base.toLocaleString();
-  document.getElementById('ordTax').textContent       = '₹'+tax.toLocaleString();
+  document.getElementById('ordBaseLabel').textContent = '?'+room.price.toLocaleString()+' � '+nights+' night'+(nights>1?'s':'');
+  document.getElementById('ordBase').textContent      = '?'+base.toLocaleString();
+  document.getElementById('ordTax').textContent       = '?'+tax.toLocaleString();
   const tLbl = document.getElementById('ordTaxLabel');
   if(tLbl) tLbl.textContent = 'GST ('+taxPct+'%)';
   const sEl = document.getElementById('ordService');
-  if(sEl) sEl.textContent = '₹'+svc.toLocaleString();
-  document.getElementById('ordDiscount').textContent  = '−₹'+disc.toLocaleString();
-  document.getElementById('ordTotal').textContent     = '₹'+total.toLocaleString();
+  if(sEl) sEl.textContent = '?'+svc.toLocaleString();
+  document.getElementById('ordDiscount').textContent  = '-?'+disc.toLocaleString();
+  document.getElementById('ordTotal').textContent     = '?'+total.toLocaleString();
 
   // EMI calc
   const emiTotal = total;
-  document.getElementById('emi3').textContent  = '₹'+Math.ceil(emiTotal/3).toLocaleString()+' / month';
-  document.getElementById('emi6').textContent  = '₹'+Math.ceil(emiTotal/6).toLocaleString()+' / month';
-  document.getElementById('emi9').textContent  = '₹'+Math.ceil(emiTotal/9).toLocaleString()+' / month';
-  document.getElementById('emi12').textContent = '₹'+Math.ceil(emiTotal/12).toLocaleString()+' / month';
+  document.getElementById('emi3').textContent  = '?'+Math.ceil(emiTotal/3).toLocaleString()+' / month';
+  document.getElementById('emi6').textContent  = '?'+Math.ceil(emiTotal/6).toLocaleString()+' / month';
+  document.getElementById('emi9').textContent  = '?'+Math.ceil(emiTotal/9).toLocaleString()+' / month';
+  document.getElementById('emi12').textContent = '?'+Math.ceil(emiTotal/12).toLocaleString()+' / month';
 
   // Tab switcher
   function switchTab(id, btn) {
@@ -512,8 +512,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if (coupons[code]) {
       extraDisc = Math.round((base+tax-disc) * coupons[code]);
       total = base + tax - disc + svc - extraDisc;
-      document.getElementById('ordTotal').textContent   = '₹'+total.toLocaleString();
-      document.getElementById('ordCoupon').textContent  = '−₹'+extraDisc.toLocaleString();
+      document.getElementById('ordTotal').textContent   = '?'+total.toLocaleString();
+      document.getElementById('ordCoupon').textContent  = '-?'+extraDisc.toLocaleString();
       document.getElementById('extraDiscRow').style.display='flex';
       res.innerHTML='<span class="text-success fw-600 small"><i class="bi bi-check-circle-fill me-1"></i>Coupon applied! Extra '+(coupons[code]*100)+'% off.</span>';
     } else {
@@ -521,7 +521,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
   }
 
-  // Pay Now — saves booking to DB then shows confirmation
+  // Pay Now � saves booking to DB then shows confirmation
   function payNow() {
     const btn = document.querySelector('.book-now-btn');
     btn.innerHTML='<span class="spinner-border spinner-border-sm me-2"></span>Processing Payment...';
@@ -588,4 +588,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 <script src="search-state.js"></script>
 </body>
 </html>
+
 

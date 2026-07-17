@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once 'db.php';
 require_once 'hotel_functions.php';
 require_once 'pricing.php';
@@ -88,7 +88,7 @@ $id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) :
     <div class="collapse navbar-collapse" id="navMenu">
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
         <li class="nav-item"><a class="nav-link active" href="hotels.php">Hotels</a></li>
-        <li class="nav-item"><a class="nav-link" href="index.php#destinations">Destinations</a></li>
+        <li class="nav-item"><a class="nav-link" href="destinations.php">Destinations</a></li>
         <li class="nav-item"><a class="nav-link" href="my-bookings.php">My Bookings</a></li>
         <li class="nav-item"><a class="nav-link" href="contact.php">Contact</a></li>
         <li class="nav-item ms-lg-3">
@@ -389,6 +389,13 @@ $id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) :
                         <?php bhPriceBlock($hotel_price, $hotel_orig); ?>
                       </div>
                       <a href="review-booking.php?room=deluxe&id=<?php echo $hotel_id; ?><?php echo $booking_qs; ?>" class="btn btn-primary btn-sm px-4">Select</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Room 2: Royal Suite -->
             <div class="room-card">
               <div class="row g-0">
                 <div class="col-4 col-md-3">
@@ -749,7 +756,7 @@ $id_qs = 'id=' . $hotel_id . ($full_qs_str ? str_replace('?','&',$full_qs_str) :
         <h6 class="fw-700 mb-3">Explore</h6>
         <ul class="list-unstyled footer-links">
           <li><a href="hotels.php">Hotels</a></li>
-          <li><a href="#">Destinations</a></li>
+          <li><a href="destinations.php">Destinations</a></li>
           <li><a href="my-bookings.php">My Bookings</a></li>
           <li><a href="#">Car Rentals</a></li>
         </ul>

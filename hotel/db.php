@@ -7,7 +7,7 @@
 // Database credentials
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
-define('DB_PASS', ''); // Set your local DB password here
+define('DB_PASS', 'Aditi@1521');
 define('DB_NAME', 'bookhotel_db');
 define('DB_PORT', 3306);
 
@@ -268,6 +268,105 @@ function initializeHotelsTable() {
 initializeDatabase();
 initializeHotelsTable();
 initializeBookingsTable();
+initializeRoomsTable();
+initializeReviewsTable();
+initializeCitiesTable();
+initializeCouponsTable();
+initializeCommissionsTable();
+
+/**
+ * Auto-create cities table
+ */
+function initializeCitiesTable() {
+    global $conn;
+    $sql = "CREATE TABLE IF NOT EXISTS `cities` (
+      `id`               INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      `name`             VARCHAR(100) NOT NULL UNIQUE,
+      `status`           ENUM('active','inactive') DEFAULT 'active',
+      `created_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      `updated_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX `idx_status` (`status`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    mysqli_query($conn, $sql);
+}
+
+/**
+ * Auto-create coupons table
+ */
+function initializeCouponsTable() {
+    global $conn;
+    $sql = "CREATE TABLE IF NOT EXISTS `coupons` (
+      `id`               INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      `code`             VARCHAR(50) NOT NULL UNIQUE,
+      `discount_type`    ENUM('percent','fixed') NOT NULL DEFAULT 'percent',
+      `discount_value`   DECIMAL(10,2) NOT NULL,
+      `expiry_date`      DATE NOT NULL,
+      `usage_limit`      INT(11) DEFAULT NULL,
+      `times_used`       INT(11) DEFAULT 0,
+      `status`           ENUM('active','inactive') DEFAULT 'active',
+      `created_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      `updated_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX `idx_code`   (`code`),
+      INDEX `idx_status` (`status`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    mysqli_query($conn, $sql);
+}
+
+/**
+ * Auto-create commissions table
+ */
+function initializeCommissionsTable() {
+    global $conn;
+    $sql = "CREATE TABLE IF NOT EXISTS `commissions` (
+      `hotel_id`         INT(11) UNSIGNED PRIMARY KEY,
+      `commission_rate`  DECIMAL(5,2) NOT NULL DEFAULT 15.00,
+      `updated_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    mysqli_query($conn, $sql);
+}
+
+/**
+ * Auto-create rooms table
+ */
+function initializeRoomsTable() {
+    global $conn;
+    $sql = "CREATE TABLE IF NOT EXISTS `rooms` (
+      `room_id`          INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      `hotel_id`         INT(11) UNSIGNED NOT NULL,
+      `room_type`        VARCHAR(100) NOT NULL,
+      `base_price`       DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+      `capacity`         TINYINT(3) DEFAULT 2,
+      `amenities`        TEXT DEFAULT NULL,
+      `status`           ENUM('Available','Occupied','Maintenance') DEFAULT 'Available',
+      `created_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      `updated_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX `idx_hotel`  (`hotel_id`),
+      INDEX `idx_status` (`status`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    mysqli_query($conn, $sql);
+}
+
+/**
+ * Auto-create reviews table
+ */
+function initializeReviewsTable() {
+    global $conn;
+    $sql = "CREATE TABLE IF NOT EXISTS `reviews` (
+      `review_id`        INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      `hotel_id`         INT(11) UNSIGNED NOT NULL,
+      `user_id`          INT(11) UNSIGNED DEFAULT NULL,
+      `guest_name`       VARCHAR(255) NOT NULL,
+      `rating`           DECIMAL(2,1) NOT NULL,
+      `comment`          TEXT DEFAULT NULL,
+      `manager_reply`    TEXT DEFAULT NULL,
+      `created_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      `updated_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX `idx_hotel`  (`hotel_id`),
+      INDEX `idx_user`   (`user_id`),
+      INDEX `idx_rating` (`rating`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    mysqli_query($conn, $sql);
+}
 
 /**
  * Auto-create bookings table
@@ -318,3 +417,4 @@ function initializeBookingsTable() {
 }
 
 ?>
+

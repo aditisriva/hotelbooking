@@ -1,11 +1,11 @@
-﻿<?php require_once 'pricing.php'; ?>
+<?php require_once 'pricing.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a56db'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='18' font-family='system-ui' fill='%23f59e0b'%3E&#x1F3E8;%3C/text%3E%3C/svg%3E"/>
-  <title>Guest Details – bookHotel</title>
+  <title>Guest Details � bookHotel</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" crossorigin="anonymous"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" crossorigin="anonymous"/>
@@ -27,7 +27,7 @@
     <div class="collapse navbar-collapse" id="navMenu">
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
         <li class="nav-item"><a class="nav-link" href="hotels.php">Hotels</a></li>
-        <li class="nav-item"><a class="nav-link" href="index.php#destinations">Destinations</a></li>
+        <li class="nav-item"><a class="nav-link" href="destinations.php">Destinations</a></li>
         <li class="nav-item"><a class="nav-link" href="my-bookings.php">My Bookings</a></li>
         <li class="nav-item"><a class="nav-link" href="contact.php">Contact</a></li>
         <li class="nav-item ms-lg-3">
@@ -123,7 +123,7 @@
               <div class="col-12 col-md-6">
                 <label class="form-label small fw-600 text-muted">MOBILE NUMBER *</label>
                 <div class="input-group">
-                  <span class="input-group-text bg-white">🇮🇳 +91</span>
+                  <span class="input-group-text bg-white">???? +91</span>
                   <input type="tel" class="form-control" id="phone" placeholder="10-digit number" maxlength="10"/>
                 </div>
               </div>
@@ -243,10 +243,10 @@
                 <select class="form-select">
                   <option>I don't know yet</option>
                   <option>Before 12:00 PM</option>
-                  <option>12:00 PM – 2:00 PM</option>
-                  <option>2:00 PM – 4:00 PM</option>
-                  <option>4:00 PM – 6:00 PM</option>
-                  <option>6:00 PM – 8:00 PM</option>
+                  <option>12:00 PM � 2:00 PM</option>
+                  <option>2:00 PM � 4:00 PM</option>
+                  <option>4:00 PM � 6:00 PM</option>
+                  <option>6:00 PM � 8:00 PM</option>
                   <option>After 8:00 PM</option>
                 </select>
               </div>
@@ -271,7 +271,7 @@
               <div>
                 <div class="fw-700 small">Heritage Haveli</div>
                 <div class="text-muted" style="font-size:0.72rem"><i class="bi bi-geo-alt-fill text-danger"></i> Jaipur, Rajasthan</div>
-                <span class="text-warning" style="font-size:0.7rem">★★★★★</span>
+                <span class="text-warning" style="font-size:0.7rem">?????</span>
               </div>
             </div>
             <hr class="my-2"/>
@@ -283,11 +283,11 @@
             </div>
             <div class="d-flex justify-content-between mb-1">
               <span class="small text-muted">Check-in</span>
-              <span class="small fw-600" id="sumCheckin">—</span>
+              <span class="small fw-600" id="sumCheckin">�</span>
             </div>
             <div class="d-flex justify-content-between mb-1">
               <span class="small text-muted">Check-out</span>
-              <span class="small fw-600" id="sumCheckout">—</span>
+              <span class="small fw-600" id="sumCheckout">�</span>
             </div>
             <div class="d-flex justify-content-between mb-3">
               <span class="small text-muted">Duration</span>
@@ -297,38 +297,38 @@
 
             <!-- Pricing -->
             <div class="d-flex justify-content-between mb-1">
-              <span class="small text-muted" id="sumBaseLabel">₹4,680 × 2 nights</span>
-              <span class="small fw-600" id="sumBase">₹9,360</span>
+              <span class="small text-muted" id="sumBaseLabel">?4,680 � 2 nights</span>
+              <span class="small fw-600" id="sumBase">?9,360</span>
             </div>
             <div class="d-flex justify-content-between mb-1">
               <span class="small text-muted" id="sumTaxLabel">Taxes (GST)</span>
-              <span class="small fw-600" id="sumTax">₹842</span>
+              <span class="small fw-600" id="sumTax">?842</span>
             </div>
                         <div class="d-flex justify-content-between mb-1">
               <span class="small text-muted">Service Charge</span>
-              <span class="small fw-600">₹200</span>
+              <span class="small fw-600">?200</span>
             </div>
             <div class="d-flex justify-content-between mb-3">
               <span class="small text-success fw-600">Discount</span>
-              <span class="small fw-600 text-success" id="sumDiscount">−₹3,276</span>
+              <span class="small fw-600 text-success" id="sumDiscount">-?3,276</span>
             </div>
             <hr class="my-2"/>
             <div class="d-flex justify-content-between align-items-center mb-1">
               <span class="fw-700">Total</span>
-              <span class="fw-800 text-primary fs-5" id="sumTotal">₹6,926</span>
+              <span class="fw-800 text-primary fs-5" id="sumTotal">?6,926</span>
             </div>
             <p class="text-muted small mb-4">Inclusive of all taxes</p>
 
             <div class="savings-badge mb-4">
               <i class="bi bi-piggy-bank-fill me-2 text-success"></i>
-              <span class="small fw-700 text-success">Saving <span id="savingsAmt">₹3,276</span> on this booking!</span>
+              <span class="small fw-700 text-success">Saving <span id="savingsAmt">?3,276</span> on this booking!</span>
             </div>
 
             <button class="btn book-now-btn w-100 fw-700 py-3 mb-3" onclick="goToPayment()">
               <i class="bi bi-lock-fill me-2"></i>Proceed to Payment
             </button>
             <p class="text-center text-muted small mb-0">
-              <i class="bi bi-shield-check-fill text-success me-1"></i>100% Secure · SSL Encrypted
+              <i class="bi bi-shield-check-fill text-success me-1"></i>100% Secure � SSL Encrypted
             </p>
           </div>
         </div>
@@ -392,7 +392,7 @@
       </div>
     </div>
     <hr class="border-secondary"/>
-    <p class="text-white-50 small text-center mb-0">© 2026 bookHotel Technologies Pvt. Ltd. All rights reserved.</p>
+    <p class="text-white-50 small text-center mb-0">� 2026 bookHotel Technologies Pvt. Ltd. All rights reserved.</p>
   </div>
 </footer>
 
@@ -430,7 +430,7 @@
   const ci = new Date(checkin), co = new Date(checkout);
   const nights = Math.max(1, Math.round((co - ci) / 86400000));
   const base   = room.price * nights;
-    // Dynamic GST: 0% ≤2500, 12% ≤7500, 18% >7500
+    // Dynamic GST: 0% =2500, 12% =7500, 18% >7500
   const taxRate = room.price <= 2500 ? 0 : room.price <= 7500 ? 0.12 : 0.18;
   const taxPct  = Math.round(taxRate * 100);
   const svc     = 200; // service charge
@@ -444,14 +444,14 @@
   document.getElementById('sumCheckin').textContent   = fmtDate(checkin);
   document.getElementById('sumCheckout').textContent  = fmtDate(checkout);
   document.getElementById('sumNights').textContent    = nights + ' Night' + (nights>1?'s':'');
-  document.getElementById('sumBaseLabel').textContent = '₹' + room.price.toLocaleString() + ' × ' + nights + ' night' + (nights>1?'s':'');
-  document.getElementById('sumBase').textContent      = '₹' + base.toLocaleString();
-    document.getElementById('sumTax').textContent        = '₹' + tax.toLocaleString();
+  document.getElementById('sumBaseLabel').textContent = '?' + room.price.toLocaleString() + ' � ' + nights + ' night' + (nights>1?'s':'');
+  document.getElementById('sumBase').textContent      = '?' + base.toLocaleString();
+    document.getElementById('sumTax').textContent        = '?' + tax.toLocaleString();
   const taxLabelEl = document.getElementById('sumTaxLabel');
   if (taxLabelEl) taxLabelEl.textContent = 'GST (' + taxPct + '%)';
-  document.getElementById('sumDiscount').textContent  = '−₹' + disc.toLocaleString();
-  document.getElementById('sumTotal').textContent     = '₹' + total.toLocaleString();
-  document.getElementById('savingsAmt').textContent   = '₹' + disc.toLocaleString();
+  document.getElementById('sumDiscount').textContent  = '-?' + disc.toLocaleString();
+  document.getElementById('sumTotal').textContent     = '?' + total.toLocaleString();
+  document.getElementById('savingsAmt').textContent   = '?' + disc.toLocaleString();
 
   // Add guest
   let guestCount = 0;
@@ -504,4 +504,5 @@
 <script src="search-state.js"></script>
 </body>
 </html>
+
 

@@ -234,3 +234,4 @@ function bhHandleImageUpload(string $field, int $hotelId = 0): string {
 // Seed on include
 bhSeedHotels();
 ?>
+

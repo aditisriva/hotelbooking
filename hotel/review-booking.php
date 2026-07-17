@@ -1,11 +1,11 @@
-﻿<?php require_once 'pricing.php'; ?>
+<?php require_once 'pricing.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a56db'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='18' font-family='system-ui' fill='%23f59e0b'%3E&#x1F3E8;%3C/text%3E%3C/svg%3E"/>
-  <title>Review Your Booking – bookHotel</title>
+  <title>Review Your Booking � bookHotel</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" crossorigin="anonymous"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" crossorigin="anonymous"/>
@@ -27,7 +27,7 @@
     <div class="collapse navbar-collapse" id="navMenu">
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
         <li class="nav-item"><a class="nav-link" href="hotels.php">Hotels</a></li>
-        <li class="nav-item"><a class="nav-link" href="index.php#destinations">Destinations</a></li>
+        <li class="nav-item"><a class="nav-link" href="destinations.php">Destinations</a></li>
         <li class="nav-item"><a class="nav-link" href="my-bookings.php">My Bookings</a></li>
         <li class="nav-item"><a class="nav-link" href="contact.php">Contact</a></li>
         <li class="nav-item ms-lg-3">
@@ -93,7 +93,7 @@
                     <h5 class="fw-800 mb-1">Heritage Haveli</h5>
                     <p class="text-muted small mb-1"><i class="bi bi-geo-alt-fill text-danger me-1"></i>M.I. Road, Pink City, Jaipur, Rajasthan</p>
                     <div class="d-flex align-items-center gap-2">
-                      <span class="text-warning small">★★★★★</span>
+                      <span class="text-warning small">?????</span>
                       <span class="rating-badge">4.9 <i class="bi bi-star-fill"></i></span>
                       <span class="badge bg-success-subtle text-success border border-success-subtle small">Free Cancellation</span>
                     </div>
@@ -115,14 +115,14 @@
               <div class="col-6 col-md-3">
                 <div class="stay-detail-box">
                   <div class="stay-detail-label">CHECK-IN</div>
-                  <div class="stay-detail-value" id="dispCheckin">—</div>
+                  <div class="stay-detail-value" id="dispCheckin">�</div>
                   <div class="stay-detail-sub">2:00 PM onwards</div>
                 </div>
               </div>
               <div class="col-6 col-md-3">
                 <div class="stay-detail-box">
                   <div class="stay-detail-label">CHECK-OUT</div>
-                  <div class="stay-detail-value" id="dispCheckout">—</div>
+                  <div class="stay-detail-value" id="dispCheckout">�</div>
                   <div class="stay-detail-sub">Until 11:00 AM</div>
                 </div>
               </div>
@@ -130,7 +130,7 @@
                 <div class="stay-detail-box">
                   <div class="stay-detail-label">DURATION</div>
                   <div class="stay-detail-value" id="dispNights">2 Nights</div>
-                  <div class="stay-detail-sub" id="dispDates">—</div>
+                  <div class="stay-detail-sub" id="dispDates">�</div>
                 </div>
               </div>
               <div class="col-6 col-md-3">
@@ -157,7 +157,7 @@
                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                   <div>
                     <h6 class="fw-700 mb-1" id="selectedRoomName">Deluxe Heritage Room</h6>
-                    <p class="text-muted small mb-2">30 m² · King Bed · City View · Non-smoking</p>
+                    <p class="text-muted small mb-2">30 m� � King Bed � City View � Non-smoking</p>
                     <div class="d-flex flex-wrap gap-2">
                       <span class="amenity-tag"><i class="bi bi-wifi"></i> Free WiFi</span>
                       <span class="amenity-tag"><i class="bi bi-cup-hot"></i> Breakfast Included</span>
@@ -277,27 +277,27 @@
 
             <!-- Pricing breakdown -->
             <div class="d-flex justify-content-between mb-2">
-              <span class="small text-muted" id="sumBaseLabel">₹4,680 × 2 nights</span>
-              <span class="small fw-600" id="sumBase">₹9,360</span>
+              <span class="small text-muted" id="sumBaseLabel">?4,680 � 2 nights</span>
+              <span class="small fw-600" id="sumBase">?9,360</span>
             </div>
             <div class="d-flex justify-content-between mb-2">
               <span class="small text-muted"><span id="sumTaxPctLabel">Taxes & Fees (12% GST)</span></span>
-              <span class="small fw-600" id="sumTax">₹842</span>
+              <span class="small fw-600" id="sumTax">?842</span>
             </div>
             <div class="d-flex justify-content-between mb-2">
               <span class="small text-muted">Service Charge</span>
-              <span class="small fw-600" id="sumService">₹200</span>
+              <span class="small fw-600" id="sumService">?200</span>
             </div>
             <div class="d-flex justify-content-between mb-2">
               <span class="small text-success fw-600">Discount (35% OFF)</span>
-              <span class="small fw-600 text-success" id="sumDiscount">−₹3,276</span>
+              <span class="small fw-600 text-success" id="sumDiscount">-?3,276</span>
             </div>
 
             <hr class="my-3"/>
 
             <div class="d-flex justify-content-between align-items-center mb-1">
               <span class="fw-700">Total Amount</span>
-              <span class="fw-800 text-primary fs-5" id="sumTotal">₹6,926</span>
+              <span class="fw-800 text-primary fs-5" id="sumTotal">?6,926</span>
             </div>
             <p class="text-muted small mb-0">Inclusive of all taxes</p>
 
@@ -316,7 +316,7 @@
             <!-- Savings badge -->
             <div class="savings-badge mb-4">
               <i class="bi bi-piggy-bank-fill me-2 text-success"></i>
-              <span class="small fw-700 text-success">You're saving <span id="savingsAmt">₹3,276</span> on this booking!</span>
+              <span class="small fw-700 text-success">You're saving <span id="savingsAmt">?3,276</span> on this booking!</span>
             </div>
 
             <!-- Book Now CTA -->
@@ -324,7 +324,7 @@
               <i class="bi bi-person-fill me-2"></i>Continue to Guest Details
             </button>
             <p class="text-center text-muted small mb-0">
-              <i class="bi bi-shield-check-fill text-success me-1"></i>100% Secure · SSL Encrypted
+              <i class="bi bi-shield-check-fill text-success me-1"></i>100% Secure � SSL Encrypted
             </p>
 
             <!-- Payment icons -->
@@ -388,7 +388,7 @@
       </div>
     </div>
     <hr class="border-secondary"/>
-    <p class="text-white-50 small text-center mb-0">© 2026 bookHotel Technologies Pvt. Ltd. All rights reserved.</p>
+    <p class="text-white-50 small text-center mb-0">� 2026 bookHotel Technologies Pvt. Ltd. All rights reserved.</p>
   </div>
 </footer>
 
@@ -433,7 +433,7 @@
   document.getElementById('dispCheckin').textContent  = fmtDate(checkin);
   document.getElementById('dispCheckout').textContent = fmtDate(checkout);
   document.getElementById('dispNights').textContent   = nights + ' Night' + (nights>1?'s':'');
-  document.getElementById('dispDates').textContent    = new Date(checkin).toLocaleDateString('en-IN',{day:'2-digit',month:'short'}) + ' – ' + new Date(checkout).toLocaleDateString('en-IN',{day:'2-digit',month:'short'});
+  document.getElementById('dispDates').textContent    = new Date(checkin).toLocaleDateString('en-IN',{day:'2-digit',month:'short'}) + ' � ' + new Date(checkout).toLocaleDateString('en-IN',{day:'2-digit',month:'short'});
 
   // Populate room name
   document.getElementById('selectedRoomName').textContent = room.name;
@@ -450,16 +450,16 @@
 
     document.getElementById('sumRoomName').textContent   = room.name;
     document.getElementById('sumNights').textContent     = nights + ' Night' + (nights>1?'s':'');
-    document.getElementById('sumBaseLabel').textContent  = '₹' + room.price.toLocaleString() + ' × ' + nights + ' night' + (nights>1?'s':'');
-    document.getElementById('sumBase').textContent       = '₹' + base.toLocaleString();
-    document.getElementById('sumTax').textContent        = '₹' + tax.toLocaleString();
+    document.getElementById('sumBaseLabel').textContent  = '?' + room.price.toLocaleString() + ' � ' + nights + ' night' + (nights>1?'s':'');
+    document.getElementById('sumBase').textContent       = '?' + base.toLocaleString();
+    document.getElementById('sumTax').textContent        = '?' + tax.toLocaleString();
     const taxPL = document.getElementById('sumTaxPctLabel');
     if (taxPL) taxPL.textContent = 'GST (' + taxPct + '%)';
     const svcEl = document.getElementById('sumService');
-    if (svcEl) svcEl.textContent = '₹' + svc.toLocaleString();
-    document.getElementById('sumDiscount').textContent   = '−₹' + disc.toLocaleString();
-    document.getElementById('sumTotal').textContent      = '₹' + total.toLocaleString();
-    document.getElementById('savingsAmt').textContent    = '₹' + disc.toLocaleString();
+    if (svcEl) svcEl.textContent = '?' + svc.toLocaleString();
+    document.getElementById('sumDiscount').textContent   = '-?' + disc.toLocaleString();
+    document.getElementById('sumTotal').textContent      = '?' + total.toLocaleString();
+    document.getElementById('savingsAmt').textContent    = '?' + disc.toLocaleString();
   }
   updatePricing();
 
@@ -482,7 +482,7 @@
     document.getElementById('gstFields').style.display = this.checked ? 'flex' : 'none';
   });
 
-  // Proceed to payment — go to guest details page
+  // Proceed to payment � go to guest details page
   function proceedToPayment() {
     const first = document.querySelector('input[placeholder="Enter first name"]').value.trim();
     const email = document.querySelector('input[type="email"]').value.trim();
@@ -502,4 +502,5 @@
 <script src="search-state.js"></script>
 </body>
 </html>
+
 

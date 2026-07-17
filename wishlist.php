@@ -26,7 +26,7 @@
     <div class="collapse navbar-collapse" id="navMenu">
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
         <li class="nav-item"><a class="nav-link" href="hotels.php">Hotels</a></li>
-        <li class="nav-item"><a class="nav-link" href="index.php#destinations">Destinations</a></li>
+        <li class="nav-item"><a class="nav-link" href="destinations.php">Destinations</a></li>
         <li class="nav-item"><a class="nav-link" href="my-bookings.php">My Bookings</a></li>
         <li class="nav-item"><a class="nav-link" href="contact.php">Contact</a></li>
         <li class="nav-item ms-lg-3" id="navAuthSlot">
@@ -596,7 +596,7 @@
       <div class="col-6 col-md-2">
         <h6 class="fw-700 mb-3">Explore</h6>
         <ul class="list-unstyled footer-links">
-          <li><a href="hotels.php">Hotels</a></li><li><a href="#">Destinations</a></li>
+          <li><a href="hotels.php">Hotels</a></li><li><a href="destinations.php">Destinations</a></li>
           <li><a href="my-bookings.php">My Bookings</a></li><li><a href="wishlist.php">Wishlist</a></li>
         </ul>
       </div>

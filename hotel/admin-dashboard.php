@@ -1,24 +1,61 @@
 <?php
 require_once 'db.php';
 require_once 'hotel_functions.php';
-$hstats = bhHotelStats();
-$total_hotels  = $hstats['total'];
-$active_hotels = $hstats['active'];
-$featured_hotels = $hstats['featured'];
-$cities_count  = $hstats['cities'];
+// Assuming logged in manager manages hotel_id = 1
+$hotel_id = 1;
 
-// Get user count from DB
-$ucount_res = mysqli_query($conn, "SELECT COUNT(*) AS cnt FROM users WHERE status='active'");
-$user_count = $ucount_res ? (int)mysqli_fetch_assoc($ucount_res)['cnt'] : 0;
+// Fetch hotel info
+$stmt = mysqli_prepare($conn, "SELECT hotel_name, city FROM hotels WHERE hotel_id = ?");
+mysqli_stmt_bind_param($stmt, 'i', $hotel_id);
+mysqli_stmt_execute($stmt);
+$hotel_res = mysqli_stmt_get_result($stmt);
+$hotel_info = mysqli_fetch_assoc($hotel_res);
+mysqli_stmt_close($stmt);
 
-// Get booking count (if table exists)
-$bcount_res = mysqli_query($conn, "SELECT COUNT(*) AS cnt FROM information_schema.tables WHERE table_schema = '" . DB_NAME . "' AND table_name = 'bookings'");
-$bookings_table_exists = $bcount_res && (int)mysqli_fetch_assoc($bcount_res)['cnt'] > 0;
-$booking_count = 0;
-if ($bookings_table_exists) {
-    $b = mysqli_query($conn, "SELECT COUNT(*) AS cnt FROM bookings");
-    if ($b) $booking_count = (int)mysqli_fetch_assoc($b)['cnt'];
-}
+$hotel_name = $hotel_info ? $hotel_info['hotel_name'] : 'My Hotel';
+$hotel_city = $hotel_info ? ucfirst($hotel_info['city']) : 'Unknown';
+
+// Total bookings
+$b_stmt = mysqli_prepare($conn, "SELECT COUNT(*) as cnt FROM bookings WHERE hotel_id = ?");
+mysqli_stmt_bind_param($b_stmt, 'i', $hotel_id);
+mysqli_stmt_execute($b_stmt);
+$b_res = mysqli_stmt_get_result($b_stmt);
+$booking_count = $b_res ? (int)mysqli_fetch_assoc($b_res)['cnt'] : 0;
+mysqli_stmt_close($b_stmt);
+
+// Total rooms
+$r_stmt = mysqli_prepare($conn, "SELECT COUNT(*) as cnt FROM rooms WHERE hotel_id = ?");
+mysqli_stmt_bind_param($r_stmt, 'i', $hotel_id);
+mysqli_stmt_execute($r_stmt);
+$r_res = mysqli_stmt_get_result($r_stmt);
+$total_rooms = $r_res ? (int)mysqli_fetch_assoc($r_res)['cnt'] : 0;
+mysqli_stmt_close($r_stmt);
+
+// Occupancy (assuming rooms table has 'status' = 'Occupied')
+$occ_stmt = mysqli_prepare($conn, "SELECT COUNT(*) as cnt FROM rooms WHERE hotel_id = ? AND status = 'Occupied'");
+mysqli_stmt_bind_param($occ_stmt, 'i', $hotel_id);
+mysqli_stmt_execute($occ_stmt);
+$occ_res = mysqli_stmt_get_result($occ_stmt);
+$occupied_rooms = $occ_res ? (int)mysqli_fetch_assoc($occ_res)['cnt'] : 0;
+mysqli_stmt_close($occ_stmt);
+
+$occupancy_rate = $total_rooms > 0 ? round(($occupied_rooms / $total_rooms) * 100) : 0;
+
+// Revenue (total_amount from paid bookings)
+$rev_stmt = mysqli_prepare($conn, "SELECT SUM(total_amount) as total FROM bookings WHERE hotel_id = ? AND payment_status = 'paid'");
+mysqli_stmt_bind_param($rev_stmt, 'i', $hotel_id);
+mysqli_stmt_execute($rev_stmt);
+$rev_res = mysqli_stmt_get_result($rev_stmt);
+$total_revenue = $rev_res ? (float)mysqli_fetch_assoc($rev_res)['total'] : 0;
+mysqli_stmt_close($rev_stmt);
+
+// Check-ins today
+$ci_stmt = mysqli_prepare($conn, "SELECT COUNT(*) as cnt FROM bookings WHERE hotel_id = ? AND checkin_date = CURDATE()");
+mysqli_stmt_bind_param($ci_stmt, 'i', $hotel_id);
+mysqli_stmt_execute($ci_stmt);
+$ci_res = mysqli_stmt_get_result($ci_stmt);
+$checkins_today = $ci_res ? (int)mysqli_fetch_assoc($ci_res)['cnt'] : 0;
+mysqli_stmt_close($ci_stmt);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -41,32 +78,26 @@ if ($bookings_table_exists) {
         <div class="ds-logo-role">Hotel Operations</div>
       </div>
     </a>
-    <nav class="ds-nav">
+    <nav class="ds-nav" id="mainSidebar">
       <div class="ds-sec">Main</div>
-      <a href="admin-dashboard.php" class="ds-link active"><i class="bi bi-grid-fill"></i> Dashboard</a>
-      <a href="admin-hotel-profile.php" class="ds-link"><i class="bi bi-building"></i> Hotel Profile</a>
-      <div class="ds-sec">Operations</div>
-      <a href="admin-rooms.php" class="ds-link"><i class="bi bi-door-open-fill"></i> Rooms</a>
-      <a href="admin-bookings.php" class="ds-link"><i class="bi bi-calendar2-check-fill"></i> Bookings</a>
-      <a href="admin-guests.php" class="ds-link"><i class="bi bi-people-fill"></i> Guests</a>
-      <div class="ds-sec">Inventory & Pricing</div>
-      <a href="admin-availability.php" class="ds-link"><i class="bi bi-calendar-range-fill"></i> Availability</a>
-      <a href="admin-pricing.php" class="ds-link"><i class="bi bi-tags-fill"></i> Pricing</a>
-      <a href="admin-discounts.php" class="ds-link"><i class="bi bi-percent"></i> Discounts</a>
-      <div class="ds-sec">Insights</div>
-      <a href="admin-reviews.php" class="ds-link"><i class="bi bi-star-fill"></i> Reviews</a>
-      <a href="admin-revenue.php" class="ds-link"><i class="bi bi-bar-chart-fill"></i> Revenue</a>
-      <a href="admin-notifications.php" class="ds-link"><i class="bi bi-bell-fill"></i> Notifications</a>
-      <div class="ds-sec">Account</div>
-      <a href="admin-settings.php" class="ds-link"><i class="bi bi-sliders"></i> Settings</a>
-      <a href="index.php" class="ds-link"><i class="bi bi-box-arrow-left"></i> Back to Website</a>
+      <a href="admin-dashboard.php" class="ds-link"><i class="bi bi-grid-fill"></i> Dashboard</a>
+      <a href="manage-bookings.php" class="ds-link"><i class="bi bi-calendar2-check-fill"></i> Manage Bookings</a>
+      <a href="check-in-order.php" class="ds-link"><i class="bi bi-person-check-fill"></i> Check In Order</a>
+      <a href="manage-hotels.php" class="ds-link"><i class="bi bi-building"></i> Manage Hotels</a>
+      <a href="manage-hotel-listing.php" class="ds-link"><i class="bi bi-card-checklist"></i> Manage Hotel Listing</a>
+      <a href="on-off-hotel-bookings.php" class="ds-link"><i class="bi bi-toggle-on"></i> On/Off Hotel Bookings</a>
+      <a href="manage-rooms.php" class="ds-link"><i class="bi bi-door-open-fill"></i> Manage Rooms</a>
+      <a href="view-ratings.php" class="ds-link"><i class="bi bi-star-fill"></i> View Ratings</a>
+      <a href="transaction-history.php" class="ds-link"><i class="bi bi-cash-stack"></i> Transaction History</a>
+      <a href="logout.php" class="ds-link"><i class="bi bi-box-arrow-left"></i> Logout</a>
     </nav>
+    <script>document.addEventListener("DOMContentLoaded",()=>{let c=location.pathname.split("/").pop()||"admin-dashboard.php";document.querySelectorAll("#mainSidebar a").forEach(l=>{l.getAttribute("href")===c?l.classList.add("active"):l.classList.remove("active")})});</script>
     <div class="ds-foot">
       <a href="admin-hotel-profile.php" class="ds-hpill">
         <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=120&q=80" alt="Hotel" />
         <div>
-          <div class="ds-hpill-name">The Grand Palace</div>
-          <div class="ds-hpill-status">● Active · Mumbai</div>
+          <div class="ds-hpill-name"><?php echo htmlspecialchars($hotel_name); ?></div>
+          <div class="ds-hpill-status">● Active · <?php echo htmlspecialchars($hotel_city); ?></div>
         </div>
       </a>
     </div>
@@ -106,7 +137,7 @@ if ($bookings_table_exists) {
         <div class="d-flex flex-column flex-lg-row justify-content-between gap-4">
           <div>
             <span class="hero-pill"><i class="bi bi-building-check"></i> Hotel Operations Console</span>
-            <h1 class="hero-title">Welcome back, Aditi. The Grand Palace is running smoothly for today’s arrivals.</h1>
+            <h1 class="hero-title">Welcome back. <?php echo htmlspecialchars($hotel_name); ?> is running smoothly for today’s arrivals.</h1>
             <p class="hero-sub">Keep room readiness, guest stay quality, and revenue momentum on track from a refined property operations dashboard.</p>
             <div class="d-flex flex-wrap gap-2 mt-3">
               <a href="admin-bookings.php" class="ds-btn prim"><i class="bi bi-calendar2-check-fill"></i> View Today’s Arrivals</a>
@@ -122,14 +153,12 @@ if ($bookings_table_exists) {
       </section>
 
       <div class="row g-3 mb-4">
-        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat blue"><div class="ds-si"><i class="bi bi-building-fill"></i></div><div class="ds-sn"><?php echo $total_hotels; ?></div><div class="ds-sl">Total Hotels</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i><?php echo $active_hotels; ?> active</div></div></div>
-        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat green"><div class="ds-si"><i class="bi bi-person-check-fill"></i></div><div class="ds-sn"><?php echo $user_count; ?></div><div class="ds-sl">Active Users</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>Registered accounts</div></div></div>
-        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat gold"><div class="ds-si"><i class="bi bi-star-fill"></i></div><div class="ds-sn"><?php echo $featured_hotels; ?></div><div class="ds-sl">Featured Hotels</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>Shown on homepage</div></div></div>
-        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat purple"><div class="ds-si"><i class="bi bi-geo-alt-fill"></i></div><div class="ds-sn"><?php echo $cities_count; ?></div><div class="ds-sl">Cities Covered</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>Across India</div></div></div>
-        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat gold"><div class="ds-si"><i class="bi bi-calendar2-check-fill"></i></div><div class="ds-sn"><?php echo $booking_count; ?></div><div class="ds-sl">Total Bookings</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>All time</div></div></div>
-        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat red"><div class="ds-si"><i class="bi bi-bell-fill"></i></div><div class="ds-sn">8</div><div class="ds-sl">Pending Requests</div><div class="ds-tr down"><i class="bi bi-arrow-down-short"></i>2 urgent</div></div></div>
-        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat orange"><div class="ds-si"><i class="bi bi-percent"></i></div><div class="ds-sn"><?php echo $total_hotels > 0 ? round($active_hotels/$total_hotels*100).'%' : '0%'; ?></div><div class="ds-sl">Availability Rate</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>Active hotels</div></div></div>
-        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat blue"><div class="ds-si"><i class="bi bi-star-fill"></i></div><div class="ds-sn">5</div><div class="ds-sl">Review Alerts</div><div class="ds-tr down"><i class="bi bi-arrow-down-short"></i>Reply needed</div></div></div>
+        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat blue"><div class="ds-si"><i class="bi bi-door-open-fill"></i></div><div class="ds-sn"><?php echo $total_rooms; ?></div><div class="ds-sl">Total Rooms</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>Available inventory</div></div></div>
+        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat green"><div class="ds-si"><i class="bi bi-calendar2-check-fill"></i></div><div class="ds-sn"><?php echo $booking_count; ?></div><div class="ds-sl">Total Bookings</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>All time</div></div></div>
+        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat gold"><div class="ds-si"><i class="bi bi-person-check-fill"></i></div><div class="ds-sn"><?php echo $checkins_today; ?></div><div class="ds-sl">Check-ins Today</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>Pending arrivals</div></div></div>
+        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat purple"><div class="ds-si"><i class="bi bi-cash-stack"></i></div><div class="ds-sn">₹<?php echo number_format($total_revenue, 2); ?></div><div class="ds-sl">Total Revenue</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>From paid bookings</div></div></div>
+        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat orange"><div class="ds-si"><i class="bi bi-percent"></i></div><div class="ds-sn"><?php echo $occupancy_rate; ?>%</div><div class="ds-sl">Occupancy Rate</div><div class="ds-tr up"><i class="bi bi-arrow-up-short"></i>Based on occupied rooms</div></div></div>
+        <div class="col-12 col-sm-6 col-xl-3"><div class="ds-stat red"><div class="ds-si"><i class="bi bi-bell-fill"></i></div><div class="ds-sn">0</div><div class="ds-sl">Pending Requests</div><div class="ds-tr down"><i class="bi bi-arrow-down-short"></i>0 urgent</div></div></div>
       </div>
 
       <div class="row g-3 mb-4">
@@ -198,4 +227,5 @@ if ($bookings_table_exists) {
   <script>renderRevenue('revChart');renderOcc('occChart');</script>
 </body>
 </html>
+
 

@@ -119,22 +119,20 @@ if (isset($_GET['edit'])) {
     <div class="ds-logo-icon"><i class="bi bi-buildings"></i></div>
     <div><div class="ds-logo-name">bookHotel</div><div class="ds-logo-role">Hotel Operations</div></div>
   </a>
-  <nav class="ds-nav">
-    <div class="ds-sec">Main</div>
-    <a href="admin-dashboard.php" class="ds-link"><i class="bi bi-grid-fill"></i> Dashboard</a>
-    <a href="admin-hotel-profile.php" class="ds-link active"><i class="bi bi-building"></i> Hotel Management</a>
-    <div class="ds-sec">Operations</div>
-    <a href="admin-rooms.php" class="ds-link"><i class="bi bi-door-open-fill"></i> Rooms</a>
-    <a href="admin-bookings.php" class="ds-link"><i class="bi bi-calendar2-check-fill"></i> Bookings</a>
-    <a href="admin-guests.php" class="ds-link"><i class="bi bi-people-fill"></i> Guests</a>
-    <div class="ds-sec">Insights</div>
-    <a href="admin-reviews.php" class="ds-link"><i class="bi bi-star-fill"></i> Reviews</a>
-    <a href="admin-revenue.php" class="ds-link"><i class="bi bi-bar-chart-fill"></i> Revenue</a>
-    <a href="admin-notifications.php" class="ds-link"><i class="bi bi-bell-fill"></i> Notifications</a>
-    <div class="ds-sec">Account</div>
-    <a href="admin-settings.php" class="ds-link"><i class="bi bi-gear-fill"></i> Settings</a>
-    <a href="index.php" class="ds-link"><i class="bi bi-box-arrow-left"></i> Back to Website</a>
-  </nav>
+  <nav class="ds-nav" id="mainSidebar">
+      <div class="ds-sec">Main</div>
+      <a href="admin-dashboard.php" class="ds-link"><i class="bi bi-grid-fill"></i> Dashboard</a>
+      <a href="manage-bookings.php" class="ds-link"><i class="bi bi-calendar2-check-fill"></i> Manage Bookings</a>
+      <a href="check-in-order.php" class="ds-link"><i class="bi bi-person-check-fill"></i> Check In Order</a>
+      <a href="manage-hotels.php" class="ds-link"><i class="bi bi-building"></i> Manage Hotels</a>
+      <a href="manage-hotel-listing.php" class="ds-link"><i class="bi bi-card-checklist"></i> Manage Hotel Listing</a>
+      <a href="on-off-hotel-bookings.php" class="ds-link"><i class="bi bi-toggle-on"></i> On/Off Hotel Bookings</a>
+      <a href="manage-rooms.php" class="ds-link"><i class="bi bi-door-open-fill"></i> Manage Rooms</a>
+      <a href="view-ratings.php" class="ds-link"><i class="bi bi-star-fill"></i> View Ratings</a>
+      <a href="transaction-history.php" class="ds-link"><i class="bi bi-cash-stack"></i> Transaction History</a>
+      <a href="logout.php" class="ds-link"><i class="bi bi-box-arrow-left"></i> Logout</a>
+    </nav>
+    <script>document.addEventListener("DOMContentLoaded",()=>{let c=location.pathname.split("/").pop()||"admin-dashboard.php";document.querySelectorAll("#mainSidebar a").forEach(l=>{l.getAttribute("href")===c?l.classList.add("active"):l.classList.remove("active")})});</script>
 </aside>
 <header class="ds-top">
   <div class="ds-top-l">
@@ -388,3 +386,4 @@ function previewImage(input, previewId) {
 </script>
 </body>
 </html>
+
