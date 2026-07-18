@@ -417,8 +417,8 @@
 
   const params   = new URLSearchParams(window.location.search);
   const roomKey  = params.get('room')     || 'deluxe';
-  const checkin  = (typeof bhSearch !== 'undefined' ? bhSearch.checkin() : params.get('checkin')) || ''; d.setDate(d.getDate()+1); return d.toISOString().split('T')[0]; })();
-  const checkout = (typeof bhSearch !== 'undefined' ? bhSearch.checkout() : params.get('checkout')) || ''; d.setDate(d.getDate()+2); return d.toISOString().split('T')[0]; })();
+  const checkin  = params.get('checkin')  || '';
+  const checkout = params.get('checkout') || '';
   const room     = rooms[roomKey] || rooms['deluxe'];
 
   // Pre-fill from previous page if available

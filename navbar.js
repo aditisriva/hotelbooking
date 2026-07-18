@@ -13,6 +13,16 @@
   /* ── helpers ── */
   function getUser() {
     try {
+      // Check if PHP has populated user details
+      if (typeof window.PHP_USER !== 'undefined' && window.PHP_USER) {
+        localStorage.setItem('bh_user', JSON.stringify(window.PHP_USER));
+        return window.PHP_USER;
+      }
+      // Check if PHP indicates the user is logged out
+      if (typeof window.PHP_LOGGED_OUT !== 'undefined' && window.PHP_LOGGED_OUT) {
+        localStorage.removeItem('bh_user');
+        return null;
+      }
       const raw = localStorage.getItem('bh_user');
       return raw ? JSON.parse(raw) : null;
     } catch (_) { return null; }
@@ -21,14 +31,14 @@
   function logout() {
     localStorage.removeItem('bh_user');
     renderSlot();                       // re-render to login button
-    // animate out then back to login page
+    // animate out then back to logout script
     const overlay = document.createElement('div');
     overlay.style.cssText =
       'position:fixed;inset:0;background:#1a56db;z-index:9999;opacity:0;transition:opacity .35s ease;pointer-events:none';
     document.body.appendChild(overlay);
     requestAnimationFrame(() => {
       overlay.style.opacity = '1';
-      setTimeout(() => window.location.href = 'login.php', 400);
+      setTimeout(() => window.location.href = 'logout.php', 400);
     });
   }
 

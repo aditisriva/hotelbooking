@@ -191,21 +191,21 @@
             <div class="row g-3">
               <div class="col-12 col-md-6">
                 <label class="form-label small fw-600 text-muted">FIRST NAME *</label>
-                <input type="text" class="form-control" placeholder="Enter first name"/>
+                <input type="text" id="rbFirstName" class="form-control" placeholder="Enter first name"/>
               </div>
               <div class="col-12 col-md-6">
                 <label class="form-label small fw-600 text-muted">LAST NAME *</label>
-                <input type="text" class="form-control" placeholder="Enter last name"/>
+                <input type="text" id="rbLastName" class="form-control" placeholder="Enter last name"/>
               </div>
               <div class="col-12 col-md-6">
                 <label class="form-label small fw-600 text-muted">EMAIL ADDRESS *</label>
-                <input type="email" class="form-control" placeholder="Enter email address"/>
+                <input type="email" id="rbEmail" class="form-control" placeholder="Enter email address"/>
               </div>
               <div class="col-12 col-md-6">
                 <label class="form-label small fw-600 text-muted">MOBILE NUMBER *</label>
                 <div class="input-group">
                   <span class="input-group-text bg-white">+91</span>
-                  <input type="tel" class="form-control" placeholder="10-digit mobile number" maxlength="10"/>
+                  <input type="tel" id="rbPhone" class="form-control" placeholder="10-digit mobile number" maxlength="10"/>
                 </div>
               </div>
               <div class="col-12">
@@ -414,9 +414,8 @@
   // Read URL params passed from hotel-details page
   const params = new URLSearchParams(window.location.search);
   const roomKey   = params.get('room')    || 'deluxe';
-  const checkin  = (typeof bhSearch !== 'undefined' ? bhSearch.checkin() : params.get('checkin')) || ''; d.setDate(d.getDate()+1); return d.toISOString().split('T')[0]; })();
-  const checkout = (typeof bhSearch !== 'undefined' ? bhSearch.checkout() : params.get('checkout')) || ''; d.setDate(d.getDate()+2); return d.toISOString().split('T')[0]; })();
-
+  const checkin  = params.get('checkin')  || '';
+  const checkout = params.get('checkout') || '';
   const room = rooms[roomKey] || rooms['deluxe'];
 
   // Format dates
@@ -482,25 +481,24 @@
     document.getElementById('gstFields').style.display = this.checked ? 'flex' : 'none';
   });
 
-  // Proceed to payment � go to guest details page
+  // Proceed to guest details page
   function proceedToPayment() {
-    const first = document.querySelector('input[placeholder="Enter first name"]').value.trim();
-    const email = document.querySelector('input[type="email"]').value.trim();
-    const phone = document.querySelector('input[type="tel"]').value.trim();
+    const first = document.getElementById('rbFirstName').value.trim();
+    const last  = document.getElementById('rbLastName').value.trim();
+    const email = document.getElementById('rbEmail').value.trim();
+    const phone = document.getElementById('rbPhone').value.trim();
     if (!first || !email || !phone) {
-      alert('Please fill in all required guest details before proceeding.');
+      alert('Please fill in First Name, Email and Mobile before proceeding.');
       return;
     }
-    // Pass data to guest details page
-    const params = new URLSearchParams(window.location.search);
-    window.location.href = 'guest-details.php?' + params.toString()
-      + '&first=' + encodeURIComponent(first)
-      + '&email=' + encodeURIComponent(email)
-      + '&phone=' + encodeURIComponent(phone);
+    const p = new URLSearchParams(window.location.search);
+    p.set('first', first);
+    p.set('last',  last);
+    p.set('email', email);
+    p.set('phone', phone);
+    window.location.href = '../guest-details.php?' + p.toString();
   }
 </script>
 <script src="search-state.js"></script>
 </body>
-</html>
-
 

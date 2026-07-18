@@ -1,4 +1,81 @@
-﻿<?php require_once 'pricing.php'; ?>
+<?php
+session_start();
+$is_logged_in   = isset($_SESSION['user_id']);
+$user_firstname = $is_logged_in ? htmlspecialchars($_SESSION['user_firstname'] ?? $_SESSION['user_name'] ?? 'User') : '';
+$user_initial   = $is_logged_in ? strtoupper(substr($_SESSION['user_firstname'] ?? $_SESSION['user_name'] ?? 'U', 0, 1)) : '';
+require_once 'db.php';
+require_once 'hotel_functions.php';
+require_once 'pricing.php';
+
+// Handle AJAX booking creation
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create_booking') {
+    header('Content-Type: application/json');
+    
+    $booking_id = 'BH-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -5));
+    $user_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
+    $hotel_id = (int)($_POST['hotel_id'] ?? 0);
+    
+    // Fetch hotel name and city
+    $hotel_query = mysqli_query($conn, "SELECT hotel_name, city FROM hotels WHERE hotel_id = $hotel_id");
+    $hotel_info = mysqli_fetch_assoc($hotel_query);
+    $h_name = $hotel_info ? $hotel_info['hotel_name'] : 'Heritage Haveli';
+    $h_city = $hotel_info ? $hotel_info['city'] : 'Jaipur';
+    
+    $room_type = sanitize($_POST['room_type'] ?? 'Deluxe Heritage Room');
+    $guest_name = sanitize($_POST['guest_name'] ?? '');
+    $guest_email = sanitize($_POST['guest_email'] ?? '');
+    $guest_phone = sanitize($_POST['guest_phone'] ?? '');
+    $checkin_date = sanitize($_POST['checkin_date'] ?? '');
+    $checkout_date = sanitize($_POST['checkout_date'] ?? '');
+    $nights = (int)($_POST['nights'] ?? 1);
+    $guests = (int)($_POST['guests'] ?? 2);
+    $base_amount = (float)($_POST['base_amount'] ?? 0);
+    $discount_amount = (float)($_POST['discount_amount'] ?? 0);
+    $tax_amount = (float)($_POST['tax_amount'] ?? 0);
+    $service_charge = (float)($_POST['service_charge'] ?? 200);
+    $coupon_discount = (float)($_POST['coupon_discount'] ?? 0);
+    $total_amount = (float)($_POST['total_amount'] ?? 0);
+    $special_requests = sanitize($_POST['special_requests'] ?? '');
+    $arrival_time = sanitize($_POST['arrival_time'] ?? '');
+    
+    $sql = "INSERT INTO bookings (
+        booking_id, user_id, hotel_id, hotel_name, hotel_city, room_type,
+        guest_name, guest_email, guest_phone, checkin_date, checkout_date,
+        nights, guests, base_amount, discount_amount, tax_amount, service_charge,
+        coupon_discount, total_amount, payment_method, payment_status, booking_status,
+        special_requests, arrival_time
+    ) VALUES (
+        '$booking_id', " . ($user_id ? $user_id : "NULL") . ", $hotel_id, '" . mysqli_real_escape_string($conn, $h_name) . "', '" . mysqli_real_escape_string($conn, $h_city) . "', '$room_type',
+        '$guest_name', '$guest_email', '$guest_phone', '$checkin_date', '$checkout_date',
+        $nights, $guests, $base_amount, $discount_amount, $tax_amount, $service_charge,
+        $coupon_discount, $total_amount, 'UPI', 'paid', 'confirmed',
+        '$special_requests', '$arrival_time'
+    )";
+    
+    $ok = mysqli_query($conn, $sql);
+    if ($ok) {
+        echo json_encode(['success' => true, 'booking_id' => $booking_id]);
+    } else {
+        echo json_encode(['success' => false, 'error' => mysqli_error($conn)]);
+    }
+    exit;
+}
+
+$hotel_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$hotel = $hotel_id ? bhGetHotelById($hotel_id) : null;
+if (!$hotel) {
+    $all = bhGetHotels();
+    $hotel = $all ? $all[0] : null;
+}
+
+$hotel_name = $hotel ? $hotel['hotel_name'] : 'Heritage Haveli';
+$hotel_city = $hotel ? ucfirst($hotel['city']) : 'Jaipur';
+$hotel_loc  = $hotel ? $hotel['location'] : 'M.I. Road, Pink City, Jaipur, Rajasthan';
+$hotel_rating = $hotel ? $hotel['rating'] : 4.9;
+$hotel_stars  = $hotel ? (int)$hotel['star_rating'] : 5;
+$hotel_images_arr = $hotel ? bhAllImages($hotel['hotel_images'] ?? '') : [];
+$hotel_img = $hotel_images_arr ? $hotel_images_arr[0] : 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=120&q=80';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,9 +103,25 @@
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
         <li class="nav-item"><a class="nav-link" href="hotels.php">Hotels</a></li>
         <li class="nav-item"><a class="nav-link" href="my-bookings.php">My Bookings</a></li>
-        <li class="nav-item ms-lg-3">
-          <a class="btn btn-outline-warning btn-sm px-3" href="login.php">Login / Sign Up</a>
-        </li>
+         <li class="nav-item ms-lg-3">
+           <?php if ($is_logged_in): ?>
+           <div class="dropdown">
+             <a class="btn btn-warning btn-sm px-3 dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
+               <span class="rounded-circle bg-white text-dark d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width:26px;height:26px;font-size:0.7rem;font-weight:700;"><?= $user_initial ?></span>
+               <span><?= $user_firstname ?></span>
+             </a>
+             <ul class="dropdown-menu dropdown-menu-end">
+               <li><a class="dropdown-item" href="profile.php"><i class="bi bi-person me-2"></i>My Profile</a></li>
+               <li><a class="dropdown-item" href="my-bookings.php"><i class="bi bi-calendar-check me-2"></i>My Bookings</a></li>
+               <li><a class="dropdown-item" href="wishlist.php"><i class="bi bi-heart me-2"></i>Wishlist</a></li>
+               <li><hr class="dropdown-divider"></li>
+               <li><a class="dropdown-item text-danger" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+             </ul>
+           </div>
+           <?php else: ?>
+           <a class="btn btn-outline-warning btn-sm px-3" href="login.php">Login / Sign Up</a>
+           <?php endif; ?>
+         </li>
       </ul>
     </div>
   </div>
@@ -231,11 +324,11 @@
           </div>
           <div class="price-summary-body">
             <div class="d-flex gap-3 align-items-center mb-3">
-              <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=80&q=80"
+              <img src="<?= htmlspecialchars($hotel_img) ?>"
                    class="rounded-2" width="56" height="48" style="object-fit:cover" alt="Hotel"/>
               <div>
-                <div class="fw-700 small">Heritage Haveli, Jaipur</div>
-                <div class="text-warning small">★★★★★</div>
+                <div class="fw-700 small"><?= htmlspecialchars($hotel_name) ?>, <?= htmlspecialchars($hotel_city) ?></div>
+                <div class="text-warning small"><?= str_repeat('★', $hotel_stars) ?></div>
                 <div class="small text-muted" id="ordRoomName">Deluxe Heritage Room</div>
               </div>
             </div>
@@ -345,9 +438,9 @@
 
   const params   = new URLSearchParams(window.location.search);
   const roomKey  = params.get('room')    || 'deluxe';
-  const guests   = (typeof bhSearch !== 'undefined' ? bhSearch.guests() : parseInt(params.get('guests')||'2'));
-  const checkin  = (typeof bhSearch !== 'undefined' ? bhSearch.checkin() : params.get('checkin')) || ''; d.setDate(d.getDate()+1); return d.toISOString().split('T')[0]; })();
-  const checkout = (typeof bhSearch !== 'undefined' ? bhSearch.checkout() : params.get('checkout')) || ''; d.setDate(d.getDate()+2); return d.toISOString().split('T')[0]; })();
+  const guests   = parseInt(params.get('guests') || '2');
+  const checkin  = params.get('checkin')  || '';
+  const checkout = params.get('checkout') || '';
   const room     = rooms[roomKey] || rooms['deluxe'];
 
   const ci = new Date(checkin), co = new Date(checkout);
@@ -457,15 +550,45 @@
     const btn = document.querySelector('.book-now-btn');
     btn.innerHTML='<span class="spinner-border spinner-border-sm me-2"></span>Processing Payment...';
     btn.disabled = true;
-    setTimeout(() => {
-      const email = params.get('email') || 'you@email.com';
-      const id    = 'BH-2026-' + Math.floor(10000+Math.random()*90000);
-      document.getElementById('confirmEmail').textContent = email;
-      document.getElementById('bookingId').textContent    = id;
-      new bootstrap.Modal(document.getElementById('confirmModal')).show();
-      btn.innerHTML='<i class="bi bi-lock-fill me-2"></i>Pay Now';
-      btn.disabled=false;
-    }, 2200);
+
+    const fd = new FormData();
+    fd.append('action', 'create_booking');
+    fd.append('hotel_id', params.get('id') || '');
+    fd.append('room_type', room.name);
+    fd.append('guest_name', (params.get('first') || '') + ' ' + (params.get('last') || ''));
+    fd.append('guest_email', params.get('email') || '');
+    fd.append('guest_phone', params.get('phone') || '');
+    fd.append('checkin_date', checkin);
+    fd.append('checkout_date', checkout);
+    fd.append('nights', nights);
+    fd.append('guests', guests);
+    fd.append('base_amount', base);
+    fd.append('discount_amount', disc);
+    fd.append('tax_amount', tax);
+    fd.append('service_charge', svc);
+    fd.append('coupon_discount', typeof extraDisc !== 'undefined' ? extraDisc : 0);
+    fd.append('total_amount', total);
+    fd.append('special_requests', params.get('requests') || '');
+    fd.append('arrival_time', params.get('arrival') || '');
+
+    fetch('payment.php', { method: 'POST', body: fd })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          document.getElementById('confirmEmail').textContent = params.get('email') || 'you@email.com';
+          document.getElementById('bookingId').textContent    = d.booking_id;
+          new bootstrap.Modal(document.getElementById('confirmModal')).show();
+        } else {
+          alert('Error creating booking: ' + d.error);
+        }
+        btn.innerHTML='<i class="bi bi-lock-fill me-2"></i>Pay Now';
+        btn.disabled=false;
+      })
+      .catch(() => {
+        alert('Network error. Please try again.');
+        btn.innerHTML='<i class="bi bi-lock-fill me-2"></i>Pay Now';
+        btn.disabled=false;
+      });
   }
 </script>
 <script src="search-state.js"></script>

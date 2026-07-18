@@ -1,4 +1,9 @@
-<?php require_once 'pricing.php'; ?>
+﻿<?php
+session_start();
+$is_logged_in   = isset($_SESSION['user_id']);
+$user_firstname = $is_logged_in ? htmlspecialchars($_SESSION['user_firstname'] ?? $_SESSION['user_name'] ?? 'User') : '';
+$user_initial   = $is_logged_in ? strtoupper(substr($_SESSION['user_firstname'] ?? $_SESSION['user_name'] ?? 'U', 0, 1)) : '';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,9 +35,25 @@
         <li class="nav-item"><a class="nav-link" href="destinations.php">Destinations</a></li>
         <li class="nav-item"><a class="nav-link" href="my-bookings.php">My Bookings</a></li>
         <li class="nav-item"><a class="nav-link" href="contact.php">Contact</a></li>
-        <li class="nav-item ms-lg-3">
-          <a class="btn btn-outline-warning btn-sm px-3" href="login.php">Login / Sign Up</a>
-        </li>
+         <li class="nav-item ms-lg-3">
+           <?php if ($is_logged_in): ?>
+           <div class="dropdown">
+             <a class="btn btn-warning btn-sm px-3 dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
+               <span class="rounded-circle bg-white text-dark d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width:26px;height:26px;font-size:0.7rem;font-weight:700;"><?= $user_initial ?></span>
+               <span><?= $user_firstname ?></span>
+             </a>
+             <ul class="dropdown-menu dropdown-menu-end">
+               <li><a class="dropdown-item" href="profile.php"><i class="bi bi-person me-2"></i>My Profile</a></li>
+               <li><a class="dropdown-item" href="my-bookings.php"><i class="bi bi-calendar-check me-2"></i>My Bookings</a></li>
+               <li><a class="dropdown-item" href="wishlist.php"><i class="bi bi-heart me-2"></i>Wishlist</a></li>
+               <li><hr class="dropdown-divider"></li>
+               <li><a class="dropdown-item text-danger" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+             </ul>
+           </div>
+           <?php else: ?>
+           <a class="btn btn-outline-warning btn-sm px-3" href="login.php">Login / Sign Up</a>
+           <?php endif; ?>
+         </li>
       </ul>
     </div>
   </div>
@@ -191,21 +212,21 @@
             <div class="row g-3">
               <div class="col-12 col-md-6">
                 <label class="form-label small fw-600 text-muted">FIRST NAME *</label>
-                <input type="text" class="form-control" placeholder="Enter first name"/>
+                <input type="text" id="rbFirstName" class="form-control" placeholder="Enter first name"/>
               </div>
               <div class="col-12 col-md-6">
                 <label class="form-label small fw-600 text-muted">LAST NAME *</label>
-                <input type="text" class="form-control" placeholder="Enter last name"/>
+                <input type="text" id="rbLastName" class="form-control" placeholder="Enter last name"/>
               </div>
               <div class="col-12 col-md-6">
                 <label class="form-label small fw-600 text-muted">EMAIL ADDRESS *</label>
-                <input type="email" class="form-control" placeholder="Enter email address"/>
+                <input type="email" id="rbEmail" class="form-control" placeholder="Enter email address"/>
               </div>
               <div class="col-12 col-md-6">
                 <label class="form-label small fw-600 text-muted">MOBILE NUMBER *</label>
                 <div class="input-group">
                   <span class="input-group-text bg-white">+91</span>
-                  <input type="tel" class="form-control" placeholder="10-digit mobile number" maxlength="10"/>
+                  <input type="tel" id="rbPhone" class="form-control" placeholder="10-digit mobile number" maxlength="10"/>
                 </div>
               </div>
               <div class="col-12">
@@ -412,10 +433,10 @@
   };
 
   // Read URL params passed from hotel-details page
-  const params = new URLSearchParams(window.location.search);
-  const roomKey   = params.get('room')    || 'deluxe';
-  const checkin  = (typeof bhSearch !== 'undefined' ? bhSearch.checkin() : params.get('checkin')) || ''; d.setDate(d.getDate()+1); return d.toISOString().split('T')[0]; })();
-  const checkout = (typeof bhSearch !== 'undefined' ? bhSearch.checkout() : params.get('checkout')) || ''; d.setDate(d.getDate()+2); return d.toISOString().split('T')[0]; })();
+  const params   = new URLSearchParams(window.location.search);
+  const roomKey  = params.get('room')    || 'deluxe';
+  const checkin  = params.get('checkin')  || '';
+  const checkout = params.get('checkout') || '';
 
   const room = rooms[roomKey] || rooms['deluxe'];
 
@@ -482,24 +503,24 @@
     document.getElementById('gstFields').style.display = this.checked ? 'flex' : 'none';
   });
 
-  // Proceed to payment — go to guest details page
+  // Proceed to guest details page
   function proceedToPayment() {
-    const first = document.querySelector('input[placeholder="Enter first name"]').value.trim();
-    const email = document.querySelector('input[type="email"]').value.trim();
-    const phone = document.querySelector('input[type="tel"]').value.trim();
+    const first = document.getElementById('rbFirstName').value.trim();
+    const last  = document.getElementById('rbLastName').value.trim();
+    const email = document.getElementById('rbEmail').value.trim();
+    const phone = document.getElementById('rbPhone').value.trim();
     if (!first || !email || !phone) {
-      alert('Please fill in all required guest details before proceeding.');
+      alert('Please fill in First Name, Email and Mobile before proceeding.');
       return;
     }
-    // Pass data to guest details page
-    const params = new URLSearchParams(window.location.search);
-    window.location.href = 'guest-details.php?' + params.toString()
-      + '&first=' + encodeURIComponent(first)
-      + '&email=' + encodeURIComponent(email)
-      + '&phone=' + encodeURIComponent(phone);
+    const p = new URLSearchParams(window.location.search);
+    p.set('first', first);
+    p.set('last',  last);
+    p.set('email', email);
+    p.set('phone', phone);
+    window.location.href = 'guest-details.php?' + p.toString();
   }
 </script>
 <script src="search-state.js"></script>
 </body>
 </html>
-

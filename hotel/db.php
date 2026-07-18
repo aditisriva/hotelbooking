@@ -4,19 +4,53 @@
  * bookHotel Hotel Booking System
  */
 
-// Database credentials
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', 'Aditi@1521');
-define('DB_NAME', 'bookhotel_db');
-define('DB_PORT', 3306);
+// ── DB Credentials ────────────────────────────────────────────────
+// To find your password: open phpMyAdmin → User Accounts.
+// Common XAMPP setups: empty password on port 3306.
+// ──────────────────────────────────────────────────────────────────
+$_db_host = 'localhost';
+$_db_user = 'root';
+$_db_name = 'bookhotel_db';
 
-// Create connection without selecting database first
-$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASS, null, DB_PORT);
+// List of (password, port) pairs to try in order (prioritizing user's password)
+$_db_candidates = [
+    ['Aditi@1521', 3306],
+    ['Aditi@1521', 3307],
+    ['', 3306],
+    ['', 3307],
+    ['root',       3306],
+    ['root',       3307],
+    ['mysql',      3306],
+];
 
-// Check connection
+// Disable mysqli exceptions during connection probing (PHP 8.1+ throws by default)
+$_prev_report = mysqli_report(MYSQLI_REPORT_OFF);
+
+$conn = null;
+foreach ($_db_candidates as [$_pass, $_port]) {
+    $conn = mysqli_connect($_db_host, $_db_user, $_pass, null, $_port);
+    if ($conn) {
+        // Store working credentials as constants for the rest of the app
+        define('DB_HOST', $_db_host);
+        define('DB_USER', $_db_user);
+        define('DB_PASS', $_pass);
+        define('DB_NAME', $_db_name);
+        define('DB_PORT', $_port);
+        break;
+    }
+}
+unset($_db_candidates, $_db_host, $_db_user, $_db_name, $_pass, $_port);
+
+// Restore normal error reporting now that we have a connection (or not)
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
 if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
+    http_response_code(503);
+    die('<h2 style="font-family:sans-serif;color:#c0392b">&#x26A0; Database Connection Failed</h2>'
+      . '<p style="font-family:sans-serif">Could not connect to MySQL.<br>'
+      . 'Make sure <strong>XAMPP MySQL is running</strong> and the credentials '
+      . 'in <code>db.php</code> are correct.</p>'
+      . '<p style="font-family:sans-serif;color:#888">Error: ' . htmlspecialchars(mysqli_connect_error()) . '</p>');
 }
 
 // Create database if not exists
