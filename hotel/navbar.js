@@ -28,10 +28,23 @@
     } catch (_) { return null; }
   }
 
+  function syncUserFromDOM(slot) {
+    try {
+      const nameEl = slot.querySelector('.bh-user-name, .dropdown-toggle span:last-child');
+      const emailEl = slot.querySelector('.bh-dropdown__email');
+      if (nameEl && nameEl.textContent.trim()) {
+        const user = {
+          name: nameEl.textContent.trim(),
+          email: emailEl ? emailEl.textContent.trim() : ''
+        };
+        localStorage.setItem('bh_user', JSON.stringify(user));
+      }
+    } catch (_) {}
+  }
+
   function logout() {
     localStorage.removeItem('bh_user');
-    renderSlot();                       // re-render to login button
-    // animate out then back to logout script
+    renderSlot();
     const overlay = document.createElement('div');
     overlay.style.cssText =
       'position:fixed;inset:0;background:#1a56db;z-index:9999;opacity:0;transition:opacity .35s ease;pointer-events:none';
@@ -101,12 +114,35 @@
     const user = getUser();
 
     if (!user) {
-      // logged out
+      const hasPHPdDropdown = slot.querySelector('.dropdown-menu');
+      const hasPHPdLoginBtn = slot.querySelector('a[href="login.php"]');
+
+      if (hasPHPdDropdown) {
+        syncUserFromDOM(slot);
+        return;
+      }
+
+      if (hasPHPdLoginBtn) {
+        localStorage.removeItem('bh_user');
+        return;
+      }
+
       slot.innerHTML = `<a class="btn btn-outline-warning btn-sm px-3" href="login.php">Login / Sign Up</a>`;
       return;
     }
 
-    // logged in
+    const hasPHPdDropdown = slot.querySelector('.dropdown-menu');
+    const hasPHPdLoginBtn = slot.querySelector('a[href="login.php"]');
+
+    if (hasPHPdDropdown) {
+      return;
+    }
+
+    if (hasPHPdLoginBtn) {
+      localStorage.removeItem('bh_user');
+      return;
+    }
+
     slot.innerHTML = buildDropdown(user);
     attachDropdownEvents();
   }

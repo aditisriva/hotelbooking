@@ -10,6 +10,12 @@ $user_initial   = $is_logged_in ? strtoupper(substr($_SESSION['user_firstname'] 
   $checkout   = (!empty($_GET["checkout"])) ? trim($_GET["checkout"]) : date("Y-m-d", strtotime("+2 days"));
   $city_idx   = (!empty($_GET["city"]))   ? trim($_GET["city"])   : "";
   $guests_idx = (!empty($_GET["guests"])) ? (int)$_GET["guests"]  : 2;
+
+  require_once 'db.php';
+  $top_hotels = [];
+  $th_res = mysqli_query($conn, "SELECT h.*, COALESCE(AVG(r.rating),0) AS avg_rating, COUNT(r.review_id) AS total_reviews FROM hotels h LEFT JOIN reviews r ON h.hotel_id=r.hotel_id AND r.status='approved' WHERE h.approval_status='approved' GROUP BY h.hotel_id ORDER BY h.featured DESC, avg_rating DESC, total_reviews DESC LIMIT 4");
+  if ($th_res) while ($row = mysqli_fetch_assoc($th_res)) $top_hotels[] = $row;
+  function getFirstImage($json, $fb) { $imgs = json_decode($json, true); return ($imgs && count($imgs)>0) ? $imgs[0] : $fb; }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -254,127 +260,52 @@ $user_initial   = $is_logged_in ? strtoupper(substr($_SESSION['user_firstname'] 
     </div>
     <div class="row g-4">
 
-      <!-- Hotel Card 1 -->
+      <?php if (empty($top_hotels)): ?>
+      <div class="col-12 text-center py-5 text-muted">
+        <i class="bi bi-building" style="font-size:3rem;opacity:.3"></i>
+        <div class="fw-bold mt-3">No top rated hotels found</div>
+      </div>
+      <?php else: ?>
+      <?php foreach($top_hotels as $h):
+        $img = getFirstImage($h['hotel_images'], 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80');
+        $stars = str_repeat('★', (int)round($h['avg_rating'])) . str_repeat('☆', 5 - (int)round($h['avg_rating']));
+        $discount = $h['original_price'] > $h['price_per_night'] ? round((($h['original_price'] - $h['price_per_night']) / $h['original_price']) * 100) : 0;
+        $badge_html = $h['featured'] ? '<span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">Top Rated</span>' : ($discount > 0 ? '<span class="badge bg-danger position-absolute top-0 start-0 m-2">'.$discount.'% OFF</span>' : '<span class="badge bg-success position-absolute top-0 start-0 m-2">Free Cancellation</span>');
+        $amenities = array_filter(explode(',', $h['amenities'] ?? ''));
+        $amenity_tags = '';
+        foreach (array_slice($amenities, 0, 3) as $a) {
+          $icon = match(trim($a)) { 'wifi' => 'bi-wifi', 'pool' => 'bi-droplet-fill', 'breakfast' => 'bi-cup-hot', 'parking' => 'bi-car-front', 'ac' => 'bi-fan', 'spa' => 'bi-flower1', 'gym' => 'bi-bicycle', 'fireplace' => 'bi-fire', default => 'bi-check' };
+          $amenity_tags .= '<span class="amenity-tag"><i class="bi '.$icon.'"></i> '.ucfirst(trim($a)).'</span>';
+        }
+      ?>
       <div class="col-12 col-md-6 col-lg-3">
         <div class="hotel-card card border-0 shadow-sm h-100">
           <div class="position-relative">
-            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80" class="card-img-top hotel-img" alt="Hotel"/>
-            <span class="badge bg-success position-absolute top-0 start-0 m-2">Free Cancellation</span>
+            <img src="<?= htmlspecialchars($img) ?>" class="card-img-top hotel-img" alt="<?= htmlspecialchars($h['hotel_name']) ?>"/>
+            <?= $badge_html ?>
             <button class="btn-wishlist" aria-label="Add to wishlist"><i class="bi bi-heart"></i></button>
           </div>
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-start mb-1">
-              <h6 class="fw-700 mb-0">The Grand Palace</h6>
-              <span class="rating-badge">4.8 <i class="bi bi-star-fill"></i></span>
+              <h6 class="fw-700 mb-0"><?= htmlspecialchars($h['hotel_name']) ?></h6>
+              <span class="rating-badge"><?= $h['avg_rating'] ?> <i class="bi bi-star-fill"></i></span>
             </div>
-            <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill me-1 text-danger"></i>Mumbai, India</p>
-            <div class="d-flex gap-1 flex-wrap mb-3">
-              <span class="amenity-tag"><i class="bi bi-wifi"></i> WiFi</span>
-              <span class="amenity-tag"><i class="bi bi-droplet-fill"></i> Pool</span>
-              <span class="amenity-tag"><i class="bi bi-cup-hot"></i> Breakfast</span>
-            </div>
+            <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill me-1 text-danger"></i><?= htmlspecialchars(ucfirst($h['city'])) ?>, India</p>
+            <div class="d-flex gap-1 flex-wrap mb-3"><?= $amenity_tags ?></div>
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <span class="text-muted text-decoration-line-through small">?6,500</span>
-                <div class="fw-800 text-primary fs-5">?4,299<span class="fs-6 fw-400 text-muted">/night</span></div>
+                <?php if ($h['original_price'] > $h['price_per_night']): ?>
+                <span class="text-muted text-decoration-line-through small">?<?= number_format($h['original_price']) ?></span>
+                <?php endif; ?>
+                <div class="fw-800 text-primary fs-5">?<?= number_format($h['price_per_night']) ?><span class="fs-6 fw-400 text-muted">/night</span></div>
               </div>
-              <a href="#" class="btn btn-primary btn-sm px-3">Book Now</a>
+              <a href="hotel-details.php?id=<?= $h['hotel_id'] ?>" class="btn btn-primary btn-sm px-3">Book Now</a>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- Hotel Card 2 -->
-      <div class="col-12 col-md-6 col-lg-3">
-        <div class="hotel-card card border-0 shadow-sm h-100">
-          <div class="position-relative">
-            <img src="https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&q=80" class="card-img-top hotel-img" alt="Hotel"/>
-            <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">Best Seller</span>
-            <button class="btn-wishlist" aria-label="Add to wishlist"><i class="bi bi-heart"></i></button>
-          </div>
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start mb-1">
-              <h6 class="fw-700 mb-0">Sunset Beach Resort</h6>
-              <span class="rating-badge">4.6 <i class="bi bi-star-fill"></i></span>
-            </div>
-            <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill me-1 text-danger"></i>Goa, India</p>
-            <div class="d-flex gap-1 flex-wrap mb-3">
-              <span class="amenity-tag"><i class="bi bi-wifi"></i> WiFi</span>
-              <span class="amenity-tag"><i class="bi bi-droplet-fill"></i> Pool</span>
-              <span class="amenity-tag"><i class="bi bi-car-front"></i> Parking</span>
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <span class="text-muted text-decoration-line-through small">?8,000</span>
-                <div class="fw-800 text-primary fs-5">?5,499<span class="fs-6 fw-400 text-muted">/night</span></div>
-              </div>
-              <a href="#" class="btn btn-primary btn-sm px-3">Book Now</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Hotel Card 3 -->
-      <div class="col-12 col-md-6 col-lg-3">
-        <div class="hotel-card card border-0 shadow-sm h-100">
-          <div class="position-relative">
-            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&q=80" class="card-img-top hotel-img" alt="Hotel"/>
-            <span class="badge bg-danger position-absolute top-0 start-0 m-2">35% OFF</span>
-            <button class="btn-wishlist" aria-label="Add to wishlist"><i class="bi bi-heart"></i></button>
-          </div>
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start mb-1">
-              <h6 class="fw-700 mb-0">Heritage Haveli</h6>
-              <span class="rating-badge">4.9 <i class="bi bi-star-fill"></i></span>
-            </div>
-            <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill me-1 text-danger"></i>Jaipur, India</p>
-            <div class="d-flex gap-1 flex-wrap mb-3">
-              <span class="amenity-tag"><i class="bi bi-wifi"></i> WiFi</span>
-              <span class="amenity-tag"><i class="bi bi-cup-hot"></i> Breakfast</span>
-              <span class="amenity-tag"><i class="bi bi-fan"></i> AC</span>
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <span class="text-muted text-decoration-line-through small">?7,200</span>
-                <div class="fw-800 text-primary fs-5">?4,680<span class="fs-6 fw-400 text-muted">/night</span></div>
-              </div>
-              <a href="#" class="btn btn-primary btn-sm px-3">Book Now</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Hotel Card 4 -->
-      <div class="col-12 col-md-6 col-lg-3">
-        <div class="hotel-card card border-0 shadow-sm h-100">
-          <div class="position-relative">
-            <img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=400&q=80" class="card-img-top hotel-img" alt="Hotel"/>
-            <span class="badge bg-info text-dark position-absolute top-0 start-0 m-2">New</span>
-            <button class="btn-wishlist" aria-label="Add to wishlist"><i class="bi bi-heart"></i></button>
-          </div>
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start mb-1">
-              <h6 class="fw-700 mb-0">Mountain View Lodge</h6>
-              <span class="rating-badge">4.7 <i class="bi bi-star-fill"></i></span>
-            </div>
-            <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill me-1 text-danger"></i>Manali, India</p>
-            <div class="d-flex gap-1 flex-wrap mb-3">
-              <span class="amenity-tag"><i class="bi bi-wifi"></i> WiFi</span>
-              <span class="amenity-tag"><i class="bi bi-fire"></i> Fireplace</span>
-              <span class="amenity-tag"><i class="bi bi-cup-hot"></i> Breakfast</span>
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <span class="text-muted text-decoration-line-through small">?5,500</span>
-                <div class="fw-800 text-primary fs-5">?3,299<span class="fs-6 fw-400 text-muted">/night</span></div>
-              </div>
-              <a href="#" class="btn btn-primary btn-sm px-3">Book Now</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
+      <?php endforeach; ?>
+      <?php endif; ?>
   </div>
 </section>
 

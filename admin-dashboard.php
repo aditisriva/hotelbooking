@@ -56,7 +56,7 @@ if ($bookings_table_exists) {
       <div class="ds-sec">Insights</div>
       <a href="admin-reviews.php" class="ds-link"><i class="bi bi-star-fill"></i> Reviews</a>
       <a href="admin-revenue.php" class="ds-link"><i class="bi bi-bar-chart-fill"></i> Revenue</a>
-      <a href="admin-notifications.php" class="ds-link"><i class="bi bi-bell-fill"></i> Notifications</a>
+      <a href="notifications.php" class="ds-link"><i class="bi bi-bell-fill"></i> Notifications</a>
       <div class="ds-sec">Account</div>
       <a href="admin-settings.php" class="ds-link"><i class="bi bi-sliders"></i> Settings</a>
       <a href="index.php" class="ds-link"><i class="bi bi-box-arrow-left"></i> Back to Website</a>
@@ -85,7 +85,7 @@ if ($bookings_table_exists) {
         <i class="bi bi-search ds-si-ic"></i>
         <input class="ds-inp search" type="text" placeholder="Search rooms, bookings, guests" />
       </div>
-      <a href="admin-notifications.php" class="ds-ibtn"><i class="bi bi-bell-fill"></i><span class="ds-dot"></span></a>
+      <a href="notifications.php" class="ds-ibtn"><i class="bi bi-bell-fill"></i><span class="ds-dot"></span></a>
       <div class="ds-avbtn" id="dsAvBtn">
         <div class="ds-av">AD</div>
         <span class="ds-avname d-none d-sm-block">Aditi</span>
@@ -167,7 +167,7 @@ if ($bookings_table_exists) {
                 <div class="col-12 col-sm-6 col-xl-4"><a href="admin-guests.php" class="module-card"><i class="bi bi-people-fill"></i><strong>Guests</strong><span>Monitor in-house guests and returning visitor profiles.</span></a></div>
                 <div class="col-12 col-sm-6 col-xl-4"><a href="admin-reviews.php" class="module-card"><i class="bi bi-star-fill"></i><strong>Reviews</strong><span>Reply to guest feedback and protect brand experience.</span></a></div>
                 <div class="col-12 col-sm-6 col-xl-4"><a href="admin-revenue.php" class="module-card"><i class="bi bi-bar-chart-fill"></i><strong>Revenue</strong><span>Review daily earnings, occupancy, and room performance.</span></a></div>
-                <div class="col-12 col-sm-6 col-xl-4"><a href="admin-notifications.php" class="module-card"><i class="bi bi-bell-fill"></i><strong>Notifications</strong><span>Stay on top of service alerts, requests, and updates.</span></a></div>
+                <div class="col-12 col-sm-6 col-xl-4"><a href="notifications.php" class="module-card"><i class="bi bi-bell-fill"></i><strong>Notifications</strong><span>Stay on top of service alerts, requests, and updates.</span></a></div>
                 <div class="col-12 col-sm-6 col-xl-4"><a href="admin-hotel-profile.php" class="module-card"><i class="bi bi-building"></i><strong>Hotel Management</strong><span>Add, edit, delete hotels. All changes reflect on user site instantly.</span></a></div>
                 <div class="col-12 col-sm-6 col-xl-4"><a href="admin-settings.php" class="module-card"><i class="bi bi-sliders"></i><strong>Settings</strong><span>Adjust hotel preferences, policies, and team access.</span></a></div>
                 <div class="col-12 col-sm-6 col-xl-4"><a href="admin-availability.php" class="module-card"><i class="bi bi-calendar-range-fill"></i><strong>Availability</strong><span>Manage room availability and block dates.</span></a></div>

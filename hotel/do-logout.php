@@ -1,14 +1,8 @@
 <?php
-/**
- * Logout — bookHotel
- * Destroys session and clears remember-me cookie
- */
 session_start();
 
-// Clear all session data
 $_SESSION = [];
 
-// Destroy the session cookie
 if (ini_get('session.use_cookies')) {
     $params = session_get_cookie_params();
     setcookie(
@@ -23,12 +17,10 @@ if (ini_get('session.use_cookies')) {
 
 session_destroy();
 
-// Optionally clear remember-me cookie
-if (isset($_COOKIE['remember_email'])) {
-    setcookie('remember_email', '', time() - 3600, '/');
+if (isset($_COOKIE['hm_remember_email'])) {
+    setcookie('hm_remember_email', '', time() - 3600, '/');
 }
 
 header('Location: login.php?logout=1');
 exit();
 ?>
-

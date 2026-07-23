@@ -1,8 +1,8 @@
 <?php
 session_start();
 $current_year = date("Y");
-$is_logged_in   = isset($_SESSION['user_id']);
-$user_firstname = $is_logged_in ? htmlspecialchars($_SESSION['user_firstname'] ?? $_SESSION['user_name'] ?? 'User') : '';
+$is_logged_in   = isset($_SESSION['hm_id']);
+$user_firstname = $is_logged_in ? htmlspecialchars($_SESSION['hm_firstname'] ?? $_SESSION['hm_name'] ?? 'Manager') : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">

@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $pay_method     = sanitize($_POST['payment_method'] ?? 'UPI');
     $special_req    = sanitize($_POST['special_requests'] ?? '');
     $arrival_time   = sanitize($_POST['arrival_time'] ?? '');
-    $user_id        = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
+    $user_id        = isset($_SESSION['hm_id']) ? (int)$_SESSION['hm_id'] : null;
 
     $stmt = mysqli_prepare($conn,
         "INSERT INTO bookings (booking_id,user_id,hotel_id,hotel_name,hotel_city,room_type,

@@ -292,9 +292,9 @@ function amenChips(string $sel=''):void{
     <div class="ds-sec">Insights</div>
     <a href="admin-reviews.php" class="ds-link"><i class="bi bi-star-fill"></i> Reviews</a>
     <a href="admin-revenue.php" class="ds-link"><i class="bi bi-bar-chart-fill"></i> Revenue</a>
-    <a href="admin-notifications.php" class="ds-link"><i class="bi bi-bell-fill"></i> Notifications</a>
+    <a href="notifications.php" class="ds-link"><i class="bi bi-bell-fill"></i> Notifications</a>
     <div class="ds-sec">Account</div>
-    <a href="admin-settings.php" class="ds-link"><i class="bi bi-sliders"></i> Settings</a>
+    <a href="settings.php" class="ds-link"><i class="bi bi-sliders"></i> Settings</a>
     <a href="index.php" class="ds-link"><i class="bi bi-box-arrow-left"></i> Back to Website</a>
   </nav>
 </aside>
@@ -304,10 +304,10 @@ function amenChips(string $sel=''):void{
     <div><div class="ds-page-title">Manage Rooms</div><div class="ds-breadcrumb">Dashboard / Rooms &middot; <?php echo (int)$s['t']; ?> rooms</div></div>
   </div>
   <div class="ds-top-r">
-    <a href="admin-notifications.php" class="ds-ibtn"><i class="bi bi-bell-fill"></i></a>
+    <a href="notifications.php" class="ds-ibtn"><i class="bi bi-bell-fill"></i></a>
     <div class="ds-avbtn" id="dsAvBtn"><div class="ds-av">AD</div><span class="ds-avname d-none d-sm-block">Admin</span>
       <div class="ds-dropdown" id="dsAvMenu">
-        <a href="admin-settings.php" class="ds-drop-item"><i class="bi bi-gear-fill text-primary"></i> Settings</a>
+        <a href="settings.php" class="ds-drop-item"><i class="bi bi-gear-fill text-primary"></i> Settings</a>
         <hr class="my-1 mx-2"/><a href="login.php" class="ds-drop-item danger"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
       </div>
     </div>

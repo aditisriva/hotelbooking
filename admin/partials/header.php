@@ -2,6 +2,18 @@
 $pageTitle = isset($pageTitle) ? $pageTitle : 'Admin Portal';
 $pageSubtitle = isset($pageSubtitle) ? $pageSubtitle : 'Platform oversight';
 $currentPage = basename($_SERVER['PHP_SELF']);
+
+if (session_status() === PHP_SESSION_NONE) session_start();
+
+if (!isset($conn)) {
+    require_once __DIR__ . '/../db.php';
+}
+
+$bellCount = 0;
+if (isset($_SESSION['admin_id'])) {
+    $res = mysqli_query($conn, "SELECT COUNT(*) AS cnt FROM notifications WHERE user_id=" . (int)$_SESSION['admin_id'] . " AND is_read=0");
+    if ($res) { $bellCount = (int)mysqli_fetch_assoc($res)['cnt']; }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -67,9 +79,10 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <i class="bi bi-search" style="position: absolute; left: .65rem; color: rgba(15,23,42,.4); font-size: .85rem;"></i>
         <input type="text" placeholder="Search…" style="background: rgba(15,23,42,.04); border: 1px solid rgba(15,23,42,.08); border-radius: 8px; padding: .38rem .8rem .38rem 2.1rem; color: #0f172a; font-size: .8rem; width: 200px; outline: none; transition: all .2s;" />
       </div>
-      <a href="../hotel/admin-notifications.php" class="ds-ibtn">
+      <a href="notifications.php" class="ds-ibtn" style="position:relative">
         <i class="bi bi-bell-fill"></i>
-        <span class="ds-dot"></span>
+        <?php if ($bellCount > 0): ?><span class="ds-dot"></span><?php endif; ?>
+        <span id="bellCount" style="position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:.65rem;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0;<?php echo $bellCount > 0 ? '' : 'display:none;'; ?>"><?php echo $bellCount > 99 ? '99+' : $bellCount; ?></span>
       </a>
       <div class="ds-avbtn" id="dsAvBtn">
         <div class="ds-av" style="background:linear-gradient(135deg,#f59e0b,#d97706);">AS</div>

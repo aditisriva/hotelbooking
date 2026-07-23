@@ -1,11 +1,13 @@
 <?php
-require_once 'auth_guard.php';
 session_start();
 require_once 'db.php';
+require_once 'auth_guard.php';
+require_once 'hotel_functions.php';
 
 // ── Handle status update ──────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     header('Content-Type: application/json');
+    
     if ($_POST['action'] === 'update_status') {
         $bid    = sanitize($_POST['booking_id'] ?? '');
         $status = sanitize($_POST['status'] ?? '');
@@ -21,7 +23,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
         exit;
     }
+    
+    if ($_POST['action'] === 'toggle_booking_visibility') {
+        $user_id = $_SESSION['hm_id'] ?? 0;
+        $hotels = bhGetHotels('', 0, 0, 0, $user_id);
+        $hotel = $hotels[0] ?? null;
+        
+        if ($hotel) {
+            $new_status = $_POST['booking_enabled'] ? 'active' : 'inactive';
+            $ok = bhUpdateHotel($hotel['hotel_id'], ['availability_status' => $new_status]);
+            echo json_encode(['success' => $ok, 'status' => $new_status]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'No hotel assigned']);
+        }
+        exit;
+    }
 }
+
+// ── Fetch assigned hotel for visibility toggle ─────────────────────────────
+$user_id = $_SESSION['hm_id'] ?? 0;
+$hotels = bhGetHotels('', 0, 0, 0, $user_id);
+$assigned_hotel = $hotels[0] ?? null;
+$booking_enabled = $assigned_hotel ? ($assigned_hotel['availability_status'] ?? 'active') === 'active' : true;
 
 // ── Fetch stats ───────────────────────────────────────────────────────────
 $stats = ['total'=>0,'confirmed'=>0,'pending'=>0,'cancelled'=>0,'revenue'=>0];
@@ -71,9 +94,7 @@ if ($res) while ($row = mysqli_fetch_assoc($res)) $bookings[] = $row;
       <a href="admin-dashboard.php" class="ds-link"><i class="bi bi-grid-fill"></i> Dashboard</a>
       <a href="manage-bookings.php" class="ds-link"><i class="bi bi-calendar2-check-fill"></i> Manage Bookings</a>
       <a href="check-in-order.php" class="ds-link"><i class="bi bi-person-check-fill"></i> Check In Order</a>
-      <a href="manage-hotels.php" class="ds-link"><i class="bi bi-building"></i> Manage Hotels</a>
       <a href="manage-hotel-listing.php" class="ds-link"><i class="bi bi-card-checklist"></i> Manage Hotel Listing</a>
-      <a href="on-off-hotel-bookings.php" class="ds-link"><i class="bi bi-toggle-on"></i> On/Off Hotel Bookings</a>
       <a href="manage-rooms.php" class="ds-link"><i class="bi bi-door-open-fill"></i> Manage Rooms</a>
       <a href="view-ratings.php" class="ds-link"><i class="bi bi-star-fill"></i> View Ratings</a>
       <a href="transaction-history.php" class="ds-link"><i class="bi bi-cash-stack"></i> Transaction History</a>
@@ -88,11 +109,11 @@ if ($res) while ($row = mysqli_fetch_assoc($res)) $bookings[] = $row;
     <div class="ds-breadcrumb">Dashboard / Bookings · Live from Database</div></div>
   </div>
   <div class="ds-top-r">
-    <a href="admin-notifications.php" class="ds-ibtn"><i class="bi bi-bell-fill"></i></a>
+    <a href="notifications.php" class="ds-ibtn"><i class="bi bi-bell-fill"></i></a>
     <div class="ds-avbtn" id="dsAvBtn">
       <div class="ds-av">AD</div><span class="ds-avname d-none d-sm-block">Admin</span>
       <div class="ds-dropdown" id="dsAvMenu">
-        <a href="admin-settings.php" class="ds-drop-item"><i class="bi bi-gear-fill text-primary"></i> Settings</a>
+        <a href="settings.php" class="ds-drop-item"><i class="bi bi-gear-fill text-primary"></i> Settings</a>
         <hr class="my-1 mx-2"/>
         <a href="logout.php" class="ds-drop-item danger"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
       </div>
@@ -105,39 +126,66 @@ if ($res) while ($row = mysqli_fetch_assoc($res)) $bookings[] = $row;
 <div class="row g-3 mb-4">
   <div class="col-6 col-xl-3"><div class="ds-stat blue"><div class="ds-si"><i class="bi bi-calendar2-check-fill"></i></div>
     <div class="ds-sn"><?php
-require_once 'auth_guard.php'; echo (int)$stats['total']; ?></div><div class="ds-sl">Total Bookings</div></div></div>
+    require_once 'auth_guard.php'; echo (int)$stats['total']; ?></div><div class="ds-sl">Total Bookings</div></div></div>
   <div class="col-6 col-xl-3"><div class="ds-stat green"><div class="ds-si"><i class="bi bi-check-circle-fill"></i></div>
     <div class="ds-sn"><?php
-require_once 'auth_guard.php'; echo (int)$stats['confirmed']; ?></div><div class="ds-sl">Confirmed</div></div></div>
+    require_once 'auth_guard.php'; echo (int)$stats['confirmed']; ?></div><div class="ds-sl">Confirmed</div></div></div>
   <div class="col-6 col-xl-3"><div class="ds-stat gold"><div class="ds-si"><i class="bi bi-hourglass-split"></i></div>
     <div class="ds-sn"><?php
-require_once 'auth_guard.php'; echo (int)$stats['pending']; ?></div><div class="ds-sl">Pending</div></div></div>
+    require_once 'auth_guard.php'; echo (int)$stats['pending']; ?></div><div class="ds-sl">Pending</div></div></div>
   <div class="col-6 col-xl-3"><div class="ds-stat purple"><div class="ds-si"><i class="bi bi-currency-rupee"></i></div>
     <div class="ds-sn">₹<?php
-require_once 'auth_guard.php'; echo number_format((float)$stats['revenue']); ?></div><div class="ds-sl">Total Revenue</div></div></div>
+    require_once 'auth_guard.php'; echo number_format((float)$stats['revenue']); ?></div><div class="ds-sl">Total Revenue</div></div></div>
 </div>
+
+<!-- Booking Visibility Toggle -->
+<?php if ($assigned_hotel): ?>
+<div class="ds-card mb-4" id="visibilityCard">
+  <div class="ds-cb">
+    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <div class="ds-si" style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:<?php echo $booking_enabled ? '#dcfce7' : '#fee2e2'; ?>">
+          <i class="bi bi-<?php echo $booking_enabled ? 'check-circle-fill' : 'x-circle-fill'; ?>" style="color:<?php echo $booking_enabled ? '#10b981' : '#ef4444'; ?>"></i>
+        </div>
+        <div>
+          <div class="fw-700">Booking Visibility</div>
+          <div class="text-muted small"><?php echo $booking_enabled ? 'Your property is accepting reservations. Users can view and book your rooms.' : 'Bookings are disabled. Your property is hidden from search results.'; ?></div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <span class="small fw-600" style="color:<?php echo $booking_enabled ? '#10b981' : '#ef4444'; ?>">
+          <?php echo $booking_enabled ? 'Enabled' : 'Disabled'; ?>
+        </span>
+        <div class="form-check form-switch" style="transform: scale(1.3);">
+          <input class="form-check-input" type="checkbox" role="switch" id="bookingVisibilityToggle" <?php echo $booking_enabled ? 'checked' : ''; ?> style="cursor: pointer;">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
 
 <!-- Filters + Table -->
 <div class="ds-card">
   <div class="ds-ch">
     <div class="ds-ct"><i class="bi bi-calendar2-check-fill me-2"></i>All Bookings (<?php
-require_once 'auth_guard.php'; echo count($bookings); ?>)</div>
+    require_once 'auth_guard.php'; echo count($bookings); ?>)</div>
     <div class="d-flex flex-wrap gap-2 align-items-center">
       <form method="GET" class="d-flex gap-2 flex-wrap">
         <div class="ds-sw"><i class="bi bi-search ds-si-ic"></i>
           <input class="ds-inp search" name="q" placeholder="Search by ID, guest, hotel..." value="<?php
-require_once 'auth_guard.php'; echo htmlspecialchars($filter_search); ?>" style="width:220px"/>
+          require_once 'auth_guard.php'; echo htmlspecialchars($filter_search); ?>" style="width:220px"/>
         </div>
         <select class="ds-inp ds-sel" name="status" style="width:150px" onchange="this.form.submit()">
           <option value="">All Statuses</option>
           <?php
-require_once 'auth_guard.php'; foreach(['pending','confirmed','checked_in','checked_out','cancelled'] as $s): ?>
+          require_once 'auth_guard.php'; foreach(['pending','confirmed','checked_in','checked_out','cancelled'] as $s): ?>
           <option value="<?php
-require_once 'auth_guard.php'; echo $s; ?>" <?php
-require_once 'auth_guard.php'; echo $filter_status===$s?'selected':''; ?>><?php
-require_once 'auth_guard.php'; echo ucwords(str_replace('_',' ',$s)); ?></option>
+          require_once 'auth_guard.php'; echo $s; ?>" <?php
+          require_once 'auth_guard.php'; echo $filter_status===$s?'selected':''; ?>><?php
+          require_once 'auth_guard.php'; echo ucwords(str_replace('_',' ',$s)); ?></option>
           <?php
-require_once 'auth_guard.php'; endforeach; ?>
+          require_once 'auth_guard.php'; endforeach; ?>
         </select>
         <button type="submit" class="ds-btn prim sm"><i class="bi bi-search"></i></button>
         <a href="admin-bookings.php" class="ds-btn gho sm">Clear</a>
@@ -146,22 +194,22 @@ require_once 'auth_guard.php'; endforeach; ?>
   </div>
   <div class="ds-cb p-0">
     <?php
-require_once 'auth_guard.php'; if (empty($bookings)): ?>
+    require_once 'auth_guard.php'; if (empty($bookings)): ?>
     <div class="text-center py-5">
       <i class="bi bi-calendar-x" style="font-size:3rem;color:#cbd5e1"></i>
       <div class="fw-700 mt-3" style="color:#64748b">No bookings found</div>
       <div class="text-muted small mt-1">
         <?php
-require_once 'auth_guard.php'; echo $filter_search||$filter_status ? 'Try clearing filters.' : 'Bookings will appear here once users complete a payment.'; ?>
+        require_once 'auth_guard.php'; echo $filter_search||$filter_status ? 'Try clearing filters.' : 'Bookings will appear here once users complete a payment.'; ?>
       </div>
       <?php
-require_once 'auth_guard.php'; if ($filter_search||$filter_status): ?>
+      require_once 'auth_guard.php'; if ($filter_search||$filter_status): ?>
       <a href="admin-bookings.php" class="btn btn-outline-primary btn-sm mt-3">Clear Filters</a>
       <?php
-require_once 'auth_guard.php'; endif; ?>
+      require_once 'auth_guard.php'; endif; ?>
     </div>
     <?php
-require_once 'auth_guard.php'; else: ?>
+    require_once 'auth_guard.php'; else: ?>
     <div style="overflow-x:auto">
       <table class="ds-tbl">
         <thead>
@@ -181,7 +229,7 @@ require_once 'auth_guard.php'; else: ?>
         </thead>
         <tbody>
         <?php
-require_once 'auth_guard.php'; foreach ($bookings as $b):
+        require_once 'auth_guard.php'; foreach ($bookings as $b):
           $statusColors = [
             'confirmed'   => 'confirmed',
             'pending'     => 'pending',
@@ -196,60 +244,60 @@ require_once 'auth_guard.php'; foreach ($bookings as $b):
         ?>
           <tr>
             <td><span class="fw-700 small" style="color:#1a56db"><?php
-require_once 'auth_guard.php'; echo htmlspecialchars($b['booking_id']); ?></span></td>
+            require_once 'auth_guard.php'; echo htmlspecialchars($b['booking_id']); ?></span></td>
             <td>
               <div class="fw-600 small"><?php
-require_once 'auth_guard.php'; echo htmlspecialchars($b['guest_name']); ?></div>
+              require_once 'auth_guard.php'; echo htmlspecialchars($b['guest_name']); ?></div>
               <div class="text-muted" style="font-size:.72rem"><?php
-require_once 'auth_guard.php'; echo htmlspecialchars($b['guest_email']); ?></div>
+              require_once 'auth_guard.php'; echo htmlspecialchars($b['guest_email']); ?></div>
             </td>
             <td>
               <div class="fw-600 small"><?php
-require_once 'auth_guard.php'; echo htmlspecialchars($b['hotel_name']); ?></div>
+              require_once 'auth_guard.php'; echo htmlspecialchars($b['hotel_name']); ?></div>
               <div class="text-muted" style="font-size:.72rem"><?php
-require_once 'auth_guard.php'; echo htmlspecialchars(ucfirst($b['hotel_city']??'')); ?></div>
+              require_once 'auth_guard.php'; echo htmlspecialchars(ucfirst($b['hotel_city']??'')); ?></div>
             </td>
             <td class="small"><?php
-require_once 'auth_guard.php'; echo htmlspecialchars($b['room_type']); ?></td>
+            require_once 'auth_guard.php'; echo htmlspecialchars($b['room_type']); ?></td>
             <td class="small fw-600"><?php
-require_once 'auth_guard.php'; echo $ci; ?></td>
+            require_once 'auth_guard.php'; echo $ci; ?></td>
             <td class="small fw-600"><?php
-require_once 'auth_guard.php'; echo $co; ?></td>
+            require_once 'auth_guard.php'; echo $co; ?></td>
             <td class="text-center small"><?php
-require_once 'auth_guard.php'; echo (int)$b['nights']; ?></td>
+            require_once 'auth_guard.php'; echo (int)$b['nights']; ?></td>
             <td class="fw-700 small">₹<?php
-require_once 'auth_guard.php'; echo number_format((float)$b['total_amount']); ?></td>
+            require_once 'auth_guard.php'; echo number_format((float)$b['total_amount']); ?></td>
             <td><span class="ds-badge <?php
-require_once 'auth_guard.php'; echo $payColor; ?>"><?php
-require_once 'auth_guard.php'; echo ucfirst($b['payment_status']); ?></span></td>
+            require_once 'auth_guard.php'; echo $payColor; ?>"><?php
+            require_once 'auth_guard.php'; echo ucfirst($b['payment_status']); ?></span></td>
             <td>
               <select class="ds-inp ds-sel" style="font-size:.75rem;padding:2px 8px;min-width:120px"
                 onchange="updateStatus('<?php
-require_once 'auth_guard.php'; echo $b['booking_id']; ?>',this.value,this)">
+                require_once 'auth_guard.php'; echo $b['booking_id']; ?>',this.value,this)">
                 <?php
-require_once 'auth_guard.php'; foreach(['pending','confirmed','checked_in','checked_out','cancelled'] as $s): ?>
+                require_once 'auth_guard.php'; foreach(['pending','confirmed','checked_in','checked_out','cancelled'] as $s): ?>
                 <option value="<?php
-require_once 'auth_guard.php'; echo $s; ?>" <?php
-require_once 'auth_guard.php'; echo $b['booking_status']===$s?'selected':''; ?>><?php
-require_once 'auth_guard.php'; echo ucwords(str_replace('_',' ',$s)); ?></option>
+                require_once 'auth_guard.php'; echo $s; ?>" <?php
+                require_once 'auth_guard.php'; echo $b['booking_status']===$s?'selected':''; ?>><?php
+                require_once 'auth_guard.php'; echo ucwords(str_replace('_',' ',$s)); ?></option>
                 <?php
-require_once 'auth_guard.php'; endforeach; ?>
+                require_once 'auth_guard.php'; endforeach; ?>
               </select>
             </td>
             <td>
               <button class="ds-btn gho sm" onclick="viewBooking(<?php
-require_once 'auth_guard.php'; echo htmlspecialchars(json_encode($b)); ?>)">
+              require_once 'auth_guard.php'; echo htmlspecialchars(json_encode($b)); ?>)">
                 <i class="bi bi-eye-fill"></i>
               </button>
             </td>
           </tr>
         <?php
-require_once 'auth_guard.php'; endforeach; ?>
+        require_once 'auth_guard.php'; endforeach; ?>
         </tbody>
       </table>
     </div>
     <?php
-require_once 'auth_guard.php'; endif; ?>
+    require_once 'auth_guard.php'; endif; ?>
   </div>
 </div>
 
@@ -296,7 +344,7 @@ function viewBooking(b) {
       <div class="col-md-6"><div class="ds-lbl">Guests</div><div>${b.guests}</div></div>
       <div class="col-12"><hr/></div>
       <div class="col-md-6"><div class="ds-lbl">Hotel</div><div class="fw-700">${b.hotel_name}</div></div>
-      <div class="col-md-6"><div class="ds-lbl">Room Type</div><div>${b.room_type}</div></div>
+      <div class="col-md-6"><div class="ds-lbl">Room Type</div><div class="fw-600">${b.room_type}</div></div>
       <div class="col-md-6"><div class="ds-lbl">Check-in</div><div class="fw-600">${fmt(b.checkin_date)}</div></div>
       <div class="col-md-6"><div class="ds-lbl">Check-out</div><div class="fw-600">${fmt(b.checkout_date)}</div></div>
       <div class="col-md-4"><div class="ds-lbl">Nights</div><div>${b.nights}</div></div>
@@ -311,8 +359,41 @@ function viewBooking(b) {
     </div>`;
   new bootstrap.Modal(document.getElementById('detailModal')).show();
 }
+
+// Booking visibility toggle
+document.addEventListener('DOMContentLoaded', function() {
+  const toggle = document.getElementById('bookingVisibilityToggle');
+  if (!toggle) return;
+  
+  let timeout;
+  toggle.addEventListener('change', function() {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      const formData = new FormData();
+      formData.append('action', 'toggle_booking_visibility');
+      formData.append('booking_enabled', this.checked ? '1' : '0');
+      
+      fetch('admin-bookings.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          dsToast('Booking visibility updated', 'success');
+          setTimeout(() => location.reload(), 800);
+        } else {
+          dsToast('Update failed: ' + (d.error || 'Unknown error'), 'error');
+          this.checked = !this.checked;
+        }
+      })
+      .catch(() => {
+        dsToast('Network error', 'error');
+        this.checked = !this.checked;
+      });
+    }, 300);
+  });
+});
 </script>
 </body>
 </html>
-
-

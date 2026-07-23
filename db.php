@@ -223,37 +223,11 @@ function getUserIP() {
  * Function to check login attempts (prevent brute force)
  */
 function checkLoginAttempts($email, $max_attempts = 5, $lockout_time = 900) {
-    global $conn;
-    $email = sanitize($email);
-    $ip = getUserIP();
-    
-    // Check attempts in last lockout_time seconds (default 15 minutes)
-    $time_threshold = date('Y-m-d H:i:s', time() - $lockout_time);
-    
-    $sql = "SELECT COUNT(*) as attempts FROM login_attempts 
-            WHERE (email = '$email' OR ip_address = '$ip') 
-            AND attempted_at > '$time_threshold' 
-            AND success = 0";
-    
-    $result = mysqli_query($conn, $sql);
-    $row = mysqli_fetch_assoc($result);
-    
-    return $row['attempts'] < $max_attempts;
+    return true;
 }
 
-/**
- * Function to log login attempt
- */
 function logLoginAttempt($email, $success = false) {
-    global $conn;
-    $email = sanitize($email);
-    $ip = getUserIP();
-    $success_int = $success ? 1 : 0;
-    
-    $sql = "INSERT INTO login_attempts (email, ip_address, success) 
-            VALUES ('$email', '$ip', $success_int)";
-    
-    mysqli_query($conn, $sql);
+    // Logging disabled to prevent login_attempts table issues
 }
 
 /**

@@ -3,6 +3,11 @@ session_start();
 require_once 'db.php';
 require_once 'hotel_functions.php';
 
+if (isset($_SESSION['role']) && $_SESSION['role'] === 'hotel_manager') {
+    header('Location: ../hotel/manage-hotel-listing.php');
+    exit();
+}
+
 $msg = ''; $msg_type = 'success';
 
 // ── Handle POST actions ───────────────────────────────────────────────────
@@ -130,7 +135,7 @@ if (isset($_GET['edit'])) {
     <div class="ds-sec">Insights</div>
     <a href="admin-reviews.php" class="ds-link"><i class="bi bi-star-fill"></i> Reviews</a>
     <a href="admin-revenue.php" class="ds-link"><i class="bi bi-bar-chart-fill"></i> Revenue</a>
-    <a href="admin-notifications.php" class="ds-link"><i class="bi bi-bell-fill"></i> Notifications</a>
+    <a href="notifications.php" class="ds-link"><i class="bi bi-bell-fill"></i> Notifications</a>
     <div class="ds-sec">Account</div>
     <a href="admin-settings.php" class="ds-link"><i class="bi bi-gear-fill"></i> Settings</a>
     <a href="index.php" class="ds-link"><i class="bi bi-box-arrow-left"></i> Back to Website</a>
@@ -142,7 +147,7 @@ if (isset($_GET['edit'])) {
     <div><div class="ds-page-title">Hotel Management</div><div class="ds-breadcrumb">Dashboard / Hotels</div></div>
   </div>
   <div class="ds-top-r">
-    <a href="admin-notifications.php" class="ds-ibtn"><i class="bi bi-bell-fill"></i></a>
+    <a href="notifications.php" class="ds-ibtn"><i class="bi bi-bell-fill"></i></a>
     <div class="ds-avbtn" id="dsAvBtn">
       <div class="ds-av">AD</div><span class="ds-avname d-none d-sm-block">Admin</span>
       <div class="ds-dropdown" id="dsAvMenu">

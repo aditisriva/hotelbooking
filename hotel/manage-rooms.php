@@ -1,17 +1,27 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Room Management -- Hotel Manager</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" crossorigin="anonymous"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/><link rel="stylesheet" href="dashboard.css"/></head><body><div class="ds-ov" id="dsOv"></div><aside class="ds-sb" id="dsSb"><a href="admin-dashboard.php" class="ds-logo"><div class="ds-logo-icon"><i class="bi bi-building-fill"></i></div><div><div class="ds-logo-name">bookHotel</div><div class="ds-logo-role">Manager Portal</div></div></a><nav class="ds-nav" id="mainSidebar">
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Room Management -- Hotel Manager</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" crossorigin="anonymous"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/><link rel="stylesheet" href="dashboard.css"/><style>
+.img-drop{border:2px dashed var(--bdr);border-radius:10px;padding:1.25rem;text-align:center;cursor:pointer;background:var(--srf);transition:.2s}
+.img-drop:hover,.img-drop.drag-over{border-color:var(--pr);background:var(--pr-lt)}
+.upload-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:.6rem;margin-top:.75rem}
+.upload-item{position:relative;border-radius:10px;overflow:hidden;border:2px solid var(--bdr);aspect-ratio:4/3;background:var(--srf)}
+.upload-item img{width:100%;height:100%;object-fit:cover;display:block}
+.upload-item .img-actions{position:absolute;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;gap:.3rem;opacity:0;transition:.2s}
+.upload-item:hover .img-actions{opacity:1}
+.img-act-btn{width:28px;height:28px;border-radius:7px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:.15s}
+.img-act-btn.del{background:var(--red);color:#fff}
+.img-act-btn:hover{transform:scale(1.12)}
+.upload-count{font-size:.72rem;font-weight:600;color:var(--mut);margin-top:.4rem}
+</style></head><body><div class="ds-ov" id="dsOv"></div><aside class="ds-sb" id="dsSb"><a href="admin-dashboard.php" class="ds-logo"><div class="ds-logo-icon"><i class="bi bi-building-fill"></i></div><div><div class="ds-logo-name">bookHotel</div><div class="ds-logo-role">Manager Portal</div></div></a><nav class="ds-nav" id="mainSidebar">
       <div class="ds-sec">Main</div>
       <a href="admin-dashboard.php" class="ds-link"><i class="bi bi-grid-fill"></i> Dashboard</a>
       <a href="manage-bookings.php" class="ds-link"><i class="bi bi-calendar2-check-fill"></i> Manage Bookings</a>
       <a href="check-in-order.php" class="ds-link"><i class="bi bi-person-check-fill"></i> Check In Order</a>
-      <a href="manage-hotels.php" class="ds-link"><i class="bi bi-building"></i> Manage Hotels</a>
       <a href="manage-hotel-listing.php" class="ds-link"><i class="bi bi-card-checklist"></i> Manage Hotel Listing</a>
-      <a href="on-off-hotel-bookings.php" class="ds-link"><i class="bi bi-toggle-on"></i> On/Off Hotel Bookings</a>
       <a href="manage-rooms.php" class="ds-link"><i class="bi bi-door-open-fill"></i> Manage Rooms</a>
       <a href="view-ratings.php" class="ds-link"><i class="bi bi-star-fill"></i> View Ratings</a>
       <a href="transaction-history.php" class="ds-link"><i class="bi bi-cash-stack"></i> Transaction History</a>
       <a href="logout.php" class="ds-link"><i class="bi bi-box-arrow-left"></i> Logout</a>
     </nav>
-    <script>document.addEventListener("DOMContentLoaded",()=>{let c=location.pathname.split("/").pop()||"admin-dashboard.php";document.querySelectorAll("#mainSidebar a").forEach(l=>{l.getAttribute("href")===c?l.classList.add("active"):l.classList.remove("active")})});</script><div class="ds-foot"><a href="admin-hotel-profile.php" class="ds-hpill"><img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=80&q=80" alt=""/><div><div class="ds-hpill-name">The Grand Palace</div><div class="ds-hpill-status">Active</div></div></a></div></aside><header class="ds-top"><div class="ds-top-l"><button class="ds-ibtn d-lg-none" id="dsTog"><i class="bi bi-list fs-5"></i></button><div><div class="ds-page-title">Room Management</div><div class="ds-breadcrumb">Dashboard / Room Management</div></div></div><div class="ds-top-r"><a href="admin-notifications.php" class="ds-ibtn"><i class="bi bi-bell-fill"></i><span class="ds-dot"></span></a><div class="ds-avbtn" id="dsAvBtn"><div class="ds-av">AD</div><span class="ds-avname d-none d-sm-block">Aditi</span><div class="ds-dropdown" id="dsAvMenu"><a href="admin-settings.php" class="ds-drop-item"><i class="bi bi-person-fill text-primary"></i> My Profile</a><hr class="my-1 mx-2"/><a href="logout.php" class="ds-drop-item danger"><i class="bi bi-box-arrow-right"></i> Sign Out</a></div></div></div></header><main class="ds-main">
+    <script>document.addEventListener("DOMContentLoaded",()=>{let c=location.pathname.split("/").pop()||"admin-dashboard.php";document.querySelectorAll("#mainSidebar a").forEach(l=>{l.getAttribute("href")===c?l.classList.add("active"):l.classList.remove("active")})});</script><div class="ds-foot"><a href="admin-hotel-profile.php" class="ds-hpill"><img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=80&q=80" alt=""/><div><div class="ds-hpill-name">The Grand Palace</div><div class="ds-hpill-status">Active</div></div></a></div></aside><header class="ds-top"><div class="ds-top-l"><button class="ds-ibtn d-lg-none" id="dsTog"><i class="bi bi-list fs-5"></i></button><div><div class="ds-page-title">Room Management</div><div class="ds-breadcrumb">Dashboard / Room Management</div></div></div><div class="ds-top-r"><a href="notifications.php" class="ds-ibtn"><i class="bi bi-bell-fill"></i><span class="ds-dot"></span></a><div class="ds-avbtn" id="dsAvBtn"><div class="ds-av">AD</div><span class="ds-avname d-none d-sm-block">Aditi</span><div class="ds-dropdown" id="dsAvMenu"><a href="profile.php" class="ds-drop-item"><i class="bi bi-person-fill text-primary"></i> My Profile</a><hr class="my-1 mx-2"/><a href="logout.php" class="ds-drop-item danger"><i class="bi bi-box-arrow-right"></i> Sign Out</a></div></div></div></header><main class="ds-main">
   <!-- Stat Cards -->
   <div class="row g-3 mb-4">
     <div class="col-6 col-md-3"><div class="ds-stat blue"><div class="ds-si"><i class="bi bi-door-open-fill"></i></div><div class="ds-sn">30</div><div class="ds-sl">Total Rooms</div></div></div>
@@ -161,12 +171,22 @@
           </div>
           <div class="col-12"><label class="ds-lbl">Amenities</label><input class="ds-inp" placeholder="WiFi, AC, TV, Mini-bar, Safe…"/></div>
           <div class="col-12"><label class="ds-lbl">Description</label><textarea class="ds-inp" rows="3" placeholder="Describe the room…"></textarea></div>
-          <div class="col-12"><label class="ds-lbl">Room Image URL</label><input class="ds-inp" placeholder="https://…"/></div>
+          <div class="col-12">
+  <label class="ds-lbl">Room Images <span class="text-muted fw-400">(select from folder, up to 10)</span></label>
+  <div class="img-drop" id="roomImgDrop" onclick="document.getElementById('roomImgInput').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)">
+    <i class="bi bi-cloud-arrow-up fs-3 text-primary"></i>
+    <div class="fw-700 mt-1">Click to browse or drag &amp; drop</div>
+    <div class="text-muted small">JPG, JPEG, PNG, WEBP — From your computer</div>
+  </div>
+  <input type="file" id="roomImgInput" multiple accept=".jpg,.jpeg,.png,.webp,image/*" class="d-none" onchange="buildPreview(this.files,'roomImgGrid','roomImgDrop')"/>
+  <div class="upload-grid" id="roomImgGrid"></div>
+  <div class="upload-count" id="roomImgCount"></div>
+</div>
         </div>
       </div>
       <div class="modal-footer">
         <button class="ds-btn gho" data-bs-dismiss="modal">Cancel</button>
-        <button class="ds-btn prim" onclick="dsToast('Room added successfully!','success')" data-bs-dismiss="modal"><i class="bi bi-plus-lg"></i> Add Room</button>
+        <button class="ds-btn prim" onclick="if(document.getElementById('roomImgGrid').querySelectorAll('.upload-item').length>0){dsToast('Room added successfully!','success')}else{dsToast('Please select at least one image','error')}" data-bs-dismiss="modal"><i class="bi bi-plus-lg"></i> Add Room</button>
       </div>
     </div>
   </div>
@@ -208,6 +228,57 @@ function filterRooms(q){
 }
 function filterRoomType(t){
   document.querySelectorAll('#roomTable tbody tr').forEach(r=>{r.style.display=(!t||r.dataset.type===t)?'':'none'});
+}
+
+function buildPreview(files, gridId, dropId) {
+  const grid = document.getElementById(gridId);
+  const countEl = document.getElementById(gridId.replace('Grid','Count'));
+  const drop = document.getElementById(dropId);
+  const MAX = 10;
+  let existing = grid.querySelectorAll('.upload-item').length;
+  if (existing >= MAX) {
+    dsToast('Maximum 10 images allowed', 'error');
+    return;
+  }
+  Array.from(files).forEach(file => {
+    if (!['image/jpeg','image/png','image/webp'].includes(file.type)) return;
+    if (file.size > 5*1024*1024) { dsToast(file.name+' exceeds 5MB', 'error'); return; }
+    if (existing >= MAX) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const item = document.createElement('div');
+      item.className = 'upload-item';
+      item.innerHTML = '<img src="'+e.target.result+'" alt=""/><div class="img-actions"><button type="button" class="img-act-btn del" title="Remove" onclick="removeItem(this)"><i class="bi bi-trash-fill"></i></button></div>';
+      grid.appendChild(item);
+      existing++;
+      updateCount();
+    };
+    reader.readAsDataURL(file);
+  });
+  updateCount();
+}
+function removeItem(btn) {
+  const item = btn.closest('.upload-item');
+  item.remove();
+  updateCount();
+}
+function updateCount() {
+  const grid = document.getElementById('roomImgGrid');
+  const countEl = document.getElementById('roomImgCount');
+  const n = grid ? grid.querySelectorAll('.upload-item').length : 0;
+  if (n > 0) countEl.textContent = n + '/10 images selected';
+  else countEl.textContent = '';
+}
+function handleDrop(e) {
+  e.preventDefault();
+  const drop = document.getElementById('roomImgDrop');
+  drop.classList.remove('drag-over');
+  const input = document.getElementById('roomImgInput');
+  const dt = new DataTransfer();
+  if (input.files) Array.from(input.files).forEach(f => dt.items.add(f));
+  Array.from(e.dataTransfer.files).forEach(f => { if (dt.files.length < 10) dt.items.add(f); });
+  input.files = dt.files;
+  buildPreview(input.files, 'roomImgGrid', 'roomImgDrop');
 }
 </script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script><script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" crossorigin="anonymous"></script><script src="dashboard.js"></script></body></html>
 

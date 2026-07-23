@@ -4,6 +4,7 @@ $is_logged_in   = isset($_SESSION['user_id']);
 $user_firstname = $is_logged_in ? htmlspecialchars($_SESSION['user_firstname'] ?? $_SESSION['user_name'] ?? 'User') : '';
 $user_initial   = $is_logged_in ? strtoupper(substr($_SESSION['user_firstname'] ?? $_SESSION['user_name'] ?? 'U', 0, 1)) : '';
 require_once 'pricing.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

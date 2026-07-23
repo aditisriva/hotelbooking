@@ -236,6 +236,110 @@ function bhHandleImageUpload(string $field, int $hotelId = 0): string {
     return '';
 }
 
+// ── Room helpers ────────────────────────────────────────────────────────────
+function bhGetRoomsByHotel(int $hotel_id): array {
+    global $conn;
+    $rooms = [];
+    $stmt = mysqli_prepare($conn, "SELECT * FROM rooms WHERE hotel_id = ? ORDER BY room_id ASC");
+    mysqli_stmt_bind_param($stmt, 'i', $hotel_id);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    while ($row = mysqli_fetch_assoc($res)) $rooms[] = $row;
+    mysqli_stmt_close($stmt);
+    return $rooms;
+}
+
+function bhGetRoomById(int $room_id): ?array {
+    global $conn;
+    $stmt = mysqli_prepare($conn, "SELECT * FROM rooms WHERE room_id = ? LIMIT 1");
+    mysqli_stmt_bind_param($stmt, 'i', $room_id);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_assoc($res);
+    mysqli_stmt_close($stmt);
+    return $row ?: null;
+}
+
+function bhInsertRoom(array $d): int|false {
+    global $conn;
+    $stmt = mysqli_prepare($conn,
+        "INSERT INTO rooms (hotel_id, manager_id, room_number, room_type, room_name, floor, adult_capacity, child_capacity, bed_type, base_price, discount_percent, final_price, description, amenities, room_images, status)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+    );
+    mysqli_stmt_bind_param($stmt, 'iissssiiisddssss',
+        $d['hotel_id'], $d['manager_id'], $d['room_number'], $d['room_type'], $d['room_name'] ?? null,
+        $d['floor'] ?? null, $d['adult_capacity'] ?? 2, $d['child_capacity'] ?? 0,
+        $d['bed_type'] ?? null, $d['base_price'], $d['discount_percent'] ?? 0, $d['final_price'],
+        $d['description'] ?? null, $d['amenities'] ?? null, $d['room_images'] ?? null,
+        $d['status'] ?? 'Available'
+    );
+    $ok = mysqli_stmt_execute($stmt);
+    $id = mysqli_insert_id($conn);
+    mysqli_stmt_close($stmt);
+    return $ok ? $id : false;
+}
+
+function bhUpdateRoom(int $room_id, array $d): bool {
+    global $conn;
+    $stmt = mysqli_prepare($conn,
+        "UPDATE rooms SET hotel_id=?, manager_id=?, room_number=?, room_type=?, room_name=?, floor=?, adult_capacity=?, child_capacity=?, bed_type=?, base_price=?, discount_percent=?, final_price=?, description=?, amenities=?, room_images=?, status=? WHERE room_id=?"
+    );
+    mysqli_stmt_bind_param($stmt, 'iissssiiisddssssi',
+        $d['hotel_id'], $d['manager_id'], $d['room_number'], $d['room_type'], $d['room_name'] ?? null,
+        $d['floor'] ?? null, $d['adult_capacity'] ?? 2, $d['child_capacity'] ?? 0,
+        $d['bed_type'] ?? null, $d['base_price'], $d['discount_percent'] ?? 0, $d['final_price'],
+        $d['description'] ?? null, $d['amenities'] ?? null, $d['room_images'] ?? null,
+        $d['status'] ?? 'Available', $room_id
+    );
+    $ok = mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+    return $ok;
+}
+
+function bhDeleteRoom(int $room_id): bool {
+    global $conn;
+    $stmt = mysqli_prepare($conn, "DELETE FROM rooms WHERE room_id = ?");
+    mysqli_stmt_bind_param($stmt, 'i', $room_id);
+    $ok = mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+    return $ok;
+}
+
+function bhRoomStats(int $hotel_id): array {
+    global $conn;
+    $stats = ['total' => 0, 'available' => 0, 'occupied' => 0, 'maintenance' => 0];
+    $stmt = mysqli_prepare($conn,
+        "SELECT COUNT(*) AS total, SUM(status='Available') AS available, SUM(status='Occupied') AS occupied, SUM(status='Maintenance') AS maintenance FROM rooms WHERE hotel_id = ?"
+    );
+    mysqli_stmt_bind_param($stmt, 'i', $hotel_id);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_assoc($res);
+    mysqli_stmt_close($stmt);
+    if ($row) {
+        $stats['total']       = (int)$row['total'];
+        $stats['available']   = (int)$row['available'];
+        $stats['occupied']    = (int)$row['occupied'];
+        $stats['maintenance'] = (int)$row['maintenance'];
+    }
+    return $stats;
+}
+
+function bhHandleRoomImageUpload(string $field, int $roomId = 0): string {
+    if (!isset($_FILES[$field]) || $_FILES[$field]['error'] !== UPLOAD_ERR_OK) return '';
+    $ext = strtolower(pathinfo($_FILES[$field]['name'], PATHINFO_EXTENSION));
+    $allowed = ['jpg','jpeg','png','webp'];
+    if (!in_array($ext, $allowed)) return '';
+    $uploadDir = __DIR__ . '/uploads/rooms/';
+    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+    $filename = 'room_' . ($roomId ?: time()) . '_' . time() . '.' . $ext;
+    $path = $uploadDir . $filename;
+    if (move_uploaded_file($_FILES[$field]['tmp_name'], $path)) {
+        return 'uploads/rooms/' . $filename;
+    }
+    return '';
+}
+
 // Seed on include
 bhSeedHotels();
 ?>

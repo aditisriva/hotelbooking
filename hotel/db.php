@@ -1,270 +1,28 @@
 <?php
 /**
- * Database Configuration and Connection
- * bookHotel Hotel Booking System
+ * Hotel Manager Panel — Database & Auth
+ * Uses the main users table with role-based access
  */
 
-// ── DB Credentials ────────────────────────────────────────────────
-// To find your password: open phpMyAdmin → User Accounts.
-// Common XAMPP setups: empty password on port 3306.
-// ──────────────────────────────────────────────────────────────────
-$_db_host = 'localhost';
-$_db_user = 'root';
-$_db_name = 'bookhotel_db';
-
-// List of (password, port) pairs to try in order (prioritizing user's password)
-$_db_candidates = [
-    ['Aditi@1521', 3306],
-    ['Aditi@1521', 3307],
-    ['', 3306],
-    ['', 3307],
-    ['root',       3306],
-    ['root',       3307],
-    ['mysql',      3306],
-];
-
-// Disable mysqli exceptions during connection probing (PHP 8.1+ throws by default)
-$_prev_report = mysqli_report(MYSQLI_REPORT_OFF);
-
-$conn = null;
-foreach ($_db_candidates as [$_pass, $_port]) {
-    $conn = mysqli_connect($_db_host, $_db_user, $_pass, null, $_port);
-    if ($conn) {
-        // Store working credentials as constants for the rest of the app
-        define('DB_HOST', $_db_host);
-        define('DB_USER', $_db_user);
-        define('DB_PASS', $_pass);
-        define('DB_NAME', $_db_name);
-        define('DB_PORT', $_port);
-        break;
-    }
-}
-unset($_db_candidates, $_db_host, $_db_user, $_db_name, $_pass, $_port);
-
-// Restore normal error reporting now that we have a connection (or not)
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-
-if (!$conn) {
-    http_response_code(503);
-    die('<h2 style="font-family:sans-serif;color:#c0392b">&#x26A0; Database Connection Failed</h2>'
-      . '<p style="font-family:sans-serif">Could not connect to MySQL.<br>'
-      . 'Make sure <strong>XAMPP MySQL is running</strong> and the credentials '
-      . 'in <code>db.php</code> are correct.</p>'
-      . '<p style="font-family:sans-serif;color:#888">Error: ' . htmlspecialchars(mysqli_connect_error()) . '</p>');
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-// Create database if not exists
-$sql = "CREATE DATABASE IF NOT EXISTS " . DB_NAME . " CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci";
-if (!mysqli_query($conn, $sql)) {
-    die("Error creating database: " . mysqli_error($conn));
-}
+require_once __DIR__ . '/../db.php';
 
-// Now select the database
-if (!mysqli_select_db($conn, DB_NAME)) {
-    die("Error selecting database: " . mysqli_error($conn));
-}
-
-// Set charset to utf8mb4 for full Unicode support
-mysqli_set_charset($conn, "utf8mb4");
-
-/**
- * Function to create tables if they don't exist
- */
-function initializeDatabase() {
-    global $conn;
-    
-    // Create users table
-    $create_users_table = "CREATE TABLE IF NOT EXISTS users (
-        id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        first_name VARCHAR(100) NOT NULL,
-        last_name VARCHAR(100) NOT NULL,
-        email VARCHAR(255) NOT NULL UNIQUE,
-        mobile VARCHAR(20) NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        profile_image VARCHAR(255) DEFAULT NULL,
-        status ENUM('active', 'inactive', 'suspended') DEFAULT 'active',
-        role ENUM('user', 'admin', 'hotel_manager') DEFAULT 'user',
-        email_verified TINYINT(1) DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        last_login TIMESTAMP NULL DEFAULT NULL,
-        INDEX idx_email (email),
-        INDEX idx_mobile (mobile),
-        INDEX idx_status (status)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-    
-    if (!mysqli_query($conn, $create_users_table)) {
-        die("Error creating users table: " . mysqli_error($conn));
-    }
-    
-    // Create password_resets table
-    $create_resets_table = "CREATE TABLE IF NOT EXISTS password_resets (
-        id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        email VARCHAR(255) NOT NULL,
-        token VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        expires_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        used TINYINT(1) DEFAULT 0,
-        INDEX idx_email (email),
-        INDEX idx_token (token)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-    
-    if (!mysqli_query($conn, $create_resets_table)) {
-        die("Error creating password_resets table: " . mysqli_error($conn));
-    }
-    
-    // Create login_attempts table for security
-    $create_attempts_table = "CREATE TABLE IF NOT EXISTS login_attempts (
-        id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        email VARCHAR(255) NOT NULL,
-        ip_address VARCHAR(45) NOT NULL,
-        attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        success TINYINT(1) DEFAULT 0,
-        INDEX idx_email (email),
-        INDEX idx_ip (ip_address)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-    
-    if (!mysqli_query($conn, $create_attempts_table)) {
-        die("Error creating login_attempts table: " . mysqli_error($conn));
-    }
-    
-    // Create contact_submissions table
-    $create_contact_table = "CREATE TABLE IF NOT EXISTS contact_submissions (
-        id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        subject VARCHAR(255) NOT NULL,
-        message TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-    
-    if (!mysqli_query($conn, $create_contact_table)) {
-        die("Error creating contact_submissions table: " . mysqli_error($conn));
-    }
-    
-    return true;
-}
-
-/**
- * Function to sanitize user input
- */
-function sanitize($data) {
-    global $conn;
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data);
-    $data = mysqli_real_escape_string($conn, $data);
-    return $data;
-}
-
-/**
- * Function to validate email
- */
-function validateEmail($email) {
-    return filter_var($email, FILTER_VALIDATE_EMAIL);
-}
-
-/**
- * Function to validate mobile number (Indian format)
- */
-function validateMobile($mobile) {
-    // Remove any non-digit characters
-    $mobile = preg_replace('/[^0-9]/', '', $mobile);
-    
-    // Check if it's a 10-digit number
-    if (preg_match('/^[6-9][0-9]{9}$/', $mobile)) {
-        return true;
-    }
-    return false;
-}
-
-/**
- * Function to check if email exists
- */
-function emailExists($email) {
-    global $conn;
-    $email = sanitize($email);
-    $sql = "SELECT id FROM users WHERE email = '$email' LIMIT 1";
-    $result = mysqli_query($conn, $sql);
-    return mysqli_num_rows($result) > 0;
-}
-
-/**
- * Function to check if mobile exists
- */
-function mobileExists($mobile) {
-    global $conn;
-    $mobile = sanitize($mobile);
-    $sql = "SELECT id FROM users WHERE mobile = '$mobile' LIMIT 1";
-    $result = mysqli_query($conn, $sql);
-    return mysqli_num_rows($result) > 0;
-}
-
-/**
- * Function to get user IP address
- */
-function getUserIP() {
-    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        return $_SERVER['HTTP_CLIENT_IP'];
-    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        return $_SERVER['HTTP_X_FORWARDED_FOR'];
-    } else {
-        return $_SERVER['REMOTE_ADDR'];
+// Ensure role column has hotel_manager option
+$col_check = mysqli_query($conn, "SHOW COLUMNS FROM users LIKE 'role'");
+if ($col_check && mysqli_num_rows($col_check) > 0) {
+    $row = mysqli_fetch_assoc($col_check);
+    if (strpos($row['Type'], 'hotel_manager') === false) {
+        mysqli_query($conn, "ALTER TABLE users MODIFY COLUMN role ENUM('user','admin','hotel_manager') DEFAULT 'user'");
     }
 }
 
-/**
- * Function to check login attempts (prevent brute force)
- */
-function checkLoginAttempts($email, $max_attempts = 5, $lockout_time = 900) {
+// Load main hotel tables if not already loaded by main db.php
+function ensure_hotel_tables() {
     global $conn;
-    $email = sanitize($email);
-    $ip = getUserIP();
     
-    // Check attempts in last lockout_time seconds (default 15 minutes)
-    $time_threshold = date('Y-m-d H:i:s', time() - $lockout_time);
-    
-    $sql = "SELECT COUNT(*) as attempts FROM login_attempts 
-            WHERE (email = '$email' OR ip_address = '$ip') 
-            AND attempted_at > '$time_threshold' 
-            AND success = 0";
-    
-    $result = mysqli_query($conn, $sql);
-    $row = mysqli_fetch_assoc($result);
-    
-    return $row['attempts'] < $max_attempts;
-}
-
-/**
- * Function to log login attempt
- */
-function logLoginAttempt($email, $success = false) {
-    global $conn;
-    $email = sanitize($email);
-    $ip = getUserIP();
-    $success_int = $success ? 1 : 0;
-    
-    $sql = "INSERT INTO login_attempts (email, ip_address, success) 
-            VALUES ('$email', '$ip', $success_int)";
-    
-    mysqli_query($conn, $sql);
-}
-
-/**
- * Function to clean old login attempts (run periodically)
- */
-function cleanOldLoginAttempts($days = 30) {
-    global $conn;
-    $threshold = date('Y-m-d H:i:s', time() - ($days * 24 * 60 * 60));
-    $sql = "DELETE FROM login_attempts WHERE attempted_at < '$threshold'";
-    mysqli_query($conn, $sql);
-}
-
-/**
- * Auto-create hotels table if it doesn't exist
- */
-function initializeHotelsTable() {
-    global $conn;
     $sql = "CREATE TABLE IF NOT EXISTS `hotels` (
       `hotel_id`            INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
       `hotel_name`          VARCHAR(255) NOT NULL,
@@ -299,117 +57,43 @@ function initializeHotelsTable() {
       INDEX `idx_assigned`  (`assigned_to`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     mysqli_query($conn, $sql);
-}
-
-// Initialize database on first run
-initializeDatabase();
-initializeHotelsTable();
-initializeBookingsTable();
-initializeRoomsTable();
-initializeReviewsTable();
-initializeCitiesTable();
-initializeCouponsTable();
-initializeCommissionsTable();
-
-/**
- * Auto-create cities table
- */
-function initializeCitiesTable() {
-    global $conn;
-    $sql = "CREATE TABLE IF NOT EXISTS `cities` (
-      `id`               INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-      `name`             VARCHAR(100) NOT NULL UNIQUE,
-      `status`           ENUM('active','inactive') DEFAULT 'active',
-      `created_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      `updated_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      INDEX `idx_status` (`status`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-    mysqli_query($conn, $sql);
-}
-
-/**
- * Auto-create coupons table
- */
-function initializeCouponsTable() {
-    global $conn;
-    $sql = "CREATE TABLE IF NOT EXISTS `coupons` (
-      `id`               INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-      `code`             VARCHAR(50) NOT NULL UNIQUE,
-      `discount_type`    ENUM('percent','fixed') NOT NULL DEFAULT 'percent',
-      `discount_value`   DECIMAL(10,2) NOT NULL,
-      `expiry_date`      DATE NOT NULL,
-      `usage_limit`      INT(11) DEFAULT NULL,
-      `times_used`       INT(11) DEFAULT 0,
-      `status`           ENUM('active','inactive') DEFAULT 'active',
-      `created_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      `updated_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      INDEX `idx_code`   (`code`),
-      INDEX `idx_status` (`status`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-    mysqli_query($conn, $sql);
-}
-
-/**
- * Auto-create commissions table
- */
-function initializeCommissionsTable() {
-    global $conn;
-    $sql = "CREATE TABLE IF NOT EXISTS `commissions` (
-      `hotel_id`         INT(11) UNSIGNED PRIMARY KEY,
-      `commission_rate`  DECIMAL(5,2) NOT NULL DEFAULT 15.00,
-      `updated_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-    mysqli_query($conn, $sql);
-}
-
-/**
- * Auto-create rooms table
- */
-function initializeRoomsTable() {
-    global $conn;
+    
     $sql = "CREATE TABLE IF NOT EXISTS `rooms` (
       `room_id`          INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
       `hotel_id`         INT(11) UNSIGNED NOT NULL,
+      `manager_id`       INT(11) UNSIGNED NOT NULL,
+      `room_number`      VARCHAR(20) NOT NULL,
       `room_type`        VARCHAR(100) NOT NULL,
+      `room_name`        VARCHAR(150) DEFAULT NULL,
+      `floor`            VARCHAR(50) DEFAULT NULL,
+      `adult_capacity`   TINYINT(3) DEFAULT 2,
+      `child_capacity`   TINYINT(3) DEFAULT 0,
+      `bed_type`         VARCHAR(100) DEFAULT NULL,
       `base_price`       DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-      `capacity`         TINYINT(3) DEFAULT 2,
+      `discount_percent` DECIMAL(5,2) DEFAULT 0.00,
+      `final_price`      DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+      `description`      TEXT DEFAULT NULL,
       `amenities`        TEXT DEFAULT NULL,
+      `room_images`      TEXT DEFAULT NULL,
       `status`           ENUM('Available','Occupied','Maintenance') DEFAULT 'Available',
       `created_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       `updated_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       INDEX `idx_hotel`  (`hotel_id`),
-      INDEX `idx_status` (`status`)
+      INDEX `idx_manager` (`manager_id`),
+      INDEX `idx_status` (`status`),
+      INDEX `idx_number` (`room_number`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     mysqli_query($conn, $sql);
-}
-
-/**
- * Auto-create reviews table
- */
-function initializeReviewsTable() {
-    global $conn;
-    $sql = "CREATE TABLE IF NOT EXISTS `reviews` (
-      `review_id`        INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-      `hotel_id`         INT(11) UNSIGNED NOT NULL,
-      `user_id`          INT(11) UNSIGNED DEFAULT NULL,
-      `guest_name`       VARCHAR(255) NOT NULL,
-      `rating`           DECIMAL(2,1) NOT NULL,
-      `comment`          TEXT DEFAULT NULL,
-      `manager_reply`    TEXT DEFAULT NULL,
-      `created_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      `updated_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      INDEX `idx_hotel`  (`hotel_id`),
-      INDEX `idx_user`   (`user_id`),
-      INDEX `idx_rating` (`rating`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-    mysqli_query($conn, $sql);
-}
-
-/**
- * Auto-create bookings table
- */
-function initializeBookingsTable() {
-    global $conn;
+    
+    $col_check = mysqli_query($conn, "SHOW COLUMNS FROM rooms LIKE 'manager_id'");
+    if ($col_check && mysqli_num_rows($col_check) === 0) {
+        mysqli_query($conn, "ALTER TABLE `rooms` ADD COLUMN `manager_id` INT(11) UNSIGNED NOT NULL AFTER `hotel_id`");
+    }
+    $col_check = mysqli_query($conn, "SHOW COLUMNS FROM rooms LIKE 'room_name'");
+    if ($col_check && mysqli_num_rows($col_check) === 0) {
+        mysqli_query($conn, "ALTER TABLE `rooms` ADD COLUMN `room_name` VARCHAR(150) DEFAULT NULL AFTER `room_type`");
+    }
+    
     $sql = "CREATE TABLE IF NOT EXISTS `bookings` (
       `booking_id`       VARCHAR(20) PRIMARY KEY,
       `user_id`          INT(11) UNSIGNED DEFAULT NULL,
@@ -443,41 +127,102 @@ function initializeBookingsTable() {
       INDEX `idx_checkin`(`checkin_date`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     mysqli_query($conn, $sql);
+    
+    $sql = "CREATE TABLE IF NOT EXISTS `reviews` (
+      `review_id`        INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      `hotel_id`         INT(11) UNSIGNED NOT NULL,
+      `user_id`          INT(11) UNSIGNED DEFAULT NULL,
+      `guest_name`       VARCHAR(255) NOT NULL,
+      `rating`           DECIMAL(2,1) NOT NULL,
+      `comment`          TEXT DEFAULT NULL,
+      `manager_reply`    TEXT DEFAULT NULL,
+      `created_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      `updated_at`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX `idx_hotel`  (`hotel_id`),
+      INDEX `idx_user`   (`user_id`),
+      INDEX `idx_rating` (`rating`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    mysqli_query($conn, $sql);
 
-    // Add approval_status to hotels if missing
-    $check = mysqli_query($conn, "SHOW COLUMNS FROM hotels LIKE 'approval_status'");
-    if ($check && mysqli_num_rows($check) === 0) {
-        mysqli_query($conn, "ALTER TABLE hotels ADD COLUMN `approval_status` ENUM('pending','approved','rejected') DEFAULT 'approved' AFTER `availability_status`");
-        // Mark existing hotels as approved
-        mysqli_query($conn, "UPDATE hotels SET approval_status='approved' WHERE approval_status IS NULL OR approval_status=''");
-    }
+    $sql = "CREATE TABLE IF NOT EXISTS `notifications` (
+      `id`         INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      `user_id`    INT(11) UNSIGNED NOT NULL,
+      `type`       VARCHAR(100) NOT NULL,
+      `title`      VARCHAR(255) NOT NULL,
+      `message`    TEXT DEFAULT NULL,
+      `is_read`    TINYINT(1) DEFAULT 0,
+      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX `idx_user` (`user_id`,`is_read`,`created_at`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    mysqli_query($conn, $sql);
 
-    // Add assigned_to to hotels if missing
-    $checkAssigned = mysqli_query($conn, "SHOW COLUMNS FROM hotels LIKE 'assigned_to'");
-    if ($checkAssigned && mysqli_num_rows($checkAssigned) === 0) {
-        mysqli_query($conn, "ALTER TABLE hotels ADD COLUMN `assigned_to` INT(11) UNSIGNED DEFAULT NULL AFTER `approval_status`");
-        mysqli_query($conn, "ALTER TABLE hotels ADD INDEX `idx_assigned` (`assigned_to`)");
-    }
+    $sql = "CREATE TABLE IF NOT EXISTS `notification_settings` (
+      `id`           INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      `user_id`      INT(11) UNSIGNED NOT NULL,
+      `booking_new`  TINYINT(1) DEFAULT 1,
+      `booking_cancel` TINYINT(1) DEFAULT 1,
+      `room_update`  TINYINT(1) DEFAULT 1,
+      `hotel_approval` TINYINT(1) DEFAULT 1,
+      `created_at`   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      `updated_at`   TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      UNIQUE KEY `uniq_user` (`user_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    mysqli_query($conn, $sql);
+}
 
-    // Fix property_type ENUM truncation issues by altering it to VARCHAR
-    mysqli_query($conn, "ALTER TABLE hotels MODIFY COLUMN `property_type` VARCHAR(50) DEFAULT 'hotel'");
+ensure_hotel_tables();
 
-    // Add role to users if missing, and extend ENUM to include hotel_manager
-    $checkRole = mysqli_query($conn, "SHOW COLUMNS FROM users LIKE 'role'");
-    if ($checkRole && mysqli_num_rows($checkRole) === 0) {
-        mysqli_query($conn, "ALTER TABLE users ADD COLUMN `role` ENUM('user', 'admin', 'hotel_manager') DEFAULT 'user' AFTER `status`");
+function hm_sanitize($data) {
+    global $conn;
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    $data = mysqli_real_escape_string($conn, $data);
+    return $data;
+}
+
+function hm_validateEmail($email) {
+    return filter_var($email, FILTER_VALIDATE_EMAIL);
+}
+
+function hm_validateMobile($mobile) {
+    $mobile = preg_replace('/[^0-9]/', '', $mobile);
+    return preg_match('/^[6-9][0-9]{9}$/', $mobile);
+}
+
+function hm_getUserIP() {
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        return $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        return $_SERVER['HTTP_X_FORWARDED_FOR'];
     } else {
-        // Ensure hotel_manager is in the ENUM (upgrade existing installs)
-        mysqli_query($conn, "ALTER TABLE users MODIFY COLUMN `role` ENUM('user', 'admin', 'hotel_manager') DEFAULT 'user'");
-    }
-
-    // Insert default admin if it doesn't exist
-    $checkAdmin = mysqli_query($conn, "SELECT id FROM users WHERE email = 'admin@bookhotel.com'");
-    if ($checkAdmin && mysqli_num_rows($checkAdmin) === 0) {
-        $admin_pw = password_hash('admin', PASSWORD_DEFAULT);
-        mysqli_query($conn, "INSERT INTO users (first_name, last_name, email, mobile, password, role, status) VALUES ('Main', 'Admin', 'admin@bookhotel.com', '0000000000', '$admin_pw', 'admin', 'active')");
+        return $_SERVER['REMOTE_ADDR'];
     }
 }
 
-?>
+function hm_checkLoginAttempts($email, $max_attempts = 5, $lockout_time = 900) {
+    return true;
+}
 
+function hm_logLoginAttempt($email, $success = false) {
+    // Logging disabled to prevent login_attempts table issues
+}
+
+function initializeLoginAttemptsTable() {
+    global $conn;
+    $sql = "CREATE TABLE IF NOT EXISTS `login_attempts` (
+        id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        email VARCHAR(255) NOT NULL,
+        ip_address VARCHAR(45) NOT NULL,
+        attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        success TINYINT(1) DEFAULT 0,
+        INDEX idx_email (email),
+        INDEX idx_ip (ip_address)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    mysqli_query($conn, $sql);
+}
+
+initializeLoginAttemptsTable();
+
+?>

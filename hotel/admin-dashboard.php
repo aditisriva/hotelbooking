@@ -1,6 +1,6 @@
 <?php
-require_once 'auth_guard.php';
 require_once 'db.php';
+require_once 'auth_guard.php';
 require_once 'hotel_functions.php';
 // Assuming logged in manager manages hotel_id = 1
 $hotel_id = 1;
@@ -84,9 +84,7 @@ mysqli_stmt_close($ci_stmt);
       <a href="admin-dashboard.php" class="ds-link"><i class="bi bi-grid-fill"></i> Dashboard</a>
       <a href="manage-bookings.php" class="ds-link"><i class="bi bi-calendar2-check-fill"></i> Manage Bookings</a>
       <a href="check-in-order.php" class="ds-link"><i class="bi bi-person-check-fill"></i> Check In Order</a>
-      <a href="manage-hotels.php" class="ds-link"><i class="bi bi-building"></i> Manage Hotels</a>
       <a href="manage-hotel-listing.php" class="ds-link"><i class="bi bi-card-checklist"></i> Manage Hotel Listing</a>
-      <a href="on-off-hotel-bookings.php" class="ds-link"><i class="bi bi-toggle-on"></i> On/Off Hotel Bookings</a>
       <a href="manage-rooms.php" class="ds-link"><i class="bi bi-door-open-fill"></i> Manage Rooms</a>
       <a href="view-ratings.php" class="ds-link"><i class="bi bi-star-fill"></i> View Ratings</a>
       <a href="transaction-history.php" class="ds-link"><i class="bi bi-cash-stack"></i> Transaction History</a>
@@ -119,14 +117,14 @@ require_once 'auth_guard.php'; echo htmlspecialchars($hotel_city); ?></div>
         <i class="bi bi-search ds-si-ic"></i>
         <input class="ds-inp search" type="text" placeholder="Search rooms, bookings, guests" />
       </div>
-      <a href="admin-notifications.php" class="ds-ibtn"><i class="bi bi-bell-fill"></i><span class="ds-dot"></span></a>
+      <a href="notifications.php" class="ds-ibtn"><i class="bi bi-bell-fill"></i><span class="ds-dot"></span></a>
       <div class="ds-avbtn" id="dsAvBtn">
         <div class="ds-av">AD</div>
         <span class="ds-avname d-none d-sm-block">Aditi</span>
         <i class="bi bi-chevron-down ms-1" style="font-size:.7rem;color:var(--mut)"></i>
         <div class="ds-dropdown" id="dsAvMenu">
-          <a href="admin-settings.php" class="ds-drop-item"><i class="bi bi-person-fill text-primary"></i> My Profile</a>
-          <a href="admin-settings.php" class="ds-drop-item"><i class="bi bi-gear-fill text-primary"></i> Settings</a>
+          <a href="profile.php" class="ds-drop-item"><i class="bi bi-person-fill text-primary"></i> My Profile</a>
+          <a href="settings.php" class="ds-drop-item"><i class="bi bi-gear-fill text-primary"></i> Settings</a>
           <hr class="my-1 mx-2" />
           <a href="logout.php" class="ds-drop-item danger"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
         </div>
@@ -205,9 +203,9 @@ require_once 'auth_guard.php'; echo $occupancy_rate; ?>%</div><div class="ds-sl"
                 <div class="col-12 col-sm-6 col-xl-4"><a href="admin-guests.php" class="module-card"><i class="bi bi-people-fill"></i><strong>Guests</strong><span>Monitor in-house guests and returning visitor profiles.</span></a></div>
                 <div class="col-12 col-sm-6 col-xl-4"><a href="admin-reviews.php" class="module-card"><i class="bi bi-star-fill"></i><strong>Reviews</strong><span>Reply to guest feedback and protect brand experience.</span></a></div>
                 <div class="col-12 col-sm-6 col-xl-4"><a href="admin-revenue.php" class="module-card"><i class="bi bi-bar-chart-fill"></i><strong>Revenue</strong><span>Review daily earnings, occupancy, and room performance.</span></a></div>
-                <div class="col-12 col-sm-6 col-xl-4"><a href="admin-notifications.php" class="module-card"><i class="bi bi-bell-fill"></i><strong>Notifications</strong><span>Stay on top of service alerts, requests, and updates.</span></a></div>
-                <div class="col-12 col-sm-6 col-xl-4"><a href="admin-hotel-profile.php" class="module-card"><i class="bi bi-building"></i><strong>Hotel Management</strong><span>Add, edit, delete hotels. All changes reflect on user site instantly.</span></a></div>
-                <div class="col-12 col-sm-6 col-xl-4"><a href="admin-settings.php" class="module-card"><i class="bi bi-sliders"></i><strong>Settings</strong><span>Adjust hotel preferences, policies, and team access.</span></a></div>
+                <div class="col-12 col-sm-6 col-xl-4"><a href="notifications.php" class="module-card"><i class="bi bi-bell-fill"></i><strong>Notifications</strong><span>Stay on top of service alerts, requests, and updates.</span></a></div>
+                <div class="col-12 col-sm-6 col-xl-4"><a href="admin-hotel-profile.php" class="module-card"><i class="bi bi-building"></i><strong>Hotel Management</strong><span>Edit assigned hotel listing. All changes reflect on user site instantly.</span></a></div>
+                <div class="col-12 col-sm-6 col-xl-4"><a href="settings.php" class="module-card"><i class="bi bi-sliders"></i><strong>Settings</strong><span>Adjust hotel preferences, policies, and team access.</span></a></div>
                 <div class="col-12 col-sm-6 col-xl-4"><a href="admin-availability.php" class="module-card"><i class="bi bi-calendar-range-fill"></i><strong>Availability</strong><span>Manage room availability and block dates.</span></a></div>
                 <div class="col-12 col-sm-6 col-xl-4"><a href="admin-pricing.php" class="module-card"><i class="bi bi-tags-fill"></i><strong>Pricing</strong><span>Set base rates, weekend, and seasonal pricing.</span></a></div>
                 <div class="col-12 col-sm-6 col-xl-4"><a href="admin-discounts.php" class="module-card"><i class="bi bi-percent"></i><strong>Discounts</strong><span>Create offers, promo codes, and special rates.</span></a></div>

@@ -56,9 +56,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $ok = mysqli_stmt_execute($stmt);
         mysqli_stmt_close($stmt);
         echo json_encode(['success'=>$ok,'status'=>$ns]);
-    } else {
-        echo json_encode(['success'=>false,'message'=>'Invalid request']);
+        exit;
     }
+
+    // Update user role
+    if ($action === 'update_role' && $uid) {
+        $new_role = in_array($_POST['new_role'] ?? '', ['user','admin','hotel_manager']) ? $_POST['new_role'] : 'user';
+        $stmt = mysqli_prepare($conn,"UPDATE users SET role=? WHERE id=?");
+        mysqli_stmt_bind_param($stmt,'si',$new_role,$uid);
+        $ok = mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        echo json_encode(['success'=>$ok,'role'=>$new_role]);
+        exit;
+    }
+
+    echo json_encode(['success'=>false,'message'=>'Invalid request']);
     exit;
 }
 
@@ -326,6 +338,17 @@ echo $bg; ?>;color:<?= $role_color ?>;padding:2px 8px;border-radius:20px;font-si
           <tr><th class="text-muted">Email</th><td id="md-email"></td></tr>
           <tr><th class="text-muted">Mobile</th><td id="md-mobile"></td></tr>
           <tr><th class="text-muted">Role</th><td id="md-role"></td></tr>
+          <tr class="d-none" id="md-role-row"><th class="text-muted">Change Role</th><td>
+            <select class="ds-inp ds-sel" id="md-role-select" style="width:180px">
+              <option value="user">Customer</option>
+              <option value="hotel_manager">Hotel Manager</option>
+              <option value="admin">Admin</option>
+            </select>
+            <button class="ds-btn prim sm ms-2" onclick="updateUserRole()">
+              <i class="bi bi-check-lg"></i> Update
+            </button>
+            <span id="md-role-msg" class="ms-2 small"></span>
+          </td></tr>
           <tr><th class="text-muted">Registered On</th><td id="md-registered"></td></tr>
           <tr><th class="text-muted">Last Login</th><td id="md-lastlogin"></td></tr>
         </table>
@@ -404,6 +427,9 @@ function openUserModal(u) {
   document.getElementById('md-role').textContent       = u.role ? u.role.charAt(0).toUpperCase() + u.role.slice(1) : '—';
   document.getElementById('md-registered').textContent = u.registered;
   document.getElementById('md-lastlogin').textContent  = u.last_login;
+  document.getElementById('md-role-select').value = u.role || 'user';
+  document.getElementById('md-role-msg').textContent = '';
+  document.getElementById('md-role-row').classList.remove('d-none');
   const parts = u.name.trim().split(' ');
   document.getElementById('md-avatar').textContent = ((parts[0]||'?')[0] + (parts[1]||'?')[0]).toUpperCase();
   const colors = {active:'#10b981',inactive:'#ef4444',suspended:'#f59e0b'};
@@ -411,6 +437,35 @@ function openUserModal(u) {
     '<span style="color:'+(colors[u.status]||'#6b7280')+';font-weight:700">' +
     u.status.charAt(0).toUpperCase() + u.status.slice(1) + '</span>';
   new bootstrap.Modal(document.getElementById('userDetailModal')).show();
+}
+
+function updateUserRole() {
+  const userId = parseInt(document.getElementById('md-id').textContent.replace('#',''));
+  const newRole = document.getElementById('md-role-select').value;
+  const msgEl = document.getElementById('md-role-msg');
+  
+  if (!confirm('Change this user\'s role to ' + newRole.replace('_',' ') + '?')) return;
+  
+  const fd = new FormData();
+  fd.append('action','update_role'); fd.append('user_id', userId); fd.append('new_role', newRole);
+  
+  msgEl.textContent = 'Updating…';
+  fetch('manage-users.php',{method:'POST',body:fd})
+  .then(r=>r.json())
+  .then(d=>{
+    if (d.success) {
+      msgEl.textContent = '✓ Role updated!';
+      msgEl.style.color = '#10b981';
+      document.getElementById('md-role').textContent = newRole.charAt(0).toUpperCase() + newRole.slice(1);
+    } else {
+      msgEl.textContent = '✗ Update failed.';
+      msgEl.style.color = '#ef4444';
+    }
+  })
+  .catch(()=>{
+    msgEl.textContent = 'Network error.';
+    msgEl.style.color = '#ef4444';
+  });
 }
 
 function toggleStatus(userId, action, btn) {
